@@ -3,7 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
+from .forms import ProfileForm
 from .forms import RegisterForm, LoginForm
+from .models import Post
 
 
 def register(request):
@@ -11,8 +13,8 @@ def register(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)  # Автоматически входим после регистрации
-            return redirect('home')  # Перенаправляем на главную страницу
+            login(request, user)
+            return redirect('home')
     else:
         form = RegisterForm()
     return render(request, 'registration/register.html', {'form': form})
@@ -38,6 +40,12 @@ def user_logout(request):
     return redirect('home')  # Перенаправляем на главную страницу
 
 
+@login_required
+def home(request):
+    posts = Post.objects.all()  # Получаем все посты
+    return render(request, 'core/home.html', {'posts': posts})
+
+
 def hello(request):
     return render(request, 'core/hello.html')
 
@@ -51,4 +59,12 @@ def get_data(request):
 
 @login_required
 def profile(request):
-    return render(request, 'core/profile.html', {'user': request.user})
+    user = request.user
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')  # Перенаправляем обратно на страницу профиля
+    else:
+        form = ProfileForm(instance=user)
+    return render(request, 'core/profile.html', {'form': form})
