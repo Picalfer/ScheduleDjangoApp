@@ -1,0 +1,18 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'core/home.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div>
+        <h1>Kodama!</h1>
+        <button id="fetchDataButton">Получить данные с бэкенда</button>
+        <p id="result"></p>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'core/testview.js' %}"></script>
+{% endblock %}

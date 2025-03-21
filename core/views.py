@@ -46,8 +46,8 @@ def home(request):
     return render(request, 'core/home.html', {'posts': posts})
 
 
-def hello(request):
-    return render(request, 'core/hello.html')
+def test_view(request):
+    return render(request, 'core/testview.html')
 
 
 def get_data(request):
