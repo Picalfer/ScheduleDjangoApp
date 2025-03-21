@@ -136,6 +136,7 @@ body.dark-theme .teacher-info {
     scrollbar-gutter: stable;
     overflow-y: auto;
     flex: 0 1 auto;
+    height: 83vh;
     position: relative;
     min-height: 0;
     background-color: white;

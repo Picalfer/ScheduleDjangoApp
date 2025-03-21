@@ -1,7 +1,7 @@
 import * as BX24API from './bx24api.js';
 import * as utils from './utils.js';
-import {Russian} from "flatpickr/dist/l10n/ru.js";
-import flatpickr from "flatpickr";
+/*import {Russian} from "flatpickr/dist/l10n/ru.js";
+import flatpickr from "flatpickr";*/
 import {calendar} from './app.js'
 
 export class AddStudentModal {

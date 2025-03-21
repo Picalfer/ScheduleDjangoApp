@@ -1,16 +1,15 @@
-/*
 import * as BX24API from './bx24api.js';
-import { Calendar } from './calendar.js';
-import { SettingsManager } from './settings.js';
-import { LessonModal } from './lessonModal.js';
-import { AddStudentModal } from './addStudentModal.js';
-import { showNotification } from "./utils.js";
+import {Calendar} from './calendar.js';
+import {SettingsManager} from './settings.js';
+import {LessonModal} from './lessonModal.js';
+import {AddStudentModal} from './addStudentModal.js';
+import {showNotification} from "./utils.js";
 
 export const calendar = new Calendar();
 const lessonModal = new LessonModal();
 const addStudentModal = new AddStudentModal();
 const settingsManager = new SettingsManager(calendar);
-*/
+
 
 export function initApp() {
     /*BX24API.initBx24();
@@ -18,7 +17,11 @@ export function initApp() {
     BX24API.setUserName();
 
     calendar.loadScheduleData();
+*/
+    calendar.updateCalendarUi()
+    calendar.goToCurrentWeek();
 
+    console.log("test2")
     // Обработчики событий для кнопок навигации
     document.getElementById('prev-week').addEventListener('click', () => {
         if (settingsManager.isOpenWindowsMode) {
@@ -60,11 +63,9 @@ export function initApp() {
         } else {
             addStudentModal.open()
         }
-    });*/
-    console.log("test2")
+    });
 }
 
-/*
 // Глобальная функция для открытия модального окна урока
 window.openLessonModal = (lessonData) => {
     if (settingsManager.isOpenWindowsMode) {
@@ -73,7 +74,6 @@ window.openLessonModal = (lessonData) => {
         lessonModal.open(lessonData);
     }
 };
-*/
 
 function setIsAdmin() {
     BX24API.isAdmin()
@@ -97,10 +97,10 @@ function setIsAdmin() {
 
                 document.getElementById('toggle-schedule-panel').addEventListener('click', function () {
                     const schedulePanel = document.getElementById('schedule-info-panel');
-                
+
                     schedulePanel.classList.toggle('collapsed');
                 });
-                                              
+
             }
         })
         .catch((error) => {
