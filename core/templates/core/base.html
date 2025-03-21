@@ -1,10 +1,10 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Мой сайт{% endblock %}</title>
+    <title>{% block title %}Расписание{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'core/base.css' %}">
     <link rel="stylesheet" href="{% static 'core/forms.css' %}">
     {% block extra_css %}{% endblock %}  <!-- Блок для дополнительных CSS-файлов -->
@@ -33,7 +33,9 @@
     </div>
 </header>
 <main>
-    {% block content %}{% endblock %}
+    <div id="content-main">
+        {% block content %}{% endblock %}
+    </div>
 </main>
 {% block scripts %}{% endblock %}
 </body>

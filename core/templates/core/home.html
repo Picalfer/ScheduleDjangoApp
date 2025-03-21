@@ -2,21 +2,276 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'core/home.css' %}">
+    <link rel="stylesheet" href="{% static 'core/home.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="content">
-    <h1>Добро пожаловать, {{ user.first_name }} {{ user.last_name }}!</h1>
-    <p>Это ваша главная страница.</p>
-
-    <h2>Посты</h2>
-    {% for post in posts %}
-        <div class="post">
-            <h3>{{ post.title }}</h3>
-            <p>{{ post.content }}</p>
-            <p><small>Автор: {{ post.author.username }}, Дата: {{ post.created_at }}</small></p>
+    <div id="schedule-container">
+        <div id="week-info">
+            <div id="week-info-left">
+                <div class="teacher-info">
+                    <div class="teacher-name">Имя преподавателя</div>
+                    <div id="admin-label" style="display: none;">(админ)</div>
+                </div>
+                <button id="settings-button" title="Настройки расписание"
+                        class="icon-button icon-button-rotate"><span>⚙️</span></button>
+                <div id="admin-panel">
+                    <button id="teachers-button" title="Преподаватели" class="icon-button icon-button-float"
+                            style="display: none;" disabled><span>‍👨‍🏫</span></button>
+                    <button id="students-button" title="Ученики" class="icon-button icon-button-float"
+                            style="display: none;" disabled><span>‍🎓</span></button>
+                    <button id="add-student-button" title="Добавить расписание ученика"
+                            class="icon-button icon-button-float"
+                            style="display: none;" disabled><span>➕</span></button>
+                </div>
+                <div id="open-windows-controls" style="display: none;">
+                    <span>Отметьте открытые окна</span>
+                    <div style="display: inline-block">
+                        <button id="save-open-windows">Сохранить</button>
+                        <button id="cancel-open-windows">Отмена</button>
+                    </div>
+                </div>
+            </div>
+            <div class="week-navigation">
+                <button id="prev-week" class="nav-button">←</button>
+                <button id="current-week" class="nav-button">Сегодня</button>
+                <h2>Неделя: <span id="week-range"></span></h2>
+                <button id="next-week" class="nav-button">→</button>
+            </div>
         </div>
-    {% endfor %}
-</div>
+        <div id="headers">
+            <div class="time-header">Время</div>
+            <div class="day-header">
+                <div>Понедельник</div>
+                <div class="date"></div>
+            </div>
+            <div class="day-header">
+                <div>Вторник</div>
+                <div class="date"></div>
+            </div>
+            <div class="day-header">
+                <div>Среда</div>
+                <div class="date"></div>
+            </div>
+            <div class="day-header">
+                <div>Четверг</div>
+                <div class="date"></div>
+            </div>
+            <div class="day-header">
+                <div>Пятница</div>
+                <div class="date"></div>
+            </div>
+            <div class="day-header">
+                <div>Суббота</div>
+                <div class="date"></div>
+            </div>
+            <div class="day-header">
+                <div>Воскресенье</div>
+                <div class="date"></div>
+            </div>
+        </div>
+        <div id="schedule">
+            <div class="time-column">
+                <!-- Слоты времени будут добавляться динамически -->
+            </div>
+            <div id="monday" class="week-day">
+                <!-- Слоты часов будут добавляться динамически -->
+            </div>
+            <div id="tuesday" class="week-day">
+                <!-- Слоты часов будут добавляться динамически -->
+            </div>
+            <div id="wednesday" class="week-day">
+                <!-- Слоты часов будут добавляться динамически -->
+            </div>
+            <div id="thursday" class="week-day">
+                <!-- Слоты часов будут добавляться динамически -->
+            </div>
+            <div id="friday" class="week-day">
+                <!-- Слоты часов будут добавляться динамически -->
+            </div>
+            <div id="saturday" class="week-day">
+                <!-- Слоты часов будут добавляться динамически -->
+            </div>
+            <div id="sunday" class="week-day">
+                <!-- Слоты часов будут добавляться динамически -->
+            </div>
+        </div>
+    </div>
+
+    <div id="lesson-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-header">
+                <h3>Информация об уроке</h3>
+                <div class="lesson-info">
+                    <p class="lesson-type"></p>
+                    <p class="lesson-student"></p>
+                </div>
+            </div>
+            <div class="modal-body">
+                <form id="lesson-form">
+                    <div class="form-group">
+                        <label>Дата</label>
+                        <input type="text" id="lesson-date" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Курс</label>
+                        <input type="text" id="lesson-course" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Тема урока <span class="required">*</span></label>
+                        <input type="text" id="lesson-topic" required>
+                        <div class="error-message">Это поле обязательно для заполнения</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Домашнее задание</label>
+                        <textarea id="lesson-homework" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Комментарий</label>
+                        <textarea id="lesson-comment" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-button">Отменить</button>
+                <button class="submit-button">Отметить</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-header">
+                <h3>Настройки расписания</h3>
+            </div>
+            <div class="modal-body">
+                <form id="settings-form">
+                    <div class="form-group">
+                        <label>Показывать часы с</label>
+                        <select id="start-hour">
+                            <!-- Опции будут добавлены через JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>До</label>
+                        <select id="end-hour">
+                            <!-- Опции будут добавлены через JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group theme-toggle">
+                        <label>Темная тема</label>
+                        <label class="switch">
+                            <input type="checkbox" id="theme-switch">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: center;">
+                        <button id="set-open-windows" class="icon-button">🔄</button>
+                        <span class="button-text" style="margin-left: 8px;">Настроить открытые окна</span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-button">Отменить</button>
+                <button class="submit-button">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" style="display: none;"></div>
+
+    <div id="selected-count">
+        Открытых окон: <span id="count">0</span>
+    </div>
+
+    <div id="add-student-modal" class="modal" style="display: none;">
+        <div class="modal-content" id="add-student-modal-content">
+            <span class="close"
+                  onclick="document.getElementById('add-student-modal').style.display='none'">&times;</span>
+            <div class="modal-header">
+                <h3>Добавить расписание ученика</h3>
+            </div>
+            <div class="modal-body">
+                <form id="add-student-form">
+                    <div class="form-group">
+                        <label for="client-id">Клиент</label>
+                        <input type="text" id="client-id" placeholder="ID клиента" required
+                               style="flex: 1; margin-right: 10px;">
+                        <button id="find-client-button" type="button" class="submit-button"
+                                style="margin-top: 10px;">Найти клиента
+                        </button>
+                        <div id="client-info" style="display: none;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="teacher-id">Преподаватель</label>
+                        <input type="text" id="teacher-id" placeholder="ID преподавателя" required
+                               style="flex: 1; margin-right: 10px;">
+                        <button id="find-teacher-button" type="button" class="submit-button"
+                                style="margin-top: 10px;">Найти преподавателя
+                        </button>
+                        <div id="teacher-info" style="display: none;"></div>
+                    </div>
+                    <div id="one-time-schedule-section" class="form-group">
+                        <h3>Вводные уроки</h3>
+                        <button id="add-one-time-lesson-button" class="submit-button"
+                                style="margin-top: 10px; margin-bottom: 10px;">
+                            Добавить вводный урок
+                        </button>
+                        <div id="one-time-lessons-container"></div>
+                    </div>
+
+                    <div id="regular-schedule-section" class="form-group">
+                        <h3>Постоянное расписание</h3>
+                        <button id="add-regular-lesson-button" class="submit-button"
+                                style="margin-top: 10px; margin-bottom: 10px;">Добавить постоянный урок
+                        </button>
+                        <div id="regular-lessons-container"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-button"
+                        onclick="document.getElementById('add-student-modal').style.display='none'">Закрыть
+                </button>
+                <button class="submit-button" id="submit-student">Добавить ученика</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmation-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close"
+                  onclick="document.getElementById('confirmation-modal').style.display='none'">&times;</span>
+            <div class="modal-header">
+                <h3>Подтверждение</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirmation-text"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirm-change" class="confirm-button">Да</button>
+                <button class="cancel-button" id="cancel-change">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="schedule-info-panel" class="expanded">
+        <button id="toggle-schedule-panel" class="toggle-button" title="Свернуть">
+            <svg id="toggle-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 xmlns="http://www.w3.org/2000/svg">
+                <polyline points="8 5 15 12 8 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                          stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <span id="schedule-info-text">Вы смотрите расписание: <span id="schedule-info-text-name">Артур
+                Кожемякин</span></span></span>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="{% static 'core/home.js' %}" type="module"></script>
 {% endblock %}
