@@ -1,0 +1,9 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+    <h2>Профиль пользователя</h2>
+    <p>Имя пользователя: {{ user.username }}</p>
+    <p>Email: {{ user.email }}</p>
+    <a href="{% url 'logout' %}">Выйти</a>
+    <a href="{% url 'password_change' %}">Сменить пароль</a>
+{% endblock %}
