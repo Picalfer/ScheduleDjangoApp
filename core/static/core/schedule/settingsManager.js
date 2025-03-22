@@ -34,7 +34,7 @@ export class SettingsManager {
                 document.body.classList.toggle('dark-theme', data.theme === 'dark');
                 this.themeSwitch.checked = data.theme === 'dark';
             }
-
+            console.log(data)
             if (data.workingHours) {
                 const {start, end} = data.workingHours;
                 if (this.isValidWorkingHours(start, end)) {
@@ -200,7 +200,7 @@ export class SettingsManager {
             newOpenSlots[day].push(hour);
         });
 
-        const currentOpenSlots = this.calendarManager.openSlots.weeklyOpenSlots;
+        const currentOpenSlots = this.calendarManager.openSlots;
 
         const isChanged = JSON.stringify(newOpenSlots) !== JSON.stringify(currentOpenSlots);
         if (!isChanged) {
@@ -210,7 +210,7 @@ export class SettingsManager {
             return;
         }
 
-        this.calendarManager.openSlots.weeklyOpenSlots = newOpenSlots;
+        this.calendarManager.openSlots = newOpenSlots;
 
         this.calendarManager.updateOpenSlots(this.calendarManager.openSlots)
             .then(() => {

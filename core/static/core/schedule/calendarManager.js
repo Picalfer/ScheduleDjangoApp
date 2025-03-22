@@ -6,8 +6,8 @@ const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'sat
 export class CalendarManager {
     constructor() {
         this.currentWeekOffset = 0;
-        this.schedule = null;
-        this.openSlots = null;
+        this.schedule = {};
+        this.openSlots = {};
         this.displayedLessons = new Set();
         this.startHour = 6;
         this.endHour = 18;
@@ -143,14 +143,19 @@ export class CalendarManager {
     }
 
     displayOpenSlots(days) {
-        days.forEach((day, dayIndex) => {
+        if (!this.openSlots) {
+            console.warn("openSlots не загружены или равны null");
+            return;
+        }
+
+        days.forEach((day) => {
             const dayElement = document.getElementById(day);
             if (!dayElement) {
                 console.error("Элемент дня не найден:", day);
                 return;
             }
 
-            const slots = this.openSlots.weeklyOpenSlots[day] || [];
+            const slots = this.openSlots[day] || [];
             slots.forEach(time => {
                 const hour = parseInt(time.split(':')[0]);
                 if (hour >= this.startHour && hour <= this.endHour) {
@@ -416,7 +421,7 @@ export class CalendarManager {
             console.warn("Расписание не загружено или не содержит информации о студентах.");
             return;
         }
-        
+
         this.startHour = start;
         this.endHour = end;
         this.generateTimeSlots();
@@ -440,7 +445,7 @@ export class CalendarManager {
     async updateOpenSlots() {
         try {
             repository.updateOpenSlots(this.openSlots);
-            console.log("Открытые часы успешно обновлены.");
+            // console.log("Открытые часы успешно обновлены.");
         } catch (error) {
             console.error("Ошибка при обновлении расписания:", error);
         }

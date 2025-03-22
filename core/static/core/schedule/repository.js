@@ -1,3 +1,4 @@
+const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
 export function getOpenSlots(teacherId = currentUserId) {
     return fetch(`/api/open-slots/${teacherId}/`)
@@ -19,6 +20,7 @@ export function updateOpenSlots(openSlots, teacherId = currentUserId) {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
         },
         body: JSON.stringify({weekly_open_slots: openSlots}),
     })
