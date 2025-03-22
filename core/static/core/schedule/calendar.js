@@ -426,49 +426,38 @@ export class Calendar {
     }
 
     async updateSchedule() {
-        // TODO
-        /*try {
+        try {
             await BX24API.updateSchedule(this.scheduleData);
             console.log("Расписание успешно обновлено в Битриксе.");
         } catch (error) {
             console.error("Ошибка при обновлении расписания:", error);
-        }*/
-        return Promise.resolve();
+        }
     }
 
     //for admin only
-    addNewStudent(teacherId, studentData) {
-        BX24API.isAdmin()
-            .then(async (isAdmin) => {
-                if (isAdmin) {
+    async addNewStudent(teacherId, studentData) {
+        const teacherSchedule = await BX24API.getSchedule(teacherId)
 
-                    const teacherSchedule = await BX24API.getSchedule(teacherId)
+        console.log(teacherSchedule)
+        teacherSchedule.students.push(
+            studentData
+        )
+        console.log(teacherSchedule)
 
-                    console.log(teacherSchedule)
-                    teacherSchedule.students.push(
-                        studentData
-                    )
-                    console.log(teacherSchedule)
-
-                    BX24API.updateSchedule(teacherSchedule, teacherId)
-                        .then(async () => {
-                            console.log('Расписание успешно добавлено');
-                            const myId = await getMyId()
-                            if (teacherId === myId) {
-                                console.log("обновили своё расписание")
-                                this.scheduleData = teacherSchedule;
-                                this.updateCalendarUi();
-                            }
-                            showNotification("Расписание успешно добавлено", "success");
-                        })
-                        .catch((error) => {
-                            console.error('Ошибка при добавлении расписания:', error);
-                            showNotification("Ошибка при добавлении расписания", "error");
-                        });
+        BX24API.updateSchedule(teacherSchedule, teacherId)
+            .then(async () => {
+                console.log('Расписание успешно добавлено');
+                const myId = await getMyId()
+                if (teacherId === myId) {
+                    console.log("обновили своё расписание")
+                    this.scheduleData = teacherSchedule;
+                    this.updateCalendarUi();
                 }
+                showNotification("Расписание успешно добавлено", "success");
             })
             .catch((error) => {
-                console.error('Ошибка при проверке прав администратора:', error);
+                console.error('Ошибка при добавлении расписания:', error);
+                showNotification("Ошибка при добавлении расписания", "error");
             });
     }
 }

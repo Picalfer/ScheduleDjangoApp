@@ -25,8 +25,9 @@ const DEFAULT_SCHEDULE_DATA = {
 let currentUserId = null;
 
 export async function getMyId() {
-    const user = await getCurrentUser();
-    return user.ID;
+    /*const user = await getCurrentUser();
+    return user.ID;*/
+    return 1
 }
 
 export function isAdmin() {
@@ -58,7 +59,8 @@ export function getCurrentUser() {
 
 export function getSchedule(teacherId = currentUserId) {
     return new Promise(async (resolve, reject) => {
-        if (teacherId == null) {
+        resolve(EXAMPLE_SCHEDULE_DATA)
+        /*if (teacherId == null) {
             teacherId = await getMyId()
         }
         getTeacherByID(teacherId).then(async teachers => {
@@ -97,14 +99,15 @@ export function getSchedule(teacherId = currentUserId) {
             // Обработка ошибки, если преподаватель не найден
             console.error("Ошибка получения данных о преподавателе:", error);
             utils.showNotification(`Клиент с ID ${teacherId} не найден.`, 'error'); // Показываем уведомление
-        });
+        });*/
 
     });
 }
 
 export function updateSchedule(scheduleData, teacherId = null) {
     return new Promise((resolve, reject) => {
-        const userId = teacherId || currentUserId; // Используем переданный ID или текущего пользователя
+        resolve("true шо");
+        /*const userId = teacherId || currentUserId; // Используем переданный ID или текущего пользователя
 
         if (!userId) {
             console.error("ID пользователя не найден.");
@@ -124,13 +127,14 @@ export function updateSchedule(scheduleData, teacherId = null) {
                 console.log(`Данные успешно обновлены для пользователя ${userId}:`, scheduleData);
                 resolve(updateResult);
             }
-        });
+        });*/
     });
 }
 
 export function updateLessonBalance(clientId, newBalance) {
     return new Promise((resolve, reject) => {
-        BX24.callMethod(
+        resolve("true шо")
+        /*BX24.callMethod(
             "crm.contact.update",
             {
                 id: clientId,
@@ -147,13 +151,14 @@ export function updateLessonBalance(clientId, newBalance) {
                     resolve(data);
                 }
             }
-        );
+        );*/
     })
 }
 
 export function getClientByID(clientId) {
     return new Promise((resolve, reject) => {
-        BX24.callMethod(
+        resolve("true шо")
+        /*BX24.callMethod(
             "crm.contact.get",
             {
                 id: clientId
@@ -168,13 +173,14 @@ export function getClientByID(clientId) {
                     resolve(client);
                 }
             }
-        );
+        );*/
     });
 }
 
 export function getTeacherByID(teacherId) {
     return new Promise((resolve, reject) => {
-        BX24.callMethod(
+        resolve("true шо")
+        /*BX24.callMethod(
             "user.get", // Название метода
             {ID: teacherId}, // ID сотрудника
             function (result) {
@@ -186,7 +192,7 @@ export function getTeacherByID(teacherId) {
                     resolve(result.data());
                 }
             }
-        );
+        );*/
     });
 }
 
@@ -202,3 +208,186 @@ function initNewSchedule(user) {
         }
     });
 }
+
+
+const EXAMPLE_SCHEDULE_DATA = {
+    "settings": {
+        "workingHours": {
+            "start": 10,
+            "end": 20
+        }
+    },
+    "weeklyOpenSlots": {
+        "monday": [
+            "18:00",
+            "20:00",
+            "21:00"
+        ],
+        "tuesday": [
+            "21:00"
+        ],
+        "wednesday": [],
+        "thursday": [
+            "21:00",
+            "22:00"
+        ],
+        "friday": [
+            "16:00",
+            "17:00",
+            "18:00",
+            "22:00"
+        ],
+        "saturday": [
+            "19:00",
+            "20:00",
+            "21:00"
+        ],
+        "sunday": [
+            "18:00",
+            "19:00",
+            "20:00",
+            "21:00",
+            "22:00"
+        ]
+    },
+    "students": [
+
+        {
+            "id": 1,
+            "name": "Женя(Наталья)",
+            "regularSchedule": [
+                {
+                    "day": "sunday",
+                    "time": "18:00",
+                    "subject": "Python"
+                }
+            ],
+            "oneTimeLessons": []
+        },
+        {
+            "id": 2,
+            "name": "Илья(Ольга)",
+            "regularSchedule": [
+                {
+                    "day": "friday",
+                    "time": "21:00",
+                    "subject": "Frontend"
+                }
+            ],
+            "oneTimeLessons": [
+                {
+                    "date": "2025-02-09",
+                    "time": "13:00",
+                    "subject": "Frontend"
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "name": "Артём(Кристина)",
+            "regularSchedule": [],
+            "oneTimeLessons": [
+                {
+                    "date": "2025-02-04",
+                    "time": "21:00",
+                    "subject": "Android"
+                },
+                {
+                    "date": "2025-02-07",
+                    "time": "17:00",
+                    "subject": "Android"
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "name": "Саша(Мария)",
+            "regularSchedule": [
+                {
+                    "day": "monday",
+                    "time": "21:00",
+                    "subject": "Unity"
+                },
+                {
+                    "day": "friday",
+                    "time": "20:00",
+                    "subject": "Unity"
+                },
+                {
+                    "day": "sunday",
+                    "time": "21:00",
+                    "subject": "Unity"
+                }
+            ],
+            "oneTimeLessons": []
+        },
+        {
+            "id": 5,
+            "name": "Никита(Кристина)",
+            "regularSchedule": [
+                {
+                    "day": "tuesday",
+                    "time": "19:00",
+                    "subject": "Frontend"
+                },
+                {
+                    "day": "thursday",
+                    "time": "19:00",
+                    "subject": "Frontend"
+                }
+            ],
+            "oneTimeLessons": []
+        },
+        {
+            "id": 6,
+            "name": "Ева(Елена)",
+            "regularSchedule": [
+                {
+                    "day": "thursday",
+                    "time": "20:00",
+                    "subject": "Blender"
+                },
+                {
+                    "day": "sunday",
+                    "time": "14:00",
+                    "subject": "Blender"
+                }
+            ],
+            "oneTimeLessons": []
+        },
+        {
+            "id": 7,
+            "name": "Лео(Алла)",
+            "regularSchedule": [
+                {
+                    "day": "monday",
+                    "time": "18:00",
+                    "subject": "Roblox"
+                },
+                {
+                    "day": "friday",
+                    "time": "18:00",
+                    "subject": "Roblox"
+                }
+            ],
+            "oneTimeLessons": []
+        },
+        {
+            "id": 8,
+            "name": "Макар(Анастасия)",
+            "regularSchedule": [
+                {
+                    "day": "tuesday",
+                    "time": "18:00",
+                    "subject": "Unity"
+                },
+                {
+                    "day": "thursday",
+                    "time": "20:00",
+                    "subject": "Unity"
+                }
+            ],
+            "oneTimeLessons": []
+        }
+    ]
+};
