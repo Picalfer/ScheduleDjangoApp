@@ -4,11 +4,12 @@ from django.db import models
 
 # Create your models here.
 
-class Post(models.Model):
-    title = models.CharField(max_length=100)
-    content = models.TextField()
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
+
+class UserSettings(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='settings')
+    working_hours_start = models.IntegerField(default=9)  # Начало рабочего дня
+    working_hours_end = models.IntegerField(default=18)  # Конец рабочего дня
+    theme = models.CharField(max_length=10, default='light')  # Тема (light/dark)
 
     def __str__(self):
-        return self.title
+        return f"Настройки пользователя {self.user.username}"

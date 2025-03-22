@@ -5,7 +5,40 @@ from django.shortcuts import render, redirect
 
 from .forms import ProfileForm
 from .forms import RegisterForm, LoginForm
-from .models import Post
+from .models import UserSettings
+
+
+@login_required
+def get_user_settings(request):
+    settings, created = UserSettings.objects.get_or_create(user=request.user)
+    return JsonResponse({
+        'theme': settings.theme,
+        'workingHours': {
+            'start': settings.working_hours_start,
+            'end': settings.working_hours_end,
+        }
+    })
+
+
+@login_required
+def update_user_settings(request):
+    if request.method == 'POST':
+        settings, created = UserSettings.objects.get_or_create(user=request.user)
+
+        # Обновляем тему, если она передана
+        if 'theme' in request.POST:
+            settings.theme = request.POST['theme']
+
+        # Обновляем рабочие часы, если они переданы
+        if 'working_hours_start' in request.POST:
+            settings.working_hours_start = int(request.POST['working_hours_start'])
+        if 'working_hours_end' in request.POST:
+            settings.working_hours_end = int(request.POST['working_hours_end'])
+
+        settings.save()
+        return JsonResponse({'status': 'success'})
+
+    return JsonResponse({'status': 'error', 'message': 'Недопустимый метод запроса'}, status=400)
 
 
 def register(request):
@@ -42,8 +75,7 @@ def user_logout(request):
 
 @login_required
 def home(request):
-    posts = Post.objects.all()  # Получаем все посты
-    return render(request, 'core/home.html', {'posts': posts})
+    return render(request, 'core/home.html')
 
 
 @login_required

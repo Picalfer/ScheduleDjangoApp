@@ -3,22 +3,9 @@ import * as utils from "./utils.js";
 export class SettingsManager {
     constructor(calendar) {
         this.calendar = calendar;
-
-        this.initializeDOMElements();
-
-        // Инициализация состояния
         this.isOpenWindowsMode = false; // Флаг для отслеживания состояния выбора открытых окон
         this.openWindowStates = {}; // Объект для хранения состояния чекбоксов
 
-        // Загружаем сохраненные настройки
-        this.loadSavedSettings();
-
-        // Настройка событий и инициализация
-        this.setupEventListeners();
-        this.initializeTimeOptions();
-    }
-
-    initializeDOMElements() {
         this.modal = document.getElementById('settings-modal');
         this.startHourSelect = document.getElementById('start-hour');
         this.endHourSelect = document.getElementById('end-hour');
@@ -28,27 +15,56 @@ export class SettingsManager {
         this.themeSwitch = document.getElementById('theme-switch');
         this.openWindowsButton = document.getElementById('set-open-windows');
         this.openWindowsControls = document.getElementById('open-windows-controls');
+
+        // Загружаем сохраненные настройки
+        this.loadSettingsFromServer();
+
+        // Настройка событий и инициализация
+        this.setupEventListeners();
+        this.initializeTimeOptions();
     }
 
-    loadSavedSettings() {
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) { // Проверяем, что тема сохранена
-            document.body.classList.toggle('dark-theme', savedTheme === 'dark');
-            this.themeSwitch.checked = savedTheme === 'dark';
+    async loadSettingsFromServer() {
+        try {
+            const response = await fetch('/get-user-settings/');
+            const data = await response.json();
+
+            // Применяем настройки
+            if (data.theme) {
+                document.body.classList.toggle('dark-theme', data.theme === 'dark');
+                this.themeSwitch.checked = data.theme === 'dark';
+            }
+
+            if (data.workingHours) {
+                const {start, end} = data.workingHours;
+                if (this.isValidWorkingHours(start, end)) {
+                    this.calendar.updateWorkingHours(start, end);
+                }
+            }
+        } catch (error) {
+            console.error('Ошибка при загрузке настроек:', error);
+        }
+    }
+
+    async saveSettingsToServer(settings) {
+        function getCsrfToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]').value;
         }
 
-        // Загружаем сохраненные часы
-        const savedStartHour = localStorage.getItem('startHour');
-        const savedEndHour = localStorage.getItem('endHour');
-
-        if (savedStartHour && savedEndHour) {
-            const startHour = parseInt(savedStartHour, 10); // Указываем систему счисления (10)
-            const endHour = parseInt(savedEndHour, 10);
-
-            // Проверяем валидность сохраненных значений
-            if (this.isValidWorkingHours(startHour, endHour)) {
-                this.calendar.updateWorkingHours(startHour, endHour);
-            }
+        try {
+            const response = await fetch('/update-user-settings/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCsrfToken(),
+                },
+                body: new URLSearchParams(settings).toString(),
+            });
+            const data = await response.json();
+            console.log('Настройки сохранены:', data);
+        } catch (error) {
+            console.error('Ошибка при сохранении настроек:', error);
+            throw error;
         }
     }
 
@@ -63,43 +79,35 @@ export class SettingsManager {
     }
 
     initializeTimeOptions() {
-        // Проверяем, что элементы select существуют
         if (!this.startHourSelect || !this.endHourSelect) {
             console.error('Элементы startHourSelect или endHourSelect не найдены');
             return;
         }
 
-        // Очищаем существующие опции
         this.startHourSelect.innerHTML = '';
         this.endHourSelect.innerHTML = '';
 
-        // Создаем опции для каждого часа
         Array.from({length: 24}, (_, i) => {
             const hour = String(i).padStart(2, '0');
             const time = `${hour}:00`;
 
-            // Создаем опции для startHourSelect и endHourSelect
             this.startHourSelect.add(new Option(time, i));
             this.endHourSelect.add(new Option(time, i));
         });
     }
 
     open() {
-        // Проверяем, что элементы существуют
         if (!this.startHourSelect || !this.endHourSelect || !this.modal) {
             console.error('Не найдены необходимые элементы DOM');
             return;
         }
 
-        // Устанавливаем текущие значения
         this.startHourSelect.value = this.calendar.startHour;
         this.endHourSelect.value = this.calendar.endHour;
 
-        // Открываем модальное окно
         this.modal.classList.add('visible'); // Добавляем класс для видимости
         this.modal.style.display = 'block';
 
-        // Сбрасываем положение скролла
         this.resetModalScroll();
     }
 
@@ -121,24 +129,23 @@ export class SettingsManager {
         this.closeButton.onclick = () => this.close();
         this.cancelButton.onclick = () => this.close();
 
-        // Обработчик для закрытия модального окна при клике вне его
         document.addEventListener('click', (e) => {
             if (e.target === this.modal) {
                 this.close();
             }
         });
 
-        // Обработчик для кнопки "Сохранить"
         this.submitButton.onclick = (e) => this.handleSubmit(e);
 
-        // Обработчик для переключения темы
-        this.themeSwitch.addEventListener('change', () => this.toggleTheme());
+        this.themeSwitch.addEventListener('change', () => {
+            const theme = this.themeSwitch.checked ? 'dark' : 'light';
+            document.body.classList.toggle('dark-theme', this.themeSwitch.checked);
+            this.saveSettingsToServer({theme});
+        });
 
-        // Обработчик для кнопки "Открытые окна"
         this.openWindowsButton.onclick = (e) => {
             e.preventDefault();
             this.toggleOpenWindows();
-            // Закрываем модальное окно
             utils.closeConfirmationModal();
         };
 
@@ -159,28 +166,25 @@ export class SettingsManager {
         const startHour = parseInt(this.startHourSelect.value);
         const endHour = parseInt(this.endHourSelect.value);
 
-        if (startHour < endHour) {
-            if (startHour === this.calendar.startHour && endHour === this.calendar.endHour) {
-                console.log('Настройки не изменились');
-            } else {
-                // Обновляем настройки в scheduleData
-                this.calendar.scheduleData.settings.workingHours.start = startHour;
-                this.calendar.scheduleData.settings.workingHours.end = endHour;
-
-                // Обновляем данные в Битриксе
-                this.calendar.updateSchedule()
-                    .then(() => {
-                        this.calendar.updateWorkingHours(startHour, endHour);
-                    })
-                    .catch((error) => {
-                        console.error('Ошибка при обновлении расписания:', error);
-                    });
-            }
-
-            this.close();
-        } else {
+        if (!this.isValidWorkingHours(startHour, endHour)) {
             alert('Время начала должно быть меньше времени окончания');
+            return;
         }
+
+        // Сохраняем настройки на сервере
+        this.saveSettingsToServer({
+            working_hours_start: startHour,
+            working_hours_end: endHour,
+        })
+            .then(() => {
+                console.log('Рабочие часы успешно сохранены');
+                this.calendar.updateWorkingHours(startHour, endHour); // Обновляем календарь
+                this.close();
+            })
+            .catch((error) => {
+                console.error('Ошибка при сохранении рабочих часов:', error);
+                alert('Ошибка при сохранении рабочих часов');
+            });
     }
 
     applyOpenSlotsUpdate() {
@@ -206,14 +210,11 @@ export class SettingsManager {
             return;
         }
 
-        // Обновляем данные в scheduleData
         this.calendar.scheduleData.weeklyOpenSlots = newOpenSlots;
 
-        // Отправляем обновленные данные на сервер
         this.calendar.updateSchedule(this.calendar.scheduleData)
             .then(() => {
                 console.log('Открытые слоты успешно обновлены');
-                // Перерисовываем календарь с новыми данными
                 this.calendar.updateCalendarUi();
                 utils.showNotification("Открытые окна успешно сохранены", "success");
             })
@@ -222,18 +223,7 @@ export class SettingsManager {
                 utils.showNotification("Ошибка при обновлении открытых окон", "error");
             });
 
-        // Выключаем режим редактирования
         this.turnOffOpenWindowsMode();
-    }
-
-    toggleTheme() {
-        if (this.themeSwitch.checked) {
-            document.body.classList.add('dark-theme');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            document.body.classList.remove('dark-theme');
-            localStorage.setItem('theme', 'light');
-        }
     }
 
     turnOffOpenWindowsMode() {
@@ -241,7 +231,6 @@ export class SettingsManager {
             checkbox.remove();
         });
 
-        // Скрываем панель "Открытых окон"
         const selectedCountPanel = document.getElementById('selected-count');
         if (selectedCountPanel) {
             selectedCountPanel.style.display = 'none';
@@ -249,7 +238,6 @@ export class SettingsManager {
 
         this.isOpenWindowsMode = false; // Сбрасываем состояние
 
-        // Скрываем контролы
         if (this.openWindowsControls) {
             this.openWindowsControls.style.display = 'none';
         }
@@ -259,22 +247,17 @@ export class SettingsManager {
         console.log("Режим настройки окон переключен");
         this.isOpenWindowsMode = !this.isOpenWindowsMode; // Переключаем состояние
 
-        // Переключаем видимость контролов
         if (this.openWindowsControls) {
             const isVisible = this.openWindowsControls.style.display === 'block';
             this.openWindowsControls.style.display = isVisible ? 'none' : 'block';
         }
 
-        // Добавляем чекбоксы
         this.addCheckboxesToHours();
 
-        // Обновляем количество выбранных ячеек
         this.updateSelectedCount();
 
-        // Закрываем модальное окно настроек
         this.close();
 
-        // Обработчик для кнопки "Отмена"
         const cancelButton = document.getElementById('cancel-open-windows');
         if (cancelButton) {
             cancelButton.onclick = () => this.turnOffOpenWindowsMode();
@@ -287,24 +270,19 @@ export class SettingsManager {
             const day = hourElement.getAttribute('data-day');
             const hour = hourElement.getAttribute('data-hour');
 
-            // Удаляем старый чекбокс, если он уже был добавлен
             const existingCheckbox = hourElement.querySelector('.open-window-checkbox');
             if (existingCheckbox) {
                 existingCheckbox.remove();
             }
 
-            // Создаем чекбокс
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.className = 'open-window-checkbox';
 
-            // Устанавливаем состояние чекбокса в зависимости от наличия класса open-window
             checkbox.checked = hourElement.classList.contains('open-window');
 
-            // Добавляем чекбокс в элемент
             hourElement.appendChild(checkbox);
 
-            // Обработчик изменения состояния чекбокса
             checkbox.addEventListener('change', () => {
                 if (checkbox.checked) {
                     hourElement.classList.add('open-window');
@@ -312,7 +290,6 @@ export class SettingsManager {
                     hourElement.classList.remove('open-window');
                 }
 
-                // Пересохраняем состояние в this.openWindowStates
                 if (!this.openWindowStates[day]) {
                     this.openWindowStates[day] = [];
                 }
@@ -325,9 +302,9 @@ export class SettingsManager {
                     this.openWindowStates[day] = this.openWindowStates[day].filter(h => h !== hour);
                 }
 
-                // Сохраняем обновленное состояние в localStorage
+                /*// Сохраняем обновленное состояние в localStorage
                 localStorage.setItem('openWindowStates', JSON.stringify(this.openWindowStates));
-
+                */
                 // Обновляем количество выбранных ячеек
                 this.updateSelectedCount();
             });
@@ -345,7 +322,6 @@ export class SettingsManager {
 
         let selectedCount = 0;
 
-        // Считаем количество выбранных ячеек
         for (const day in this.openWindowStates) {
             for (const hour in this.openWindowStates[day]) {
                 if (this.openWindowStates[day][hour]) {
@@ -354,7 +330,7 @@ export class SettingsManager {
             }
         }
 
-        countElement.textContent = selectedCount.toString(); // Обновляем текст
-        selectedCountPanel.style.display = selectedCount > 0 ? 'block' : 'none'; // Показываем или скрываем панель
+        countElement.textContent = selectedCount.toString();
+        selectedCountPanel.style.display = selectedCount > 0 ? 'block' : 'none';
     }
 }

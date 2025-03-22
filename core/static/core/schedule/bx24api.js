@@ -24,16 +24,6 @@ const DEFAULT_SCHEDULE_DATA = {
 
 let currentUserId = null;
 
-export function initBx24() {
-    BX24.init(async function () {
-        BX24.fitWindow();
-        // Получаем данные авторизации
-        const authData = BX24.getAuth();
-
-        currentUserId = await getMyId();
-    });
-}
-
 export async function getMyId() {
     const user = await getCurrentUser();
     return user.ID;
@@ -52,13 +42,6 @@ export function isAdmin() {
             }
         );
     })
-}
-
-export function setUserName() {
-    getCurrentUser().then(user => {
-        const teacherNameElement = document.querySelector('.teacher-name');
-        teacherNameElement.textContent = `${user.NAME} ${user.LAST_NAME}`;
-    });
 }
 
 export function getCurrentUser() {

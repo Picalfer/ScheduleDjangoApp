@@ -414,7 +414,6 @@ export class Calendar {
     }
 
     updateWorkingHours(start, end) {
-        console.log("test4");
         this.startHour = start;
         this.endHour = end;
         this.generateTimeSlots();
@@ -427,12 +426,14 @@ export class Calendar {
     }
 
     async updateSchedule() {
-        try {
+        // TODO
+        /*try {
             await BX24API.updateSchedule(this.scheduleData);
             console.log("Расписание успешно обновлено в Битриксе.");
         } catch (error) {
             console.error("Ошибка при обновлении расписания:", error);
-        }
+        }*/
+        return Promise.resolve();
     }
 
     //for admin only
