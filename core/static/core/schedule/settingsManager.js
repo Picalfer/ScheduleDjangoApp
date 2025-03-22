@@ -1,8 +1,8 @@
 import * as utils from "./utils.js";
 
 export class SettingsManager {
-    constructor(calendar) {
-        this.calendar = calendar;
+    constructor(calendarManager) {
+        this.calendarManager = calendarManager;
         this.isOpenWindowsMode = false; // Флаг для отслеживания состояния выбора открытых окон
         this.openWindowStates = {}; // Объект для хранения состояния чекбоксов
 
@@ -38,7 +38,7 @@ export class SettingsManager {
             if (data.workingHours) {
                 const {start, end} = data.workingHours;
                 if (this.isValidWorkingHours(start, end)) {
-                    this.calendar.updateWorkingHours(start, end);
+                    this.calendarManager.updateWorkingHours(start, end);
                 }
             }
         } catch (error) {
@@ -102,8 +102,8 @@ export class SettingsManager {
             return;
         }
 
-        this.startHourSelect.value = this.calendar.startHour;
-        this.endHourSelect.value = this.calendar.endHour;
+        this.startHourSelect.value = this.calendarManager.startHour;
+        this.endHourSelect.value = this.calendarManager.endHour;
 
         this.modal.classList.add('visible'); // Добавляем класс для видимости
         this.modal.style.display = 'block';
@@ -178,7 +178,7 @@ export class SettingsManager {
         })
             .then(() => {
                 console.log('Рабочие часы успешно сохранены');
-                this.calendar.updateWorkingHours(startHour, endHour); // Обновляем календарь
+                this.calendarManager.updateWorkingHours(startHour, endHour); // Обновляем календарь
                 this.close();
             })
             .catch((error) => {
@@ -200,7 +200,7 @@ export class SettingsManager {
             newOpenSlots[day].push(hour);
         });
 
-        const currentOpenSlots = this.calendar.scheduleData.weeklyOpenSlots;
+        const currentOpenSlots = this.calendarManager.openSlots.weeklyOpenSlots;
 
         const isChanged = JSON.stringify(newOpenSlots) !== JSON.stringify(currentOpenSlots);
         if (!isChanged) {
@@ -210,12 +210,12 @@ export class SettingsManager {
             return;
         }
 
-        this.calendar.scheduleData.weeklyOpenSlots = newOpenSlots;
+        this.calendarManager.openSlots.weeklyOpenSlots = newOpenSlots;
 
-        this.calendar.updateSchedule(this.calendar.scheduleData)
+        this.calendarManager.updateOpenSlots(this.calendarManager.openSlots)
             .then(() => {
                 console.log('Открытые слоты успешно обновлены');
-                this.calendar.updateCalendarUi();
+                this.calendarManager.updateCalendarUi();
                 utils.showNotification("Открытые окна успешно сохранены", "success");
             })
             .catch((error) => {

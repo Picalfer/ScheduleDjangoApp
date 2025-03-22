@@ -1,10 +1,10 @@
-import * as BX24API from './bx24api.js';
+import * as BX24API from './repository.js';
 import * as utils from './utils.js';
 /*import {Russian} from "flatpickr/dist/l10n/ru.js";
 import flatpickr from "flatpickr";*/
-import {calendar} from './app.js'
+import {calendarManager} from './app.js'
 
-export class AddStudentModal {
+export class AddStudentModalManager {
     constructor() {
         this.initializeDOMElements()
         this.setupEventListeners();
@@ -347,7 +347,7 @@ export class AddStudentModal {
         utils.showConfirmationModal({
             text: "Вы уверены в добавлении нового расписания?",
             onConfirm: () => {
-                calendar.addNewStudent(teacherId, studentData);
+                calendarManager.addNewStudent(teacherId, studentData);
                 this.close();
             },
             onCancel: () => {

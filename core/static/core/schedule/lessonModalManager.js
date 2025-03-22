@@ -1,8 +1,8 @@
-import * as BX24API from './bx24api.js';
-import {AMOUNT_LESSONS_FIELD_ID, updateLessonBalance} from './bx24api.js'
+import * as BX24API from './repository.js';
+import {updateLessonBalance} from './repository.js'
 import {showNotification} from "./utils.js";
 
-export class LessonModal {
+export class LessonModalManager {
     constructor() {
         this.modal = document.getElementById("lesson-modal");
         this.closeButton = document.getElementsByClassName("close")[0];

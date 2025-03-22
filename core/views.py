@@ -1,11 +1,49 @@
+import json
+
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
+from django.views.decorators.http import require_http_methods
 
 from .forms import ProfileForm
 from .forms import RegisterForm, LoginForm
-from .models import UserSettings
+from .models import UserSettings, OpenSlots
+
+
+@require_http_methods(["GET"])
+def get_open_slots(request, teacher_id):
+    try:
+        teacher = get_object_or_404(User, id=teacher_id)
+        open_slots = get_object_or_404(OpenSlots, teacher=teacher)
+        return JsonResponse({
+            "teacher": teacher.id,
+            "weekly_open_slots": open_slots.weekly_open_slots
+        })
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+
+@require_http_methods(["PUT"])
+def update_open_slots(request, teacher_id):
+    try:
+        teacher = get_object_or_404(User, id=teacher_id)
+        open_slots = get_object_or_404(OpenSlots, teacher=teacher)
+        data = json.loads(request.body)
+        open_slots.weekly_open_slots = data.get("weekly_open_slots", {})
+        open_slots.full_clean()  # Валидация данных
+        open_slots.save()
+        return JsonResponse({
+            "teacher": teacher.id,
+            "weekly_open_slots": open_slots.weekly_open_slots
+        })
+    except ValidationError as e:
+        return JsonResponse({"error": str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
 
 
 @login_required
@@ -75,7 +113,7 @@ def user_logout(request):
 
 @login_required
 def home(request):
-    return render(request, 'core/home.html')
+    return render(request, 'core/home.html', context={"current_user_id": request.user.id})
 
 
 @login_required

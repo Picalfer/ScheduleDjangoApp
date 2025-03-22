@@ -1,26 +1,25 @@
-import {Calendar} from './calendar.js';
-import {SettingsManager} from './settings.js';
-import {LessonModal} from './lessonModal.js';
-import {AddStudentModal} from './addStudentModal.js';
+import {CalendarManager} from './calendarManager.js';
+import {SettingsManager} from './settingsManager.js';
+import {LessonModalManager} from './lessonModalManager.js';
+import {AddStudentModalManager} from './addStudentModalManager.js';
 import {showNotification} from "./utils.js";
 
-export const calendar = new Calendar();
-const settingsManager = new SettingsManager(calendar);
-const lessonModal = new LessonModal();
-const addStudentModal = new AddStudentModal();
+export const calendarManager = new CalendarManager();
+const settingsManager = new SettingsManager(calendarManager);
+const lessonModalManager = new LessonModalManager();
+const addStudentModalManager = new AddStudentModalManager();
 
 
 export function initApp() {
-    calendar.loadScheduleData();
-    calendar.updateCalendarUi()
-    calendar.goToCurrentWeek();
+    calendarManager.loadSchedule();
+    calendarManager.updateCalendarUi()
+    calendarManager.goToCurrentWeek();
 
-    // Обработчики событий для кнопок навигации
     document.getElementById('prev-week').addEventListener('click', () => {
         if (settingsManager.isOpenWindowsMode) {
             showNotification("Недоступно в режиме выбора открытых окон", "error");
         } else {
-            calendar.prevWeek();
+            calendarManager.prevWeek();
         }
     });
 
@@ -28,7 +27,7 @@ export function initApp() {
         if (settingsManager.isOpenWindowsMode) {
             showNotification("Недоступно в режиме выбора открытых окон", "error");
         } else {
-            calendar.nextWeek();
+            calendarManager.nextWeek();
         }
     });
 
@@ -36,7 +35,7 @@ export function initApp() {
         if (settingsManager.isOpenWindowsMode) {
             showNotification("Недоступно в режиме выбора открытых окон", "error");
         } else {
-            calendar.goToCurrentWeek();
+            calendarManager.goToCurrentWeek();
         }
     });
 
@@ -54,7 +53,7 @@ export function initApp() {
         if (settingsManager.isOpenWindowsMode) {
             showNotification("Недоступно в режиме выбора открытых окон", "error");
         } else {
-            addStudentModal.open()
+            addStudentModalManager.open()
         }
     });
 }
@@ -64,6 +63,6 @@ window.openLessonModal = (lessonData) => {
     if (settingsManager.isOpenWindowsMode) {
         showNotification("Недоступно в режиме выбора открытых окон", "error");
     } else {
-        lessonModal.open(lessonData);
+        lessonModalManager.open(lessonData);
     }
 };

@@ -1,11 +1,13 @@
-import * as BX24API from './bx24api.js';
-import {getMyId} from './bx24api.js';
+import * as repository from './repository.js';
 import {showNotification} from "./utils.js";
 
-export class Calendar {
+const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+export class CalendarManager {
     constructor() {
         this.currentWeekOffset = 0;
-        this.scheduleData = null;
+        this.schedule = null;
+        this.openSlots = null;
         this.displayedLessons = new Set();
         this.startHour = 6;
         this.endHour = 18;
@@ -115,9 +117,6 @@ export class Calendar {
         timeColumn.innerHTML = '';
         weekDays.forEach(day => day.innerHTML = '');
 
-        // Массив с названиями дней недели
-        const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-
         // Создаем новые слоты времени
         for (let hour = this.startHour; hour <= this.endHour; hour++) {
             // Форматируем час в "HH:00"
@@ -151,7 +150,7 @@ export class Calendar {
                 return;
             }
 
-            const slots = this.scheduleData.weeklyOpenSlots[day] || [];
+            const slots = this.openSlots.weeklyOpenSlots[day] || [];
             slots.forEach(time => {
                 const hour = parseInt(time.split(':')[0]);
                 if (hour >= this.startHour && hour <= this.endHour) {
@@ -166,13 +165,13 @@ export class Calendar {
     }
 
     displayRegularLessons(days, dates) {
-        if (!this.scheduleData || !this.scheduleData.students) {
-            console.warn('Нет данных о студентах в scheduleData');
+        if (!this.schedule || !this.schedule.students) {
+            console.warn('Нет данных о студентах в schedule');
             return;
         }
 
         // Перебираем студентов
-        this.scheduleData.students.forEach(student => {
+        this.schedule.students.forEach(student => {
             const {id, name, regularSchedule} = student;
 
             // Проверяем, есть ли регулярное расписание
@@ -227,8 +226,8 @@ export class Calendar {
     }
 
     displayOneTimeLessons() {
-        if (!this.scheduleData || !this.scheduleData.students) {
-            console.warn('Нет данных о студентах в scheduleData');
+        if (!this.schedule || !this.schedule.students) {
+            console.warn('Нет данных о студентах в schedule');
             return;
         }
 
@@ -239,7 +238,7 @@ export class Calendar {
         const {start: weekStart, end: weekEnd} = this.getWeekRange(this.currentWeekOffset);
 
         // Перебираем студентов
-        this.scheduleData.students.forEach(student => {
+        this.schedule.students.forEach(student => {
             const {id, name, oneTimeLessons} = student;
 
             // Проверяем, есть ли разовые уроки
@@ -305,23 +304,25 @@ export class Calendar {
     }
 
     updateScheduleDisplay() {
-        if (!this.scheduleData || !this.scheduleData.weeklyOpenSlots) return;
+        if (!this.schedule || !this.schedule.students) {
+            console.warn("Расписание не загружено или не содержит информации о студентах.");
+            return;
+        }
 
         this.clearSchedule();
         this.displayedLessons.clear();
 
         const dates = this.getWeekDates(this.currentWeekOffset); // Используем currentWeekOffset
-        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
         // Очищаем все ячейки перед отображением уроков
-        this.clearAllLessons(days);
+        this.clearAllLessons(daysOfWeek);
 
         // Отображаем открытые слоты
-        this.displayOpenSlots(days);
+        this.displayOpenSlots(daysOfWeek);
 
         // Проверяем наличие данных о студентах перед отображением регулярных уроков
-        if (this.scheduleData.students && Array.isArray(this.scheduleData.students)) {
-            this.displayRegularLessons(days, dates);
+        if (this.schedule.students && Array.isArray(this.schedule.students)) {
+            this.displayRegularLessons(daysOfWeek, dates);
         } else {
             console.warn("Нет данных о студентах для отображения регулярных уроков.");
         }
@@ -379,41 +380,43 @@ export class Calendar {
         this.updateWeekInfo();
     }
 
-    async loadScheduleData() {
+    async loadSchedule() {
         try {
-            this.scheduleData = await BX24API.getSchedule();
+            this.schedule = await repository.getSchedule();
+            this.openSlots = await repository.getOpenSlots();
+
+            if (!this.schedule || !this.schedule.students) {
+                console.warn("Данные расписания не загружены или не содержат информации о студентах.");
+                return; // Прекращаем выполнение, если данные не загружены
+            }
 
             // Проверяем, что данные загружены и содержат информацию о студентах
-            if (!this.scheduleData || !this.scheduleData.students || this.scheduleData.students.length === 0) {
+            if (!this.schedule || !this.schedule.students || this.schedule.students.length === 0) {
                 console.warn("Данные расписания не загружены или не содержат информации о студентах.");
             }
 
-            // Используем настройки из scheduleData
-            if (this.scheduleData.settings?.workingHours) {
-                this.startHour = this.scheduleData.settings.workingHours.start;
-                this.endHour = this.scheduleData.settings.workingHours.end;
-            } else {
-                // Если нет настроек в scheduleData, используем значения по умолчанию
-                this.startHour = 11;  // значение по умолчанию
-                this.endHour = 21;   // значение по умолчанию
-            }
-
-            // Генерируем слоты времени с загруженными настройками
+            // Генерируем слоты часов
             this.generateTimeSlots();
 
             // Обновляем календарь и отображение расписания
             this.updateCalendar();
+
             this.updateScheduleDisplay();
 
-            // Обновляем заголовки и даты после загрузки данных
-            this.updateHeaderDates();
-            this.updateWeekInfo();
+            // TODO убрать?
+            this.updateCalendar();
         } catch (error) {
             console.log('Ошибка загрузки данных:', error);
         }
     }
 
     updateWorkingHours(start, end) {
+
+        if (!this.schedule || !this.schedule.students) {
+            console.warn("Расписание не загружено или не содержит информации о студентах.");
+            return;
+        }
+        
         this.startHour = start;
         this.endHour = end;
         this.generateTimeSlots();
@@ -427,8 +430,17 @@ export class Calendar {
 
     async updateSchedule() {
         try {
-            await BX24API.updateSchedule(this.scheduleData);
+            repository.updateSchedule(this.schedule);
             console.log("Расписание успешно обновлено в Битриксе.");
+        } catch (error) {
+            console.error("Ошибка при обновлении расписания:", error);
+        }
+    }
+
+    async updateOpenSlots() {
+        try {
+            repository.updateOpenSlots(this.openSlots);
+            console.log("Открытые часы успешно обновлены.");
         } catch (error) {
             console.error("Ошибка при обновлении расписания:", error);
         }
@@ -436,7 +448,7 @@ export class Calendar {
 
     //for admin only
     async addNewStudent(teacherId, studentData) {
-        const teacherSchedule = await BX24API.getSchedule(teacherId)
+        const teacherSchedule = await repository.getSchedule(teacherId)
 
         console.log(teacherSchedule)
         teacherSchedule.students.push(
@@ -444,13 +456,13 @@ export class Calendar {
         )
         console.log(teacherSchedule)
 
-        BX24API.updateSchedule(teacherSchedule, teacherId)
+        repository.updateSchedule(teacherSchedule, teacherId)
             .then(async () => {
                 console.log('Расписание успешно добавлено');
                 const myId = await getMyId()
                 if (teacherId === myId) {
                     console.log("обновили своё расписание")
-                    this.scheduleData = teacherSchedule;
+                    this.schedule = teacherSchedule;
                     this.updateCalendarUi();
                 }
                 showNotification("Расписание успешно добавлено", "success");

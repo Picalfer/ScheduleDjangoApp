@@ -13,3 +13,11 @@ class UserSettings(models.Model):
 
     def __str__(self):
         return f"Настройки пользователя {self.user.username}"
+
+
+class OpenSlots(models.Model):
+    teacher = models.OneToOneField(User, on_delete=models.CASCADE, related_name='open_slots')
+    weekly_open_slots = models.JSONField(default=dict)
+
+    def __str__(self):
+        return f"Open slots for {self.teacher.username}"

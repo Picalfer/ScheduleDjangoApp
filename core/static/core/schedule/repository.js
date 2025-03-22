@@ -1,60 +1,38 @@
-import * as utils from "./utils.js";
 
-const SCHEDULE_FIELD_ID = "UF_USR_1739378861094";
-export const AMOUNT_LESSONS_FIELD_ID = "UF_CRM_1739959665254";
-
-const DEFAULT_SCHEDULE_DATA = {
-    "settings": {
-        "workingHours": {
-            "start": 10,
-            "end": 20
-        }
-    },
-    "weeklyOpenSlots": {
-        "monday": [],
-        "tuesday": [],
-        "wednesday": [],
-        "thursday": [],
-        "friday": [],
-        "saturday": [],
-        "sunday": []
-    },
-    "students": []
-};
-
-let currentUserId = null;
-
-export async function getMyId() {
-    /*const user = await getCurrentUser();
-    return user.ID;*/
-    return 1
-}
-
-export function isAdmin() {
-    return new Promise((resolve, reject) => {
-        BX24.callMethod(
-            "user.admin",
-            {},
-            function (result) {
-                if (result.error())
-                    reject(result.error());
-                else
-                    resolve(result.data());
+export function getOpenSlots(teacherId = currentUserId) {
+    return fetch(`/api/open-slots/${teacherId}/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Ошибка: ${response.status} ${response.statusText}`);
             }
-        );
-    })
-}
-
-export function getCurrentUser() {
-    return new Promise((resolve, reject) => {
-        BX24.callMethod("user.current", {}, function (result) {
-            if (result.error()) {
-                reject(result.error());
-            } else {
-                resolve(result.data());
-            }
+            return response.json();
+        })
+        .then(data => data.weekly_open_slots)
+        .catch(error => {
+            console.error("Ошибка при получении свободных слотов:", error);
+            throw error;
         });
-    });
+}
+
+export function updateOpenSlots(openSlots, teacherId = currentUserId) {
+    return fetch(`/api/open-slots/${teacherId}/update/`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({weekly_open_slots: openSlots}),
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Ошибка: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => data.weekly_open_slots)
+        .catch(error => {
+            console.error("Ошибка при обновлении свободных слотов:", error);
+            throw error;
+        });
 }
 
 export function getSchedule(teacherId = currentUserId) {
@@ -105,31 +83,20 @@ export function getSchedule(teacherId = currentUserId) {
 }
 
 export function updateSchedule(scheduleData, teacherId = null) {
-    return new Promise((resolve, reject) => {
-        resolve("true шо");
-        /*const userId = teacherId || currentUserId; // Используем переданный ID или текущего пользователя
-
-        if (!userId) {
-            console.error("ID пользователя не найден.");
-            reject("ID пользователя не найден.");
-            return;
-        }
-
-        // Обновляем расписание
-        BX24.callMethod("user.update", {
-            ID: userId, // Используем переданный или сохраненный ID
-            [SCHEDULE_FIELD_ID]: JSON.stringify(scheduleData) // Записываем обновленное расписание
-        }, function (updateResult) {
-            if (updateResult.error()) {
-                console.error("Ошибка обновления данных:", updateResult.error());
-                reject(updateResult.error());
-            } else {
-                console.log(`Данные успешно обновлены для пользователя ${userId}:`, scheduleData);
-                resolve(updateResult);
-            }
+    return true
+    /*return fetch(`/api/teacher-availability/${teacherId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(scheduleData.weeklyOpenSlots),
+    })
+        .then(response => response.json())
+        .catch(error => {
+            console.error("Ошибка обновления открытых окон:", error);
         });*/
-    });
 }
+
 
 export function updateLessonBalance(clientId, newBalance) {
     return new Promise((resolve, reject) => {
@@ -209,14 +176,26 @@ function initNewSchedule(user) {
     });
 }
 
-
-const EXAMPLE_SCHEDULE_DATA = {
+const DEFAULT_SCHEDULE_DATA = {
     "settings": {
         "workingHours": {
             "start": 10,
             "end": 20
         }
     },
+    "weeklyOpenSlots": {
+        "monday": [],
+        "tuesday": [],
+        "wednesday": [],
+        "thursday": [],
+        "friday": [],
+        "saturday": [],
+        "sunday": []
+    },
+    "students": []
+};
+
+let EXAMPLE_OPEN_SLOTS = {
     "weeklyOpenSlots": {
         "monday": [
             "18:00",
@@ -250,8 +229,10 @@ const EXAMPLE_SCHEDULE_DATA = {
             "22:00"
         ]
     },
-    "students": [
+}
 
+const EXAMPLE_SCHEDULE_DATA = {
+    "students": [
         {
             "id": 1,
             "name": "Женя(Наталья)",
@@ -276,8 +257,8 @@ const EXAMPLE_SCHEDULE_DATA = {
             ],
             "oneTimeLessons": [
                 {
-                    "date": "2025-02-09",
-                    "time": "13:00",
+                    "date": "2025-03-19",
+                    "time": "20:00",
                     "subject": "Frontend"
                 }
             ]
@@ -288,12 +269,12 @@ const EXAMPLE_SCHEDULE_DATA = {
             "regularSchedule": [],
             "oneTimeLessons": [
                 {
-                    "date": "2025-02-04",
+                    "date": "2025-03-22",
                     "time": "21:00",
                     "subject": "Android"
                 },
                 {
-                    "date": "2025-02-07",
+                    "date": "2025-03-19",
                     "time": "17:00",
                     "subject": "Android"
                 }

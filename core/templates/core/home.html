@@ -272,5 +272,8 @@
 
 {% block scripts %}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        let currentUserId = {{ current_user_id }};
+    </script>
     <script src="{% static 'core/home.js' %}" type="module"></script>
 {% endblock %}

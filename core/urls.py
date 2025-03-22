@@ -2,6 +2,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import path
 
 from . import views
+from .views import get_open_slots, update_open_slots
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -13,4 +14,6 @@ urlpatterns = [
     path('password-change/done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
     path('get-user-settings/', views.get_user_settings, name='get_user_settings'),
     path('update-user-settings/', views.update_user_settings, name='update_user_settings'),
+    path('api/open-slots/<int:teacher_id>/', get_open_slots, name='get_open_slots'),
+    path('api/open-slots/<int:teacher_id>/update/', update_open_slots, name='update_open_slots'),
 ]
