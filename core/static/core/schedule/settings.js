@@ -64,7 +64,6 @@ export class SettingsManager {
 
     initializeTimeOptions() {
         // Проверяем, что элементы select существуют
-        console.log("test3")
         if (!this.startHourSelect || !this.endHourSelect) {
             console.error('Элементы startHourSelect или endHourSelect не найдены');
             return;

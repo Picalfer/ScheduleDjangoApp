@@ -9,7 +9,6 @@ export class Calendar {
         this.displayedLessons = new Set();
         this.startHour = 6;
         this.endHour = 18;
-        console.log("calendar start")
     }
 
     getWeekDates(offset = 0) {

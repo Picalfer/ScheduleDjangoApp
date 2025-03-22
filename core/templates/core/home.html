@@ -10,21 +10,19 @@
     <div id="schedule-container">
         <div id="week-info">
             <div id="week-info-left">
-                <div class="teacher-info">
-                    <div class="teacher-name">Имя преподавателя</div>
-                    <div id="admin-label" style="display: none;">(админ)</div>
-                </div>
                 <button id="settings-button" title="Настройки расписание"
                         class="icon-button icon-button-rotate"><span>⚙️</span></button>
-                <div id="admin-panel">
-                    <button id="teachers-button" title="Преподаватели" class="icon-button icon-button-float"
-                            style="display: none;" disabled><span>‍👨‍🏫</span></button>
-                    <button id="students-button" title="Ученики" class="icon-button icon-button-float"
-                            style="display: none;" disabled><span>‍🎓</span></button>
-                    <button id="add-student-button" title="Добавить расписание ученика"
-                            class="icon-button icon-button-float"
-                            style="display: none;" disabled><span>➕</span></button>
-                </div>
+                {% if user.is_staff %}
+                    <div id="admin-panel" style="display: inline-block">
+                        <button id="teachers-button" title="Преподаватели" class="icon-button icon-button-float"
+                                style="display: inline-block;"><span>‍👨‍🏫</span></button>
+                        <button id="students-button" title="Ученики" class="icon-button icon-button-float"
+                                style="display: inline-block;"><span>‍🎓</span></button>
+                        <button id="add-student-button" title="Добавить расписание ученика"
+                                class="icon-button icon-button-float"
+                                style="display: inline-block;"><span>➕</span></button>
+                    </div>
+                {% endif %}
                 <div id="open-windows-controls" style="display: none;">
                     <span>Отметьте открытые окна</span>
                     <div style="display: inline-block">
@@ -226,7 +224,7 @@
                     <div id="regular-schedule-section" class="form-group">
                         <h3>Постоянное расписание</h3>
                         <button id="add-regular-lesson-button" class="submit-button"
-                                style="margin-top: 10px; margin-bottom: 10px;">Добавить постоянный урок
+                                style="margin-top: 10px; margin-bottom: 10px; border: none">Добавить постоянный урок
                         </button>
                         <div id="regular-lessons-container"></div>
                     </div>
@@ -263,11 +261,11 @@
             <svg id="toggle-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
                  xmlns="http://www.w3.org/2000/svg">
                 <polyline points="8 5 15 12 8 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                          stroke-linejoin="round"/>
+                          stroke-linejoin="round"></polyline>
             </svg>
         </button>
         <span id="schedule-info-text">Вы смотрите расписание: <span id="schedule-info-text-name">Артур
-                Кожемякин</span></span></span>
+                Кожемякин</span></span>
     </div>
 {% endblock %}
 

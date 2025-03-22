@@ -12,6 +12,9 @@
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit">Сохранить</button>
+            <br>
+            <br>
+            <a href="{% url 'password_change' %}">Сменить пароль</a>
         </form>
     </div>
 {% endblock %}

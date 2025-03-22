@@ -70,31 +70,9 @@ body {
     font-size: 1.2em;
 }
 
-.teacher-info {
-    width: fit-content;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    justify-content: center;
-    padding-right: 5px;
-    border-right: 1px solid var(--border-color);
-}
-
-body.dark-theme .teacher-info {
-    border-right: 1px solid var(--dark-border-color);
-}
-
-.teacher-name {
-    display: block;
-    font-size: 0.9em;
-    font-weight: 500;
-    padding: 2px 4px;
-}
-
 #admin-label {
     color: #666;
-    font-size: 0.7em;
-    margin-top: 2px;
+    font-size: 1em;
     display: block;
 }
 
@@ -388,7 +366,7 @@ body.dark-theme .teacher-info {
     border: 1px solid var(--border-color);
     margin: 0 auto;
     padding: 20px;
-    width: 50%;
+    width: 30%;
     position: fixed;
     top: 50%;
     left: 50%;
@@ -398,7 +376,7 @@ body.dark-theme .teacher-info {
     flex-direction: column;
     justify-content: space-between;
     height: auto;
-    max-height: 90vh;
+    max-height: 80vh;
     overflow-y: auto;
 }
 
@@ -1025,12 +1003,6 @@ body.dark-theme #settings-modal select optgroup {
     color: var(--dark-text-secondary);
 }
 
-/* Стилизация скроллбара для модального окна */
-.modal-content {
-    max-height: 80vh;
-    overflow-y: auto;
-}
-
 /* Стилизация скроллбара */
 .modal-content::-webkit-scrollbar {
     width: 8px;
@@ -1302,15 +1274,13 @@ body.dark-theme #add-one-time-lesson-button {
     transition: opacity 0.3s ease;
 }
 
-#client-info,
-#teacher-info {
+#client-info {
     margin-top: 10px;
     color: #333;
 }
 
 /* Стили для темной темы */
-body.dark-theme #client-info,
-body.dark-theme #teacher-info {
+body.dark-theme #client-info {
     color: var(--dark-text-primary);
     background-color: var(--dark-header-bg);
     padding: 10px;

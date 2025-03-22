@@ -21,7 +21,6 @@ export function initApp() {
     calendar.updateCalendarUi()
     calendar.goToCurrentWeek();
 
-    console.log("test2")
     // Обработчики событий для кнопок навигации
     document.getElementById('prev-week').addEventListener('click', () => {
         if (settingsManager.isOpenWindowsMode) {

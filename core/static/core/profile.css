@@ -1,4 +1,8 @@
 /* Стили для формы профиля */
+main {
+    text-align: center;
+}
+
 form {
     max-width: 400px;
     margin: 0 auto;

@@ -66,16 +66,8 @@ export class AddStudentModal {
     }
 
     open() {
-        BX24API.isAdmin()
-            .then((isAdmin) => {
-                if (isAdmin) {
-                    this.modal.style.display = 'block';
-                    this.resetModalScroll();
-                }
-            })
-            .catch((error) => {
-                console.error('Ошибка при проверке прав администратора:', error);
-            });
+        this.modal.style.display = 'block';
+        this.resetModalScroll();
     }
 
     resetModalScroll() {

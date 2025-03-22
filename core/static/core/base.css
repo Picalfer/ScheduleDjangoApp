@@ -5,8 +5,8 @@ body {
     padding: 0;
     background: linear-gradient(135deg, #6a11cb, #fc2525);
     color: white;
-    min-height: 100vh;
     display: flex;
+    min-height: 100vh;
     flex-direction: column;
 }
 
@@ -20,8 +20,13 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1200px;
     margin: 0 auto;
+}
+.user-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
 }
 
 .user-info p {
@@ -47,7 +52,6 @@ main {
     display: flex;
     justify-content: center;
     align-items: center;
-    text-align: center;
 }
 
 #content-main {

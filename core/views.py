@@ -46,17 +46,6 @@ def home(request):
     return render(request, 'core/home.html', {'posts': posts})
 
 
-def test_view(request):
-    return render(request, 'core/testview.html')
-
-
-def get_data(request):
-    response_data = {
-        'message': 'Данные с бэкенда!',
-    }
-    return JsonResponse(response_data)
-
-
 @login_required
 def profile(request):
     user = request.user
