@@ -310,7 +310,6 @@ export class CalendarManager {
 
     updateScheduleDisplay() {
         if (!this.schedule || !this.schedule.students) {
-            console.warn("Расписание не загружено или не содержит информации о студентах.");
             return;
         }
 

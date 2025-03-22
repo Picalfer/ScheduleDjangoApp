@@ -34,7 +34,6 @@ export class SettingsManager {
                 document.body.classList.toggle('dark-theme', data.theme === 'dark');
                 this.themeSwitch.checked = data.theme === 'dark';
             }
-            console.log(data)
             if (data.workingHours) {
                 const {start, end} = data.workingHours;
                 if (this.isValidWorkingHours(start, end)) {
