@@ -1,5 +1,41 @@
 const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
+export async function createLesson(date, time, teacherId, studentId, subject, isRecurring = false) {
+    try {
+        // Проверка данных перед отправкой
+        if (!date || !time || !teacherId || !studentId || !subject) {
+            throw new Error('Missing required fields');
+        }
+
+        const response = await fetch('/api/create-lesson/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify({
+                date: date,
+                time: time,
+                teacher_id: teacherId,
+                student_id: studentId,
+                subject: subject,
+                is_recurring: isRecurring
+            }),
+        });
+
+        const responseData = await response.json();
+
+        if (!response.ok) {
+            throw new Error(responseData.error || `HTTP error! status: ${response.status}`);
+        }
+
+        return responseData;
+    } catch (error) {
+        console.error('Error creating lesson:', error);
+        throw error;
+    }
+}
+
 export function getOpenSlots(teacherId = currentUserId) {
     return fetch(`/api/open-slots/${teacherId}/`)
         .then(response => {
@@ -37,51 +73,52 @@ export function updateOpenSlots(openSlots, teacherId = currentUserId) {
         });
 }
 
-export function getSchedule(teacherId = currentUserId) {
-    return new Promise(async (resolve, reject) => {
-        resolve(EXAMPLE_SCHEDULE_DATA)
-        /*if (teacherId == null) {
-            teacherId = await getMyId()
+export async function getLessons(teacherId, startDate, endDate) {
+    try {
+        const response = await fetch(`/timeslots/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ошибка: ${response.status} ${response.statusText}`);
         }
-        getTeacherByID(teacherId).then(async teachers => {
-            if (teachers) {
-                const teacher = teachers[0];
-                // Проверяем, существует ли кастомное поле
-                if (!teacher || !teacher[SCHEDULE_FIELD_ID]) {
-                    console.warn(`Кастомное поле ${SCHEDULE_FIELD_ID} не найдено или оно пустое.`);
-                    console.info(`Инициализируем пустое расписание для пользователя ${teacher?.ID || "неизвестного"}`);
-                    await initNewSchedule(teacher);
-                    resolve(DEFAULT_SCHEDULE_DATA);
-                    return;
-                }
 
-                // Если данные уже существуют, просто возвращаем их
-                let scheduleData = teacher[SCHEDULE_FIELD_ID];
+        const data = await response.json();
+        console.log(data.results)
+        return data;
+    } catch (error) {
+        console.error("Ошибка при получении уроков:", error);
+        throw error;
+    }
+}
 
-                // Проверяем, что данные имеют нужную структуру
-                if (typeof scheduleData === 'string') {
-                    try {
-                        scheduleData = JSON.parse(scheduleData); // Пробуем парсить строку в объект
-                    } catch (error) {
-                        console.error("Ошибка парсинга данных:", error);
-                        scheduleData = {}; // Возвращаем пустой объект в случае ошибки
-                    }
-                }
+async function cancelLesson(lessonId, date) {
+    try {
+        const response = await fetch('/api/cancel-lesson/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,  // CSRF-токен, если используется
+            },
+            body: JSON.stringify({
+                lesson_id: lessonId,
+                date: date,
+            }),
+        });
 
-                if (typeof scheduleData !== 'object') {
-                    console.error("Полученные данные не являются объектом:", scheduleData);
-                    scheduleData = {}; // Возвращаем пустой объект в случае ошибки
-                }
+        if (!response.ok) {
+            throw new Error(`Ошибка: ${response.status} ${response.statusText}`);
+        }
 
-                resolve(scheduleData); // Возвращаем обработанные данные
-            }
-        }).catch(error => {
-            // Обработка ошибки, если преподаватель не найден
-            console.error("Ошибка получения данных о преподавателе:", error);
-            utils.showNotification(`Клиент с ID ${teacherId} не найден.`, 'error'); // Показываем уведомление
-        });*/
-
-    });
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Ошибка при отмене урока:", error);
+        throw error;
+    }
 }
 
 export function updateSchedule(scheduleData, teacherId = null) {
@@ -99,10 +136,43 @@ export function updateSchedule(scheduleData, teacherId = null) {
         });*/
 }
 
+/*
+async function rescheduleLesson(lessonId, date, newTime) {
+    try {
+        const response = await fetch('/api/reschedule-lesson/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,  // CSRF-токен, если используется
+            },
+            body: JSON.stringify({
+                lesson_id: lessonId,
+                date: date,
+                new_time: newTime,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ошибка: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Ошибка при переносе урока:", error);
+        throw error;
+    }
+}*/
+
+export function getSchedule(teacherId = currentUserId) {
+    return new Promise(async (resolve, reject) => {
+        resolve(getLessons())
+    });
+}
 
 export function updateLessonBalance(clientId, newBalance) {
     return new Promise((resolve, reject) => {
-        resolve("true шо")
+        resolve("заглушка")
         /*BX24.callMethod(
             "crm.contact.update",
             {
@@ -164,213 +234,3 @@ export function getTeacherByID(teacherId) {
         );*/
     });
 }
-
-function initNewSchedule(user) {
-    BX24.callMethod("user.update", {
-        ID: user.ID,
-        [SCHEDULE_FIELD_ID]: JSON.stringify(DEFAULT_SCHEDULE_DATA) // Записываем шаблон JSON
-    }, function (updateResult) {
-        if (updateResult.error()) {
-            console.error("Ошибка обновления данных:", updateResult.error());
-        } else {
-            console.log("Данные успешно инициализированы:", DEFAULT_SCHEDULE_DATA); // Выводим инициализированные данные
-        }
-    });
-}
-
-const DEFAULT_SCHEDULE_DATA = {
-    "settings": {
-        "workingHours": {
-            "start": 10,
-            "end": 20
-        }
-    },
-    "weeklyOpenSlots": {
-        "monday": [],
-        "tuesday": [],
-        "wednesday": [],
-        "thursday": [],
-        "friday": [],
-        "saturday": [],
-        "sunday": []
-    },
-    "students": []
-};
-
-let EXAMPLE_OPEN_SLOTS = {
-    "weeklyOpenSlots": {
-        "monday": [
-            "18:00",
-            "20:00",
-            "21:00"
-        ],
-        "tuesday": [
-            "21:00"
-        ],
-        "wednesday": [],
-        "thursday": [
-            "21:00",
-            "22:00"
-        ],
-        "friday": [
-            "16:00",
-            "17:00",
-            "18:00",
-            "22:00"
-        ],
-        "saturday": [
-            "19:00",
-            "20:00",
-            "21:00"
-        ],
-        "sunday": [
-            "18:00",
-            "19:00",
-            "20:00",
-            "21:00",
-            "22:00"
-        ]
-    },
-}
-
-const EXAMPLE_SCHEDULE_DATA = {
-    "students": [
-        {
-            "id": 1,
-            "name": "Женя(Наталья)",
-            "regularSchedule": [
-                {
-                    "day": "sunday",
-                    "time": "18:00",
-                    "subject": "Python"
-                }
-            ],
-            "oneTimeLessons": []
-        },
-        {
-            "id": 2,
-            "name": "Илья(Ольга)",
-            "regularSchedule": [
-                {
-                    "day": "friday",
-                    "time": "21:00",
-                    "subject": "Frontend"
-                }
-            ],
-            "oneTimeLessons": [
-                {
-                    "date": "2025-03-19",
-                    "time": "20:00",
-                    "subject": "Frontend"
-                }
-            ]
-        },
-        {
-            "id": 3,
-            "name": "Артём(Кристина)",
-            "regularSchedule": [],
-            "oneTimeLessons": [
-                {
-                    "date": "2025-03-22",
-                    "time": "21:00",
-                    "subject": "Android"
-                },
-                {
-                    "date": "2025-03-19",
-                    "time": "17:00",
-                    "subject": "Android"
-                }
-            ]
-        },
-        {
-            "id": 4,
-            "name": "Саша(Мария)",
-            "regularSchedule": [
-                {
-                    "day": "monday",
-                    "time": "21:00",
-                    "subject": "Unity"
-                },
-                {
-                    "day": "friday",
-                    "time": "20:00",
-                    "subject": "Unity"
-                },
-                {
-                    "day": "sunday",
-                    "time": "21:00",
-                    "subject": "Unity"
-                }
-            ],
-            "oneTimeLessons": []
-        },
-        {
-            "id": 5,
-            "name": "Никита(Кристина)",
-            "regularSchedule": [
-                {
-                    "day": "tuesday",
-                    "time": "19:00",
-                    "subject": "Frontend"
-                },
-                {
-                    "day": "thursday",
-                    "time": "19:00",
-                    "subject": "Frontend"
-                }
-            ],
-            "oneTimeLessons": []
-        },
-        {
-            "id": 6,
-            "name": "Ева(Елена)",
-            "regularSchedule": [
-                {
-                    "day": "thursday",
-                    "time": "20:00",
-                    "subject": "Blender"
-                },
-                {
-                    "day": "sunday",
-                    "time": "14:00",
-                    "subject": "Blender"
-                }
-            ],
-            "oneTimeLessons": []
-        },
-        {
-            "id": 7,
-            "name": "Лео(Алла)",
-            "regularSchedule": [
-                {
-                    "day": "monday",
-                    "time": "18:00",
-                    "subject": "Roblox"
-                },
-                {
-                    "day": "friday",
-                    "time": "18:00",
-                    "subject": "Roblox"
-                }
-            ],
-            "oneTimeLessons": []
-        },
-        {
-            "id": 8,
-            "name": "Макар(Анастасия)",
-            "regularSchedule": [
-                {
-                    "day": "tuesday",
-                    "time": "18:00",
-                    "subject": "Unity"
-                },
-                {
-                    "day": "thursday",
-                    "time": "20:00",
-                    "subject": "Unity"
-                }
-            ],
-            "oneTimeLessons": []
-        }
-    ]
-};

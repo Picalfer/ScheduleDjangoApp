@@ -2,7 +2,64 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
-# Create your models here.
+class Teacher(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    courses = models.CharField(max_length=255, blank=True)  # Например: "Python, JavaScript"
+
+    def __str__(self):
+        return self.user.get_full_name() or self.user.username
+
+
+class Student(models.Model):
+    name = models.CharField(
+        max_length=100,
+        default='Новый ученик',  # Добавьте временное значение по умолчанию
+        verbose_name='Имя ученика'
+    )
+    subject = models.CharField(max_length=100,
+                               default='не выбрано')  # Предмет
+    teacher = models.ForeignKey(
+        Teacher,  # Или User, если используете вариант 2
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='students'
+    )
+    bitrix_link = models.URLField(max_length=500, blank=True)  # Ссылка на Битрикс
+
+    def __str__(self):
+        return f"{self.name} ({self.subject})"
+
+
+class TimeSlot(models.Model):
+    teacher = models.ForeignKey(
+        Teacher,  # Или User, если используете вариант 2
+        on_delete=models.CASCADE,
+        related_name='time_slots'
+    )
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    date = models.DateField()
+    time = models.TimeField()
+    is_recurring = models.BooleanField(
+        default=False,
+        verbose_name='Регулярный урок',
+        help_text='Отметьте для регулярных занятий'
+    )
+    subject = models.CharField(max_length=100)  # Дубль для быстрого доступа
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('scheduled', 'Запланирован'),
+            ('completed', 'Проведён'),
+            ('canceled', 'Отменён'),
+        ],
+        default='scheduled'
+    )
+
+    class Meta:
+        ordering = ['date', 'time']
+
+    def __str__(self):
+        return f"{self.date} {self.time} - {self.student.name}"
 
 
 class UserSettings(models.Model):

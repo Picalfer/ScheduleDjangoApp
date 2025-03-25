@@ -7,11 +7,69 @@ from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics
 
 from .forms import ProfileForm
 from .forms import RegisterForm, LoginForm
-from .models import UserSettings, OpenSlots
+from .models import OpenSlots, UserSettings
+from .models import TimeSlot, Teacher, Student
+from .serializers import TimeSlotSerializer, TeacherSerializer, StudentSerializer
+
+
+class TimeSlotListCreate(generics.ListCreateAPIView):
+    queryset = TimeSlot.objects.all()
+    serializer_class = TimeSlotSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['date', 'teacher', 'student', 'status']
+
+
+class TimeSlotRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = TimeSlot.objects.all()
+    serializer_class = TimeSlotSerializer
+
+
+class TeacherList(generics.ListAPIView):
+    queryset = Teacher.objects.all()
+    serializer_class = TeacherSerializer
+
+
+class StudentList(generics.ListAPIView):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+
+
+@csrf_exempt
+def create_lesson(request):
+    if request.method == 'POST':
+        try:
+            print("Raw request body:", request.body)  # Логируем сырые данные
+            data = json.loads(request.body)
+            print("Parsed data:", data)  # Логируем распарсенные данные
+
+            # Проверка обязательных полей
+            required_fields = ['date', 'time', 'teacher_id', 'student_id', 'subject']
+            for field in required_fields:
+                if field not in data:
+                    return JsonResponse({'error': f'Missing field: {field}'}, status=400)
+
+            # Создаем урок
+            lesson = TimeSlot.objects.create(
+                date=data['date'],
+                time=data['time'],
+                teacher_id=data['teacher_id'],
+                student_id=data['student_id'],
+                subject=data['subject'],
+                is_recurring=data.get('is_recurring', False)
+            )
+            return JsonResponse({'status': 'success', 'id': lesson.id})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'error': 'Invalid method'}, status=405)
 
 
 @require_http_methods(["GET"])

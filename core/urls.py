@@ -16,4 +16,9 @@ urlpatterns = [
     path('update-user-settings/', views.update_user_settings, name='update_user_settings'),
     path('api/open-slots/<int:teacher_id>/', get_open_slots, name='get_open_slots'),
     path('api/open-slots/<int:teacher_id>/update/', update_open_slots, name='update_open_slots'),
+    path('timeslots/', views.TimeSlotListCreate.as_view(), name='timeslot-list'),
+    path('timeslots/<int:pk>/', views.TimeSlotRetrieveUpdateDestroy.as_view(), name='timeslot-detail'),
+    path('teachers/', views.TeacherList.as_view(), name='teacher-list'),
+    path('students/', views.StudentList.as_view(), name='student-list'),
+    path('api/create-lesson/', views.create_lesson, name='create-lesson'),
 ]

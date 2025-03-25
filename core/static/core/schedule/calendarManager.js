@@ -6,7 +6,7 @@ const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'sat
 export class CalendarManager {
     constructor() {
         this.currentWeekOffset = 0;
-        this.schedule = {};
+        this.lessons = {};
         this.openSlots = {};
         this.displayedLessons = new Set();
         this.startHour = 6;
@@ -91,22 +91,18 @@ export class CalendarManager {
     }
 
     createLessonHTML(lesson) {
-        const emoji = lesson.status === 'permanent' ? '🔄' : '1️⃣';
-        const statusText = lesson.status === 'permanent' ? 'Постоянный урок' : 'Разовый урок';
-
-        // Добавляем смайлики для ученика и предмета
-        const studentEmoji = '👩‍🎓'; // Смайлик студента
-        const subjectEmoji = '📚'; // Смайлик предмета
+        const emoji = lesson.is_recurring ? '🔄' : '1️⃣';
+        const statusText = lesson.is_recurring ? 'Постоянный урок' : 'Разовый урок';
 
         return `
-            <div class="lesson ${lesson.status}" 
-                 data-student-id="${lesson.id}" 
-                 onclick="window.openLessonModal(${JSON.stringify(lesson).replace(/"/g, '&quot;')})">
-                <h4 data-emoji="${emoji}">${statusText}</h4>
-                <p>${studentEmoji} <span id="student-name">${lesson.student}</span></p>
-                <p>${subjectEmoji} <span id="subject-name">${lesson.subject}</span></p>
-            </div>
-        `;
+        <div class="lesson ${lesson.is_recurring ? 'permanent' : 'one-time'}" 
+             data-lesson-id="${lesson.id}"
+             onclick="window.openLessonModal(${JSON.stringify(lesson).replace(/"/g, '&quot;')})">
+            <h4 data-emoji="${emoji}">${statusText}</h4>
+            <p>👩‍🎓 <span id="student-name">${lesson.student_name || `Student ${lesson.student}`}</span></p>
+            <p>📚 <span id="subject-name">${lesson.subject}</span></p>
+        </div>
+    `;
     }
 
     generateTimeSlots() {
@@ -170,146 +166,67 @@ export class CalendarManager {
     }
 
     displayRegularLessons(days, dates) {
-        if (!this.schedule || !this.schedule.students) {
-            console.warn('Нет данных о студентах в schedule');
-            return;
-        }
+        if (!this.lessons?.students) return;
 
-        // Перебираем студентов
-        this.schedule.students.forEach(student => {
-            const {id, name, regularSchedule} = student;
-
-            // Проверяем, есть ли регулярное расписание
-            if (regularSchedule && Array.isArray(regularSchedule)) {
-                regularSchedule.forEach(lesson => {
-                    const {day, time, subject} = lesson;
-                    const hour = parseInt(time.split(':')[0]);
-
-                    // Проверяем, что час находится в рабочем диапазоне
-                    if (hour >= this.startHour && hour <= this.endHour) {
-                        const dayElement = document.getElementById(day);
-                        if (dayElement) {
-                            const hourIndex = hour - this.startHour;
-                            const hourElement = dayElement.children[hourIndex];
-
-                            if (hourElement) {
-                                // Проверяем, что day существует в days
-                                const dayIndex = days.indexOf(day);
-                                if (dayIndex === -1) {
-                                    console.warn(`День "${day}" не найден в массиве days`);
-                                    return;
-                                }
-
-                                // Проверяем, что dates[dayIndex] является объектом Date
-                                const date = dates[dayIndex];
-                                if (!(date instanceof Date)) {
-                                    console.warn(`dates[${dayIndex}] не является объектом Date`);
-                                    return;
-                                }
-
-                                // Форматируем дату
-                                const formattedDate = date.toISOString().split('T')[0];
-
-                                // Убираем проверку на доступность слота
-                                // Обновляем содержимое элемента
-                                hourElement.innerHTML = this.createLessonHTML({
-                                    id: id,
-                                    date: formattedDate,
-                                    time: time,
-                                    student: name,
-                                    subject: subject,
-                                    status: 'permanent'
-                                });
-                            }
+        this.lessons.students.forEach(student => {
+            student.regularSchedule.forEach(lesson => {
+                const hour = parseInt(lesson.time.split(':')[0]);
+                if (hour >= this.startHour && hour <= this.endHour) {
+                    const dayElement = document.getElementById(lesson.day);
+                    if (dayElement) {
+                        const hourElement = dayElement.children[hour - this.startHour];
+                        if (hourElement) {
+                            hourElement.innerHTML = this.createLessonHTML({
+                                id: student.id,
+                                date: dates[days.indexOf(lesson.day)].toISOString().split('T')[0],
+                                time: lesson.time,
+                                student: student.name,
+                                subject: lesson.subject,
+                                is_recurring: true
+                            });
                         }
                     }
-                });
-            } else {
-                console.warn(`Нет регулярного расписания для студента: ${name}`);
-            }
+                }
+            });
         });
     }
 
     displayOneTimeLessons() {
-        if (!this.schedule || !this.schedule.students) {
-            console.warn('Нет данных о студентах в schedule');
-            return;
-        }
+        if (!this.lessons?.students) return;
 
-        // Массив с английскими названиями дней недели
-        const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-
-        // Получаем диапазон текущей недели
         const {start: weekStart, end: weekEnd} = this.getWeekRange(this.currentWeekOffset);
 
-        // Перебираем студентов
-        this.schedule.students.forEach(student => {
-            const {id, name, oneTimeLessons} = student;
+        this.lessons.students.forEach(student => {
+            student.oneTimeLessons.forEach(lesson => {
+                const lessonDate = new Date(lesson.date);
+                if (lessonDate >= weekStart && lessonDate <= weekEnd) {
+                    const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday',
+                        'thursday', 'friday', 'saturday'][lessonDate.getDay()];
+                    const hour = parseInt(lesson.time.split(':')[0]);
 
-            // Проверяем, есть ли разовые уроки
-            if (oneTimeLessons && Array.isArray(oneTimeLessons)) {
-
-                oneTimeLessons.forEach(lesson => {
-                    const {date, time, subject} = lesson;
-
-                    // Проверяем, что date существует и является строкой
-                    if (!date || typeof date !== 'string') {
-                        console.warn(`Некорректная дата для студента ${name}: ${date}`);
-                        return;
-                    }
-
-                    // Преобразуем строку в объект Date
-                    const lessonDate = new Date(date);
-
-                    // Проверяем, что lessonDate является корректной датой
-                    if (isNaN(lessonDate.getTime())) {
-                        console.warn(`Некорректная дата для студента ${name}: ${date}`);
-                        return;
-                    }
-
-                    // Проверяем, что дата урока попадает в текущую неделю
-                    if (lessonDate < weekStart || lessonDate > weekEnd) {
-                        return;
-                    }
-
-                    // Проверяем, что время урока находится в рабочем диапазоне
-                    const hour = parseInt(time.split(':')[0]);
                     if (hour >= this.startHour && hour <= this.endHour) {
-                        // Находим элемент дня
-                        const dayOfWeek = daysOfWeek[lessonDate.getDay()]; // Используем английские названия
-
                         const dayElement = document.getElementById(dayOfWeek);
                         if (dayElement) {
-                            const hourIndex = hour - this.startHour;
-                            const hourElement = dayElement.children[hourIndex];
-
+                            const hourElement = dayElement.children[hour - this.startHour];
                             if (hourElement) {
                                 hourElement.innerHTML = this.createLessonHTML({
-                                    id: id,
-                                    date: date,
-                                    time: time,
-                                    student: name,
-                                    subject: subject,
-                                    status: 'one-time'
+                                    id: student.id,
+                                    date: lesson.date,
+                                    time: lesson.time,
+                                    student: student.name,
+                                    subject: lesson.subject,
+                                    is_recurring: false
                                 });
-                            } else {
-                                console.warn(`Ячейка для времени ${time} не найдена в дне ${dayOfWeek}`);
                             }
-                        } else {
-                            console.warn(`Элемент дня ${dayOfWeek} не найден`);
                         }
-                    } else {
-                        console.warn(`Время урока ${time} вне рабочего диапазона`);
                     }
-                });
-            } else {
-                console.warn(`Нет разовых уроков для студента: ${name}`);
-            }
+                }
+            });
         });
     }
 
     updateScheduleDisplay() {
-        if (!this.schedule || !this.schedule.students) {
+        if (!this.lessons || !this.lessons.students) {
             return;
         }
 
@@ -325,7 +242,7 @@ export class CalendarManager {
         this.displayOpenSlots(daysOfWeek);
 
         // Проверяем наличие данных о студентах перед отображением регулярных уроков
-        if (this.schedule.students && Array.isArray(this.schedule.students)) {
+        if (this.lessons.students && Array.isArray(this.lessons.students)) {
             this.displayRegularLessons(daysOfWeek, dates);
         } else {
             console.warn("Нет данных о студентах для отображения регулярных уроков.");
@@ -386,37 +303,99 @@ export class CalendarManager {
 
     async loadSchedule() {
         try {
-            this.schedule = await repository.getSchedule();
+            // 1. Получаем текущую неделю
+            const {start: weekStart, end: weekEnd} = this.getWeekRange(this.currentWeekOffset);
+
+            // 2. Форматируем даты в YYYY-MM-DD
+            const formatDate = (date) => date.toISOString().split('T')[0];
+            const startDate = formatDate(weekStart);
+            const endDate = formatDate(weekEnd);
+
+            // 3. Получаем ID текущего пользователя (предполагаем, что это учитель)
+            const teacherId = await this.getMyId(); // Используем вашу существующую функцию
+
+            // 4. Загружаем данные
+            const timeSlots = await repository.getLessons(teacherId, startDate, endDate);
+
+            // 5. Преобразуем в старый формат
+            this.lessons = this.convertTimeSlotsToLegacyFormat(timeSlots.results);
+
             this.openSlots = await repository.getOpenSlots();
-
-            if (!this.schedule || !this.schedule.students) {
-                console.warn("Данные расписания не загружены или не содержат информации о студентах.");
-                return; // Прекращаем выполнение, если данные не загружены
-            }
-
-            // Проверяем, что данные загружены и содержат информацию о студентах
-            if (!this.schedule || !this.schedule.students || this.schedule.students.length === 0) {
-                console.warn("Данные расписания не загружены или не содержат информации о студентах.");
-            }
-
-            // Генерируем слоты часов
             this.generateTimeSlots();
-
-            // Обновляем календарь и отображение расписания
             this.updateCalendar();
-
             this.updateScheduleDisplay();
-
-            // TODO убрать?
-            this.updateCalendar();
         } catch (error) {
-            console.log('Ошибка загрузки данных:', error);
+            console.error('Ошибка загрузки данных:', error);
+            showNotification("Ошибка загрузки расписания", "error");
+        }
+    }
+
+    async getMyId() {
+        // Реализация зависит от вашей системы аутентификации
+        // Например, если ID хранится в localStorage:
+        return currentUserId;
+    }
+
+    // Конвертер из TimeSlot в старый формат
+    convertTimeSlotsToLegacyFormat(timeSlots) {
+        const result = {
+            students: []
+        };
+
+        // Группируем по студентам
+        const studentsMap = new Map();
+
+        timeSlots.forEach(slot => {
+            if (!studentsMap.has(slot.student)) {
+                studentsMap.set(slot.student, {
+                    id: slot.student,
+                    name: `Student ${slot.student}`, // Здесь нужно получить реальное имя студента
+                    regularSchedule: [],
+                    oneTimeLessons: []
+                });
+            }
+
+            const student = studentsMap.get(slot.student);
+            const lesson = {
+                date: slot.date,
+                time: slot.time,
+                subject: slot.subject
+            };
+
+            if (slot.is_recurring) {
+                // Для повторяющихся уроков определяем день недели
+                const date = new Date(slot.date);
+                const day = ['sunday', 'monday', 'tuesday', 'wednesday',
+                    'thursday', 'friday', 'saturday'][date.getDay()];
+                student.regularSchedule.push({
+                    day: day,
+                    time: slot.time.split(':').slice(0, 2).join(':'), // Убираем секунды
+                    subject: slot.subject
+                });
+            } else {
+                student.oneTimeLessons.push(lesson);
+            }
+        });
+
+        result.students = Array.from(studentsMap.values());
+        return result;
+    }
+
+    async getStudentName(studentId) {
+        // Здесь нужно реализовать запрос к API для получения имени студента
+        // Например:
+        try {
+            const response = await fetch(`/api/students/${studentId}/`);
+            const data = await response.json();
+            return data.name || `Student ${studentId}`;
+        } catch {
+            return `Student ${studentId}`;
         }
     }
 
     updateWorkingHours(start, end) {
 
-        if (!this.schedule || !this.schedule.students) {
+        if (!this.lessons || !this.lessons.students) {
             console.warn("Расписание не загружено или не содержит информации о студентах.");
             return;
         }
@@ -434,7 +413,7 @@ export class CalendarManager {
 
     async updateSchedule() {
         try {
-            repository.updateSchedule(this.schedule);
+            repository.updateSchedule(this.lessons);
             console.log("Расписание успешно обновлено в Битриксе.");
         } catch (error) {
             console.error("Ошибка при обновлении расписания:", error);
@@ -466,7 +445,7 @@ export class CalendarManager {
                 const myId = await getMyId()
                 if (teacherId === myId) {
                     console.log("обновили своё расписание")
-                    this.schedule = teacherSchedule;
+                    this.lessons = teacherSchedule;
                     this.updateCalendarUi();
                 }
                 showNotification("Расписание успешно добавлено", "success");
