@@ -394,8 +394,7 @@ export class CalendarManager {
     }
 
     updateWorkingHours(start, end) {
-
-        if (!this.lessons || !this.lessons.students) {
+        if (!this.lessons) {
             console.warn("Расписание не загружено или не содержит информации о студентах.");
             return;
         }
