@@ -33,8 +33,10 @@
                 </div>
             </div>
             <div class="week-navigation">
-                <button id="prev-week" class="nav-button">←</button>
-                <button id="current-week" class="nav-button">Сегодня</button>
+                <div>
+                    <button id="prev-week" class="nav-button">←</button>
+                    <button id="current-week" class="nav-button">Сегодня</button>
+                </div>
                 <h2>Неделя: <span id="week-range"></span></h2>
                 <button id="next-week" class="nav-button">→</button>
             </div>
@@ -275,9 +277,9 @@
     <script>
         let currentUserId = {{ current_user_id }};
         const userData = {
-        isAdmin: {% if request.user.is_staff %}true{% else %}false{% endif %},
-        username: "{{ request.user.username|escapejs }}"
-    };
+            isAdmin: {% if request.user.is_staff %}true{% else %}false{% endif %},
+            username: "{{ request.user.username|escapejs }}"
+        };
     </script>
     <script src="{% static 'core/home.js' %}" type="module"></script>
 {% endblock %}

@@ -59,9 +59,10 @@ body {
 
 .week-navigation {
     display: flex;
-    grid-template-columns: auto 50px 100px minmax(200px, auto) 50px;
+    justify-content: space-between;
     align-items: center;
     gap: 10px;
+    width: 40%;
     padding: 5px;
 }
 
@@ -1384,23 +1385,8 @@ body.dark-theme #new-one-time-lesson-date {
     max-height: 150px;
 }
 
-/* Стили для скроллбара */
 .time-select::-webkit-scrollbar {
     width: 8px;
-}
-
-.time-select::-webkit-scrollbar-track {
-    background: var(--scrollbar-track-color);
-    border-radius: 4px;
-}
-
-.time-select::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thumb-color);
-    border-radius: 4px;
-}
-
-.time-select::-webkit-scrollbar-thumb:hover {
-    background: var(--scrollbar-thumb-hover-color);
 }
 
 #schedule-info-panel {
@@ -1421,7 +1407,6 @@ body.dark-theme #new-one-time-lesson-date {
     height: 40px;
     transition: max-width 0.4s ease, padding 0.3s ease;
     white-space: nowrap;
-    /* Запрещаем перенос строк */
     overflow: hidden;
 }
 
@@ -1440,7 +1425,6 @@ body.dark-theme #schedule-info-panel {
     font-size: 18px;
 }
 
-/* Текст */
 #schedule-info-text {
     opacity: 1;
     transition: opacity 0.3s ease;
@@ -1448,7 +1432,6 @@ body.dark-theme #schedule-info-panel {
     text-overflow: ellipsis;
 }
 
-/* Свернутая панель */
 #schedule-info-panel.collapsed {
     max-width: 40px;
     padding: 5px;
