@@ -51,7 +51,7 @@ class Student(models.Model):
 
 class TimeSlot(models.Model):
     teacher = models.ForeignKey(
-        Teacher,  # Или User, если используете вариант 2
+        Teacher,
         on_delete=models.CASCADE,
         related_name='time_slots'
     )
@@ -63,7 +63,7 @@ class TimeSlot(models.Model):
         verbose_name='Регулярный урок',
         help_text='Отметьте для регулярных занятий'
     )
-    subject = models.CharField(max_length=100)  # Дубль для быстрого доступа
+    subject = models.CharField(max_length=100)
     status = models.CharField(
         max_length=20,
         choices=[

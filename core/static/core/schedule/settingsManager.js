@@ -119,6 +119,42 @@ export class SettingsManager {
         }
     }
 
+    addHourClickHandlers() {
+        this.hourClickHandler = (event) => {
+            // Если кликнули по чекбоксу - ничего не делаем, он сам обработает клик
+            if (event.target.classList.contains('open-window-checkbox')) {
+                return;
+            }
+
+            // Если кликнули по уроку - не переключаем чекбокс
+            if (event.target.closest('.lesson')) {
+                return;
+            }
+
+            const hourElement = event.currentTarget;
+            const checkbox = hourElement.querySelector('.open-window-checkbox');
+
+            // Переключаем состояние чекбокса
+            checkbox.checked = !checkbox.checked;
+
+            // Вызываем обработчик изменения чекбокса
+            const changeEvent = new Event('change');
+            checkbox.dispatchEvent(changeEvent);
+        };
+
+        document.querySelectorAll('.hour').forEach(hour => {
+            hour.addEventListener('click', this.hourClickHandler);
+        });
+    }
+
+    removeHourClickHandlers() {
+        // Удаляем обработчики со всех часов
+        document.querySelectorAll('.hour').forEach(hour => {
+            hour.removeEventListener('click', this.hourClickHandler);
+        });
+        this.hourClickHandler = null;
+    }
+
     close() {
         this.modal.classList.remove('visible');
         this.modal.style.display = 'none';
@@ -225,7 +261,36 @@ export class SettingsManager {
         this.turnOffOpenWindowsMode();
     }
 
+    toggleOpenWindows() {
+        console.log("Режим настройки окон переключен");
+        this.isOpenWindowsMode = !this.isOpenWindowsMode;
+
+        if (this.openWindowsControls) {
+            const isVisible = this.openWindowsControls.style.display === 'block';
+            this.openWindowsControls.style.display = isVisible ? 'none' : 'block';
+        }
+
+        this.addCheckboxesToHours();
+
+        // Добавляем или удаляем обработчики кликов
+        if (this.isOpenWindowsMode) {
+            this.addHourClickHandlers();
+        } else {
+            this.removeHourClickHandlers();
+        }
+
+        this.updateSelectedCount();
+        this.close();
+
+        const cancelButton = document.getElementById('cancel-open-windows');
+        if (cancelButton) {
+            cancelButton.onclick = () => this.turnOffOpenWindowsMode();
+        }
+    }
+
     turnOffOpenWindowsMode() {
+        this.removeHourClickHandlers(); // Удаляем обработчики кликов
+
         document.querySelectorAll('.open-window-checkbox').forEach((checkbox) => {
             checkbox.remove();
         });
@@ -235,33 +300,11 @@ export class SettingsManager {
             selectedCountPanel.style.display = 'none';
         }
 
-        this.isOpenWindowsMode = false; // Сбрасываем состояние
-
-        if (this.openWindowsControls) {
-            this.openWindowsControls.style.display = 'none';
-        }
+        this.isOpenWindowsMode = false;
+        this.openWindowsControls.style.display = 'none';
+        this.calendarManager.updateCalendarUi();
     }
 
-    toggleOpenWindows() {
-        console.log("Режим настройки окон переключен");
-        this.isOpenWindowsMode = !this.isOpenWindowsMode; // Переключаем состояние
-
-        if (this.openWindowsControls) {
-            const isVisible = this.openWindowsControls.style.display === 'block';
-            this.openWindowsControls.style.display = isVisible ? 'none' : 'block';
-        }
-
-        this.addCheckboxesToHours();
-
-        this.updateSelectedCount();
-
-        this.close();
-
-        const cancelButton = document.getElementById('cancel-open-windows');
-        if (cancelButton) {
-            cancelButton.onclick = () => this.turnOffOpenWindowsMode();
-        }
-    }
 
     addCheckboxesToHours() {
         const hourElements = document.querySelectorAll('.hour');
@@ -269,26 +312,31 @@ export class SettingsManager {
             const day = hourElement.getAttribute('data-day');
             const hour = hourElement.getAttribute('data-hour');
 
+            // Удаляем старый чекбокс, если есть
             const existingCheckbox = hourElement.querySelector('.open-window-checkbox');
             if (existingCheckbox) {
                 existingCheckbox.remove();
             }
 
+            // Создаем новый видимый чекбокс
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.className = 'open-window-checkbox';
-
             checkbox.checked = hourElement.classList.contains('open-window');
 
             hourElement.appendChild(checkbox);
 
-            checkbox.addEventListener('change', () => {
-                if (checkbox.checked) {
-                    hourElement.classList.add('open-window');
-                } else {
-                    hourElement.classList.remove('open-window');
-                }
+            // Добавляем/убираем режим редактирования
+            if (this.isOpenWindowsMode) {
+                hourElement.classList.add('open-window-mode');
+            } else {
+                hourElement.classList.remove('open-window-mode');
+            }
 
+            checkbox.addEventListener('change', () => {
+                hourElement.classList.toggle('open-window', checkbox.checked);
+
+                // Ваша существующая логика обновления состояния...
                 if (!this.openWindowStates[day]) {
                     this.openWindowStates[day] = [];
                 }
@@ -301,10 +349,6 @@ export class SettingsManager {
                     this.openWindowStates[day] = this.openWindowStates[day].filter(h => h !== hour);
                 }
 
-                /*// Сохраняем обновленное состояние в localStorage
-                localStorage.setItem('openWindowStates', JSON.stringify(this.openWindowStates));
-                */
-                // Обновляем количество выбранных ячеек
                 this.updateSelectedCount();
             });
         });
