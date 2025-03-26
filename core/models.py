@@ -74,6 +74,18 @@ class TimeSlot(models.Model):
         default='scheduled'
     )
 
+    start_date = models.DateField(
+        verbose_name='Дата начала регулярных уроков',
+        null=True,
+        blank=True
+    )
+
+    def save(self, *args, **kwargs):
+        # Автоматически устанавливаем start_date для регулярных уроков
+        if self.is_recurring and not self.start_date:
+            self.start_date = self.date
+        super().save(*args, **kwargs)
+
     def clean(self):
         if self.status == 'scheduled' and self.student.lesson_balance <= 0:
             raise ValidationError('У студента недостаточно уроков на балансе')

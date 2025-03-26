@@ -5,9 +5,11 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError, PermissionDenied
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
+from django.utils import timezone
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -83,18 +85,16 @@ class TimeSlotListCreate(generics.ListCreateAPIView):
     filterset_fields = ['date', 'student', 'status']
 
     def get_queryset(self):
-        # Получаем teacher_id из параметров запроса
-        teacher_id = self.request.query_params.get('teacher_id')
+        queryset = TimeSlot.objects.filter(teacher__user=self.request.user)
 
-        # Если teacher_id не указан - используем текущего пользователя
-        if not teacher_id:
-            return TimeSlot.objects.filter(teacher__user=self.request.user)
-
-        # Проверяем права (только админ может смотреть чужие расписания)
-        if not self.request.user.is_staff:
-            raise PermissionDenied("Только администраторы могут просматривать чужие расписания")
-
-        return TimeSlot.objects.filter(teacher_id=teacher_id)
+        # Для регулярных уроков фильтруем только актуальные
+        if self.request.query_params.get('recurring') == 'true':
+            today = timezone.now().date()
+            queryset = queryset.filter(
+                Q(is_recurring=True) &
+                Q(start_date__lte=today)
+            )
+        return queryset
 
 
 class TimeSlotRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):

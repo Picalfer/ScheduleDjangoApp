@@ -170,26 +170,38 @@ export class CalendarManager {
     displayRegularLessons(days, dates) {
         if (!this.lessons?.students) return;
 
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
         this.lessons.students.forEach(student => {
             student.regularSchedule.forEach(lesson => {
+                // Проверяем что урок активен на текущей неделе
+                const lessonDayIndex = days.indexOf(lesson.day);
+                if (lessonDayIndex === -1) return;
+
+                const lessonDate = new Date(dates[lessonDayIndex]);
+                const startDate = new Date(lesson.start_date); // Получаем дату начала
+
+                // Пропускаем если дата урока раньше start_date
+                if (lessonDate < startDate) return;
+
                 const hour = parseInt(lesson.time.split(':')[0]);
                 if (hour >= this.startHour && hour <= this.endHour) {
                     const dayElement = document.getElementById(lesson.day);
                     if (dayElement) {
                         const hourElement = dayElement.children[hour - this.startHour];
                         if (hourElement) {
-                            // Собираем полные данные урока
                             const lessonData = {
                                 id: lesson.id,
-                                date: dates[days.indexOf(lesson.day)].toISOString().split('T')[0],
+                                date: dates[lessonDayIndex].toISOString().split('T')[0],
                                 time: lesson.time,
-                                status: lesson.status || 'scheduled', // гарантированно есть статус
+                                status: lesson.status,
                                 student: student.id,
-                                student_name: student.name, // отдельное поле для имени
+                                student_name: student.name,
                                 subject: lesson.subject,
-                                is_recurring: true
+                                is_recurring: true,
+                                start_date: lesson.start_date // Добавляем дату начала
                             };
-
                             hourElement.innerHTML = this.createLessonHTML(lessonData);
                         }
                     }
@@ -353,60 +365,46 @@ export class CalendarManager {
     }
 
     convertTimeSlotsToLegacyFormat(timeSlots) {
-        const result = {
-            students: []
-        };
-
-        // Группируем по студентам, но сохраняем полные данные уроков
+        const result = {students: []};
         const studentsMap = new Map();
 
         timeSlots.forEach(slot => {
-            // Создаем объект урока с уникальным ID
-            const lesson = {
-                id: slot.id, // Используем оригинальный ID из TimeSlot
-                date: slot.date,
-                time: slot.time,
-                subject: slot.subject,
-                status: slot.status || 'scheduled', // Гарантируем наличие статуса
-                is_recurring: slot.is_recurring,
-                teacher: slot.teacher,
-                student_id: slot.student // Сохраняем ID студента отдельно
-            };
-
-            // Если студента еще нет в мапе - создаем
             if (!studentsMap.has(slot.student)) {
                 studentsMap.set(slot.student, {
-                    id: slot.student, // ID студента
+                    id: slot.student,
                     name: `Student ${slot.student}`,
-                    allLessons: [],    // Все уроки студента
-                    regularSchedule: [], // Только регулярные (для совместимости)
-                    oneTimeLessons: []  // Только разовые (для совместимости)
+                    regularSchedule: [],
+                    oneTimeLessons: []
                 });
             }
 
             const student = studentsMap.get(slot.student);
+            const lessonData = {
+                id: slot.id,
+                date: slot.date,
+                start_date: slot.start_date || slot.date, // Используем start_date если есть
+                time: slot.time,
+                subject: slot.subject,
+                status: slot.status || 'scheduled',
+                is_recurring: slot.is_recurring
+            };
 
-            // Добавляем урок в общий массив
-            student.allLessons.push(lesson);
-
-            // Для совместимости со старым кодом сохраняем разделение
             if (slot.is_recurring) {
-                const date = new Date(slot.date);
+                const date = new Date(slot.start_date || slot.date);
                 const day = ['sunday', 'monday', 'tuesday', 'wednesday',
                     'thursday', 'friday', 'saturday'][date.getDay()];
 
                 student.regularSchedule.push({
-                    ...lesson,
+                    ...lessonData,
                     day: day,
                     time: slot.time.split(':').slice(0, 2).join(':')
                 });
             } else {
-                student.oneTimeLessons.push(lesson);
+                student.oneTimeLessons.push(lessonData);
             }
         });
 
         result.students = Array.from(studentsMap.values());
-        console.log('Converted lessons with unique IDs:', result);
         return result;
     }
 

@@ -8,6 +8,9 @@ class TimeSlotSerializer(serializers.ModelSerializer):
     class Meta:
         model = TimeSlot
         fields = '__all__'
+        extra_kwargs = {
+            'start_date': {'required': False}
+        }
 
 
 class TeacherSerializer(serializers.ModelSerializer):

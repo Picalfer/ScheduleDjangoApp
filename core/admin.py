@@ -114,9 +114,14 @@ from django.contrib import admin
 
 @admin.register(TimeSlot)
 class TimeSlotAdmin(admin.ModelAdmin):
-    list_display = ('date', 'time', 'teacher', 'student', 'subject', 'is_recurring_display')
+    list_display = ('date', 'start_date', 'time', 'teacher', 'student', 'subject', 'is_recurring_display')
     list_filter = ('is_recurring', 'status', 'date')
     inlines = [LessonLogInline]
+
+    def save_model(self, request, obj, form, change):
+        if obj.is_recurring and not obj.start_date:
+            obj.start_date = obj.date
+        super().save_model(request, obj, form, change)
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == 'time':
