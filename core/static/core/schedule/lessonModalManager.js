@@ -59,7 +59,6 @@ export class LessonModalManager {
             homework: getValue('lesson-homework')
         };
 
-        // Остальной код остаётся без изменений
         const confirmationMessage = `Вы уверены, что хотите отметить урок как проведенный?\n\n` +
             `Тема: ${lessonData.topic || 'не указана'}\n` +
             `Комментарий: ${lessonData.notes || 'нет'}\n` +
@@ -85,38 +84,6 @@ export class LessonModalManager {
                     "error"
                 );
             });
-    }
-
-    markLessonAsCompleted(responseData, id) {
-        console.log("test")
-        console.log(this.lessonId)
-        console.log(id)
-        // 1. Находим элемент урока
-        const lessonElement = document.querySelector(`[data-lesson-id="${id}"]`);
-
-        // 2. Добавляем класс completed
-        if (lessonElement) {
-            console.log("test2")
-            lessonElement.classList.add('completed');
-
-            // 3. Удаляем кнопку (если есть)
-            const completeBtn = lessonElement.querySelector('.complete-btn');
-            if (completeBtn) {
-                completeBtn.remove();
-            }
-
-            // 4. Добавляем статус (опционально)
-            const statusBadge = document.createElement('span');
-            statusBadge.className = 'lesson-status';
-            statusBadge.textContent = '✓ Проведен';
-            lessonElement.appendChild(statusBadge);
-        }
-
-        // 5. Обновляем баланс (если есть такой элемент)
-        const balanceElement = document.getElementById('student-balance');
-        if (balanceElement) {
-            balanceElement.textContent = responseData.remaining_balance;
-        }
     }
 
     close() {
