@@ -1,6 +1,5 @@
-import * as BX24API from './repository.js';
-import {updateLessonBalance} from './repository.js'
 import {showNotification} from "./utils.js";
+import {completeLesson} from "./repository.js";
 
 export class LessonModalManager {
     constructor() {
@@ -10,7 +9,7 @@ export class LessonModalManager {
         this.cancelButton = this.modal.querySelector(".cancel-button");
         this.submitButton = this.modal.querySelector(".submit-button");
 
-        this.studentId = null;
+        this.lessonId = null;
 
         // дополнительные поля для сброса перед закрытием модального окна
         this.topicInput = document.getElementById("lesson-topic");
@@ -45,42 +44,79 @@ export class LessonModalManager {
     }
 
     admitLesson() {
-        BX24API.getClientByID(this.studentId).then(client => {
-            if (client) {
-                console.log("Отмечаем урок проведенным")
-                let lessons_left = Number(client[AMOUNT_LESSONS_FIELD_ID]);
-                console.log(lessons_left);
-                if (!isNaN(lessons_left)) { // Проверяем, что это число
-                    lessons_left -= 1; // Уменьшаем на 1
-                } else {
-                    console.error("Значение не является числом:", client.AMOUNT_LESSONS_FIELD_ID);
-                }
-                console.log("Измененный баланс " + lessons_left)
-                updateLessonBalance(client.ID, lessons_left).then(r =>
-                    showNotification("Урок отмечен", "success")
-                    // TODO
-                    /*отчетность - записать - кто провел когда и кому, сколько было и сколько стало
-                    урок серый и все такое*/
-                )
-            } else {
-                showNotification(`Клиент с ID ${this.studentId} не найден.`, 'error');
+        // 1. Подтверждение действия
+        if (!confirm("Вы уверены, что хотите отметить урок как проведенный? Баланс студента уменьшится на 1.")) {
+            return;
+        }
+
+        // 2. Вызов функции completeLesson
+        completeLesson(this.lessonId)
+            .then(response => {
+                // 3. Обработка успешного ответа
+                showNotification(
+                    `Урок проведен! Осталось уроков: ${response.remaining_balance}`,
+                    "success"
+                );
+
+                // 4. Обновление UI
+                this.markLessonAsCompleted(response);
+
+                // 5. Логирование (опционально)
+                console.log('Lesson completed:', {
+                    lessonId: this.lessonId,
+                    studentId: this.lessonId,
+                    newBalance: response.remaining_balance,
+                    logId: response.log_id
+                });
+            })
+            .catch(error => {
+                // 6. Обработка ошибок
+                console.error("Ошибка при проведении урока:", error);
+                showNotification(
+                    error.message || "Произошла ошибка при проведении урока",
+                    "error"
+                );
+            });
+    }
+
+    markLessonAsCompleted(responseData) {
+        // 1. Находим элемент урока
+        const lessonElement = document.querySelector(`[data-lesson-id="${this.lessonId}"]`);
+
+        // 2. Добавляем класс completed
+        if (lessonElement) {
+            lessonElement.classList.add('completed');
+
+            // 3. Удаляем кнопку (если есть)
+            const completeBtn = lessonElement.querySelector('.complete-btn');
+            if (completeBtn) {
+                completeBtn.remove();
             }
-        }).catch(error => {
-            console.error("Ошибка получения данных о клиенте:", error);
-            showNotification(`Клиент с ID ${this.studentId} не найден.`, 'error');
-        });
+
+            // 4. Добавляем статус (опционально)
+            const statusBadge = document.createElement('span');
+            statusBadge.className = 'lesson-status';
+            statusBadge.textContent = '✓ Проведен';
+            lessonElement.appendChild(statusBadge);
+        }
+
+        // 5. Обновляем баланс (если есть такой элемент)
+        const balanceElement = document.getElementById('student-balance');
+        if (balanceElement) {
+            balanceElement.textContent = responseData.remaining_balance;
+        }
     }
 
     close() {
         this.modal.style.display = "none";
         this.form.reset();
-        this.studentId = null;
+        this.lessonId = null;
         // Убираем ошибки при закрытии
         this.topicInput.closest('.form-group').classList.remove('error');
     }
 
     open(lessonData) {
-        this.studentId = lessonData.id
+        this.lessonId = lessonData.id
         this.modal.style.display = 'block';
         this.modal.querySelector('.modal-content').scrollTop = 0;
 

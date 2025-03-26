@@ -1489,3 +1489,9 @@ body.dark-theme #schedule-info-panel {
 .complete-btn:hover {
     background-color: #45a049;
 }
+
+.lesson-status {
+    color: #4CAF50;
+    font-weight: bold;
+    margin-left: 10px;
+}

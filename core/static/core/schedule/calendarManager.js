@@ -316,7 +316,7 @@ export class CalendarManager {
 
             // 4. Загружаем данные
             const timeSlots = await repository.getLessons(teacherId, startDate, endDate);
-
+            console.log(timeSlots.results)
             // 5. Преобразуем в старый формат
             this.lessons = this.convertTimeSlotsToLegacyFormat(timeSlots.results);
 
@@ -348,7 +348,7 @@ export class CalendarManager {
         timeSlots.forEach(slot => {
             if (!studentsMap.has(slot.student)) {
                 studentsMap.set(slot.student, {
-                    id: slot.student,
+                    id: slot.id,
                     name: `Student ${slot.student}`, // Здесь нужно получить реальное имя студента
                     regularSchedule: [],
                     oneTimeLessons: []
@@ -378,6 +378,7 @@ export class CalendarManager {
         });
 
         result.students = Array.from(studentsMap.values());
+        console.log(result)
         return result;
     }
 
