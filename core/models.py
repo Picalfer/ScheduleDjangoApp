@@ -1,4 +1,6 @@
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 
 
@@ -26,8 +28,25 @@ class Student(models.Model):
     )
     bitrix_link = models.URLField(max_length=500, blank=True)  # Ссылка на Битрикс
 
+    lesson_balance = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Баланс уроков',
+        validators=[MinValueValidator(0)]  # Гарантируем, что баланс не уйдет в минус
+    )
+
+    def spend_lesson(self):
+        """
+        Уменьшает баланс уроков на 1.
+        Возвращает True если операция успешна, False если баланс недостаточен.
+        """
+        if self.lesson_balance > 0:
+            self.lesson_balance -= 1
+            self.save()
+            return True
+        return False
+
     def __str__(self):
-        return f"{self.name} ({self.subject})"
+        return f"{self.name} ({self.subject}) - осталось уроков: {self.lesson_balance}"
 
 
 class TimeSlot(models.Model):
@@ -55,11 +74,55 @@ class TimeSlot(models.Model):
         default='scheduled'
     )
 
+    def clean(self):
+        if self.status == 'scheduled' and self.student.lesson_balance <= 0:
+            raise ValidationError('У студента недостаточно уроков на балансе')
+
     class Meta:
         ordering = ['date', 'time']
 
     def __str__(self):
         return f"{self.date} {self.time} - {self.student.name}"
+
+
+class LessonLog(models.Model):
+    lesson = models.ForeignKey(
+        TimeSlot,
+        on_delete=models.PROTECT,
+        related_name='logs',
+        verbose_name='Урок'
+    )
+    teacher = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        verbose_name='Преподаватель'
+    )
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.PROTECT,
+        verbose_name='Студент'
+    )
+    action = models.CharField(
+        max_length=50,
+        choices=[
+            ('completed', 'Проведен'),
+            ('canceled', 'Отменен'),
+            ('modified', 'Изменен')
+        ],
+        verbose_name='Действие'
+    )
+    old_balance = models.IntegerField(verbose_name='Было уроков')
+    new_balance = models.IntegerField(verbose_name='Стало уроков')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата записи')
+    notes = models.TextField(blank=True, verbose_name='Примечания')
+
+    class Meta:
+        verbose_name = 'Лог урока'
+        verbose_name_plural = 'Логи уроков'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.get_action_display()} - {self.student.name} ({self.created_at})"
 
 
 class UserSettings(models.Model):

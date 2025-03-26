@@ -1,5 +1,68 @@
 const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
+export async function completeLesson(lessonId) {
+    try {
+        // Получаем CSRF токен
+        const csrfToken = getCookie('csrftoken');
+        if (!csrfToken) {
+            throw new Error('CSRF token not found');
+        }
+
+        const response = await fetch(`/api/complete-lesson/${lessonId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest' // Помогает Django определить AJAX
+            },
+            credentials: 'include' // Важно для передачи куки
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка при завершении урока:', error);
+        throw error;
+    }
+}
+
+// Функция для получения куки
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+// Вспомогательные функции для UI
+function updateLessonUI(lessonId, newBalance) {
+    const lessonElement = document.querySelector(`.lesson[data-lesson-id="${lessonId}"]`);
+    if (lessonElement) {
+        lessonElement.classList.add('completed');
+        const btn = lessonElement.querySelector('.complete-btn');
+        if (btn) btn.remove();
+
+        // Обновляем отображение баланса где-то в интерфейсе
+        const balanceElement = document.querySelector(`#student-balance-${lessonId}`);
+        if (balanceElement) {
+            balanceElement.textContent = newBalance;
+        }
+    }
+}
+
+function showSuccessMessage(studentName, balance) {
+    alert(`Урок студента ${studentName} проведен успешно! Осталось уроков: ${balance}`);
+    // Или используйте вашу систему уведомлений
+}
+
+function showErrorMessage(message) {
+    alert(`Ошибка: ${message}`);
+    // Или используйте вашу систему уведомлений
+}
+
 export async function createLesson(date, time, teacherId, studentId, subject, isRecurring = false) {
     try {
         // Проверка данных перед отправкой
@@ -73,22 +136,32 @@ export function updateOpenSlots(openSlots, teacherId = currentUserId) {
         });
 }
 
-export async function getLessons(teacherId, startDate, endDate) {
+export async function getLessons({teacherId = null, startDate, endDate} = {}) {
     try {
-        const response = await fetch(`/timeslots/`, {
+        const params = new URLSearchParams();
+
+        // Добавляем teacher_id только если он указан
+        if (teacherId) {
+            params.append('teacher_id', teacherId);
+        }
+
+        // Добавляем даты
+        if (startDate) params.append('date_after', startDate);
+        if (endDate) params.append('date_before', endDate);
+
+        const response = await fetch(`/timeslots/?${params.toString()}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'include'
         });
 
         if (!response.ok) {
             throw new Error(`Ошибка: ${response.status} ${response.statusText}`);
         }
 
-        const data = await response.json();
-        console.log(data.results)
-        return data;
+        return await response.json();
     } catch (error) {
         console.error("Ошибка при получении уроков:", error);
         throw error;

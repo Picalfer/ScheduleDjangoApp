@@ -100,13 +100,28 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+# Языковые настройки
+LANGUAGE_CODE = 'ru-RU'  # Основной язык для России
+LANGUAGES = [
+    ('ru', 'Русский'),
+    ('en', 'English'),
+]
 
-TIME_ZONE = 'UTC'
+# Региональные настройки
+TIME_ZONE = 'Europe/Moscow'
+USE_I18N = True  # Включение интернационализации
+USE_L10N = True  # Локализация форматов
+USE_TZ = True    # Работа с часовыми поясами
 
-USE_I18N = True
+# Форматы даты и времени
+DATE_FORMAT = 'd.m.Y'
+TIME_FORMAT = 'H:i'
+DATETIME_FORMAT = 'd.m.Y H:i'
+FIRST_DAY_OF_WEEK = 1  # Понедельник как первый день недели
 
-USE_TZ = True
+FORMAT_MODULE_PATH = [
+    'formats.ru',
+]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/

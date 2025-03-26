@@ -22,6 +22,7 @@ header {
     align-items: center;
     margin: 0 auto;
 }
+
 .user-info {
     display: flex;
     flex-direction: row;
@@ -66,4 +67,19 @@ h1 {
 
 p {
     font-size: 1.2rem;
+}
+
+.admin-btn {
+    display: inline-block;
+    background: #417690;
+    color: white;
+    padding: 5px 7px;
+    border-radius: 4px;
+    text-decoration: none;
+    z-index: 1000;
+    font-size: 12px;
+}
+
+.admin-btn:hover {
+    background: #305067;
 }

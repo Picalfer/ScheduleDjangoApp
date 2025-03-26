@@ -1,29 +1,100 @@
 import json
+from venv import logger
 
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
+from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.views.decorators.http import require_http_methods
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
 
 from .forms import ProfileForm
 from .forms import RegisterForm, LoginForm
-from .models import OpenSlots, UserSettings
+from .models import OpenSlots, UserSettings, LessonLog
 from .models import TimeSlot, Teacher, Student
 from .serializers import TimeSlotSerializer, TeacherSerializer, StudentSerializer
 
 
+@require_POST
+def complete_lesson(request, lesson_id):
+    try:
+        lesson = TimeSlot.objects.select_related('student', 'teacher__user').get(id=lesson_id)
+
+        # Проверки
+        if not request.user.is_authenticated:
+            return JsonResponse({'status': 'error', 'message': 'Требуется авторизация'}, status=401)
+
+        if request.user != lesson.teacher.user:
+            return JsonResponse({'status': 'error', 'message': 'Можно отмечать только свои уроки'}, status=403)
+
+        if lesson.status == 'completed':
+            return JsonResponse({'status': 'error', 'message': 'Урок уже проведен'}, status=400)
+
+        # Фиксируем начальный баланс
+        old_balance = lesson.student.lesson_balance
+
+        # Проверяем и списываем урок
+        if not lesson.student.spend_lesson():
+            return JsonResponse({
+                'status': 'error',
+                'message': f'У студента {lesson.student.name} нулевой баланс уроков'
+            }, status=402)
+
+        # Создаем запись в логе
+        LessonLog.objects.create(
+            lesson=lesson,
+            teacher=request.user,
+            student=lesson.student,
+            action='completed',
+            old_balance=old_balance,
+            new_balance=lesson.student.lesson_balance,
+            notes=f'Урок по {lesson.subject} отмечен как проведенный'
+        )
+
+        # Обновляем статус урока
+        lesson.status = 'completed'
+        lesson.completed_at = now()  # Добавьте это поле в модель TimeSlot
+        lesson.save()
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Урок успешно проведен',
+            'remaining_balance': lesson.student.lesson_balance,
+            'log_id': LessonLog.objects.latest('id').id  # ID созданной записи
+        })
+
+    except Exception as e:
+        logger.error(f'Ошибка проведения урока: {str(e)}', exc_info=True)
+        return JsonResponse({'status': 'error', 'message': 'Внутренняя ошибка сервера'}, status=500)
+
+
 class TimeSlotListCreate(generics.ListCreateAPIView):
-    queryset = TimeSlot.objects.all()
     serializer_class = TimeSlotSerializer
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['date', 'teacher', 'student', 'status']
+    filterset_fields = ['date', 'student', 'status']
+
+    def get_queryset(self):
+        # Получаем teacher_id из параметров запроса
+        teacher_id = self.request.query_params.get('teacher_id')
+
+        # Если teacher_id не указан - используем текущего пользователя
+        if not teacher_id:
+            return TimeSlot.objects.filter(teacher__user=self.request.user)
+
+        # Проверяем права (только админ может смотреть чужие расписания)
+        if not self.request.user.is_staff:
+            raise PermissionDenied("Только администраторы могут просматривать чужие расписания")
+
+        return TimeSlot.objects.filter(teacher_id=teacher_id)
 
 
 class TimeSlotRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):

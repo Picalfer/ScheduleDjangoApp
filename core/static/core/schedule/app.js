@@ -3,7 +3,7 @@ import {SettingsManager} from './settingsManager.js';
 import {LessonModalManager} from './lessonModalManager.js';
 import {AddStudentModalManager} from './addStudentModalManager.js';
 import {showNotification} from "./utils.js";
-import {createLesson, getLessons} from "./repository.js";
+import {completeLesson, createLesson} from "./repository.js";
 
 export const calendarManager = new CalendarManager();
 const settingsManager = new SettingsManager(calendarManager);
@@ -65,9 +65,9 @@ function initTestBtn() {
     document.getElementById('test-button').addEventListener('click', async () => {
         try {
             const result = await createLesson(
-                '2025-03-25',  // date (YYYY-MM-DD)
-                '17:00',       // time (HH:MM)
-                1,             // teacher_id (должен существовать в БД)
+                '2025-03-26',  // date (YYYY-MM-DD)
+                '20:00',       // time (HH:MM)
+                2,             // teacher_id (должен существовать в БД)
                 1,             // student_id (должен существовать в БД)
                 'Math',        // subject
                 false          // is_recurring (опционально)
@@ -81,9 +81,12 @@ function initTestBtn() {
 
     document.getElementById('test-button2').addEventListener('click', async () => {
         try {
-            await getLessons(1, '2025-03-20', '2025-03-30')
+            const result = await completeLesson(7); // Тестовый ID урока
+            console.log('Урок проведен:', result);
+            alert(`Урок проведен! Осталось: ${result.remaining_balance} уроков`);
         } catch (error) {
-            alert(`Error: ${error.message}`);
+            console.error('Ошибка:', error);
+            alert(`Ошибка: ${error.message}`);
         }
     })
 }

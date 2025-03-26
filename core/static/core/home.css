@@ -1469,3 +1469,23 @@ body.dark-theme #schedule-info-panel {
 #schedule-info-panel.collapsed #toggle-icon {
     transform: rotate(180deg);
 }
+
+.lesson.completed {
+    opacity: 0.7;
+    background-color: #f0f0f0;
+    border-left: 4px solid #4CAF50;
+}
+
+.complete-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+.complete-btn:hover {
+    background-color: #45a049;
+}

@@ -21,4 +21,5 @@ urlpatterns = [
     path('teachers/', views.TeacherList.as_view(), name='teacher-list'),
     path('students/', views.StudentList.as_view(), name='student-list'),
     path('api/create-lesson/', views.create_lesson, name='create-lesson'),
+    path('api/complete-lesson/<int:lesson_id>/', views.complete_lesson, name='complete-lesson'),
 ]
