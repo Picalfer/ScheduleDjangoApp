@@ -1,5 +1,6 @@
 import {showNotification} from "./utils.js";
 import {completeLesson} from "./repository.js";
+import {calendarManager} from "./app.js";
 
 export class LessonModalManager {
     constructor() {
@@ -44,13 +45,14 @@ export class LessonModalManager {
     }
 
     admitLesson() {
+        const currentLessonId = this.lessonId
         // 1. Подтверждение действия
         if (!confirm("Вы уверены, что хотите отметить урок как проведенный? Баланс студента уменьшится на 1.")) {
             return;
         }
 
         // 2. Вызов функции completeLesson
-        completeLesson(this.lessonId)
+        completeLesson(currentLessonId)
             .then(response => {
                 // 3. Обработка успешного ответа
                 showNotification(
@@ -59,12 +61,13 @@ export class LessonModalManager {
                 );
 
                 // 4. Обновление UI
-                this.markLessonAsCompleted(response);
+                //this.markLessonAsCompleted(response, currentLessonId);
+                calendarManager.loadSchedule()
 
                 // 5. Логирование (опционально)
                 console.log('Lesson completed:', {
-                    lessonId: this.lessonId,
-                    studentId: this.lessonId,
+                    lessonId: currentLessonId,
+                    studentId: currentLessonId,
                     newBalance: response.remaining_balance,
                     logId: response.log_id
                 });
@@ -79,12 +82,16 @@ export class LessonModalManager {
             });
     }
 
-    markLessonAsCompleted(responseData) {
+    markLessonAsCompleted(responseData, id) {
+        console.log("test")
+        console.log(this.lessonId)
+        console.log(id)
         // 1. Находим элемент урока
-        const lessonElement = document.querySelector(`[data-lesson-id="${this.lessonId}"]`);
+        const lessonElement = document.querySelector(`[data-lesson-id="${id}"]`);
 
         // 2. Добавляем класс completed
         if (lessonElement) {
+            console.log("test2")
             lessonElement.classList.add('completed');
 
             // 3. Удаляем кнопку (если есть)

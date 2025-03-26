@@ -91,17 +91,19 @@ export class CalendarManager {
     }
 
     createLessonHTML(lesson) {
-        const emoji = lesson.is_recurring ? '🔄' : '1️⃣';
-        const statusText = lesson.is_recurring ? 'Постоянный урок' : 'Разовый урок';
+        // 1. Проверяем статус урока (защита от undefined)
+        const isCompleted = lesson.status && lesson.status.toLowerCase() === 'completed';
 
+        // 3. Формируем HTML
         return `
-        <div class="lesson ${lesson.is_recurring ? 'permanent' : 'one-time'}" 
-             data-lesson-id="${lesson.id}"
-             onclick="window.openLessonModal(${JSON.stringify(lesson).replace(/"/g, '&quot;')})">
-            <h4 data-emoji="${emoji}">${statusText}</h4>
-            <p>👩‍🎓 <span id="student-name">${lesson.student_name || `Student ${lesson.student}`}</span></p>
-            <p>📚 <span id="subject-name">${lesson.subject}</span></p>
-        </div>
+    <div class="lesson ${lesson.is_recurring ? 'permanent' : 'one-time'} ${isCompleted ? 'completed' : ''}" 
+         data-lesson-id="${lesson.id}"
+         data-status="${lesson.status || 'scheduled'}"
+         onclick="window.openLessonModal(${JSON.stringify(lesson).replace(/"/g, '&quot;')})">
+        <h4>${lesson.is_recurring ? '🔄 Постоянный' : '1️⃣ Разовый'} урок</h4>
+        <p>👩‍🎓 ${lesson.student_name || `Student ${lesson.student}`}</p>
+        <p>📚 ${lesson.subject}</p>
+    </div>
     `;
     }
 
@@ -176,14 +178,19 @@ export class CalendarManager {
                     if (dayElement) {
                         const hourElement = dayElement.children[hour - this.startHour];
                         if (hourElement) {
-                            hourElement.innerHTML = this.createLessonHTML({
+                            // Собираем полные данные урока
+                            const lessonData = {
                                 id: student.id,
                                 date: dates[days.indexOf(lesson.day)].toISOString().split('T')[0],
                                 time: lesson.time,
-                                student: student.name,
+                                status: lesson.status || 'scheduled', // гарантированно есть статус
+                                student: student.id,
+                                student_name: student.name, // отдельное поле для имени
                                 subject: lesson.subject,
                                 is_recurring: true
-                            });
+                            };
+
+                            hourElement.innerHTML = this.createLessonHTML(lessonData);
                         }
                     }
                 }
@@ -198,28 +205,37 @@ export class CalendarManager {
 
         this.lessons.students.forEach(student => {
             student.oneTimeLessons.forEach(lesson => {
-                const lessonDate = new Date(lesson.date);
-                if (lessonDate >= weekStart && lessonDate <= weekEnd) {
-                    const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday',
-                        'thursday', 'friday', 'saturday'][lessonDate.getDay()];
-                    const hour = parseInt(lesson.time.split(':')[0]);
+                try {
+                    const lessonDate = new Date(lesson.date);
+                    if (lessonDate >= weekStart && lessonDate <= weekEnd) {
+                        const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday',
+                            'thursday', 'friday', 'saturday'][lessonDate.getDay()];
+                        const hour = parseInt(lesson.time.split(':')[0]);
 
-                    if (hour >= this.startHour && hour <= this.endHour) {
-                        const dayElement = document.getElementById(dayOfWeek);
-                        if (dayElement) {
-                            const hourElement = dayElement.children[hour - this.startHour];
-                            if (hourElement) {
-                                hourElement.innerHTML = this.createLessonHTML({
-                                    id: student.id,
-                                    date: lesson.date,
-                                    time: lesson.time,
-                                    student: student.name,
-                                    subject: lesson.subject,
-                                    is_recurring: false
-                                });
+                        if (hour >= this.startHour && hour <= this.endHour) {
+                            const dayElement = document.getElementById(dayOfWeek);
+                            if (dayElement) {
+                                const hourElement = dayElement.children[hour - this.startHour];
+                                if (hourElement) {
+                                    // Формируем полные данные урока
+                                    const lessonData = {
+                                        id: student.id,
+                                        date: lesson.date,
+                                        time: lesson.time,
+                                        status: lesson.status || 'scheduled', // гарантированный статус
+                                        student: student.id,
+                                        student_name: student.name,
+                                        subject: lesson.subject,
+                                        is_recurring: false
+                                    };
+
+                                    hourElement.innerHTML = this.createLessonHTML(lessonData);
+                                }
                             }
                         }
                     }
+                } catch (e) {
+                    console.error('Error processing lesson:', lesson, e);
                 }
             });
         });
@@ -336,7 +352,6 @@ export class CalendarManager {
         return currentUserId;
     }
 
-    // Конвертер из TimeSlot в старый формат
     convertTimeSlotsToLegacyFormat(timeSlots) {
         const result = {
             students: []
@@ -348,37 +363,47 @@ export class CalendarManager {
         timeSlots.forEach(slot => {
             if (!studentsMap.has(slot.student)) {
                 studentsMap.set(slot.student, {
-                    id: slot.id,
-                    name: `Student ${slot.student}`, // Здесь нужно получить реальное имя студента
+                    id: slot.id,  // используем id урока
+                    name: `Student ${slot.student}`,
                     regularSchedule: [],
-                    oneTimeLessons: []
+                    oneTimeLessons: [],
+                    lessonStatuses: {}  // Добавляем объект для статусов
                 });
             }
 
             const student = studentsMap.get(slot.student);
+            const lessonKey = `${slot.date}_${slot.time.split(':').slice(0, 2).join(':')}`;
+
+            // Сохраняем статус урока
+            student.lessonStatuses[lessonKey] = slot.status;
+
             const lesson = {
                 date: slot.date,
                 time: slot.time,
-                subject: slot.subject
+                subject: slot.subject,
+                status: slot.status  // Добавляем статус в каждый урок
             };
 
             if (slot.is_recurring) {
-                // Для повторяющихся уроков определяем день недели
                 const date = new Date(slot.date);
                 const day = ['sunday', 'monday', 'tuesday', 'wednesday',
                     'thursday', 'friday', 'saturday'][date.getDay()];
                 student.regularSchedule.push({
                     day: day,
-                    time: slot.time.split(':').slice(0, 2).join(':'), // Убираем секунды
-                    subject: slot.subject
+                    time: slot.time.split(':').slice(0, 2).join(':'),
+                    subject: slot.subject,
+                    status: slot.status  // Добавляем статус
                 });
             } else {
-                student.oneTimeLessons.push(lesson);
+                student.oneTimeLessons.push({
+                    ...lesson,
+                    status: slot.status  // Добавляем статус
+                });
             }
         });
 
         result.students = Array.from(studentsMap.values());
-        console.log(result)
+        console.log('Converted data with statuses:', result);
         return result;
     }
 
@@ -422,7 +447,7 @@ export class CalendarManager {
 
     async updateOpenSlots() {
         try {
-            repository.updateOpenSlots(this.openSlots);
+            await repository.updateOpenSlots(this.openSlots);
             // console.log("Открытые часы успешно обновлены.");
         } catch (error) {
             console.error("Ошибка при обновлении расписания:", error);
