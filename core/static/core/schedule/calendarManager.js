@@ -180,7 +180,7 @@ export class CalendarManager {
                         if (hourElement) {
                             // Собираем полные данные урока
                             const lessonData = {
-                                id: student.id,
+                                id: lesson.id,
                                 date: dates[days.indexOf(lesson.day)].toISOString().split('T')[0],
                                 time: lesson.time,
                                 status: lesson.status || 'scheduled', // гарантированно есть статус
@@ -219,7 +219,7 @@ export class CalendarManager {
                                 if (hourElement) {
                                     // Формируем полные данные урока
                                     const lessonData = {
-                                        id: student.id,
+                                        id: lesson.id,
                                         date: lesson.date,
                                         time: lesson.time,
                                         status: lesson.status || 'scheduled', // гарантированный статус
@@ -357,53 +357,56 @@ export class CalendarManager {
             students: []
         };
 
-        // Группируем по студентам
+        // Группируем по студентам, но сохраняем полные данные уроков
         const studentsMap = new Map();
 
         timeSlots.forEach(slot => {
+            // Создаем объект урока с уникальным ID
+            const lesson = {
+                id: slot.id, // Используем оригинальный ID из TimeSlot
+                date: slot.date,
+                time: slot.time,
+                subject: slot.subject,
+                status: slot.status || 'scheduled', // Гарантируем наличие статуса
+                is_recurring: slot.is_recurring,
+                teacher: slot.teacher,
+                student_id: slot.student // Сохраняем ID студента отдельно
+            };
+
+            // Если студента еще нет в мапе - создаем
             if (!studentsMap.has(slot.student)) {
                 studentsMap.set(slot.student, {
-                    id: slot.id,  // используем id урока
+                    id: slot.student, // ID студента
                     name: `Student ${slot.student}`,
-                    regularSchedule: [],
-                    oneTimeLessons: [],
-                    lessonStatuses: {}  // Добавляем объект для статусов
+                    allLessons: [],    // Все уроки студента
+                    regularSchedule: [], // Только регулярные (для совместимости)
+                    oneTimeLessons: []  // Только разовые (для совместимости)
                 });
             }
 
             const student = studentsMap.get(slot.student);
-            const lessonKey = `${slot.date}_${slot.time.split(':').slice(0, 2).join(':')}`;
 
-            // Сохраняем статус урока
-            student.lessonStatuses[lessonKey] = slot.status;
+            // Добавляем урок в общий массив
+            student.allLessons.push(lesson);
 
-            const lesson = {
-                date: slot.date,
-                time: slot.time,
-                subject: slot.subject,
-                status: slot.status  // Добавляем статус в каждый урок
-            };
-
+            // Для совместимости со старым кодом сохраняем разделение
             if (slot.is_recurring) {
                 const date = new Date(slot.date);
                 const day = ['sunday', 'monday', 'tuesday', 'wednesday',
                     'thursday', 'friday', 'saturday'][date.getDay()];
+
                 student.regularSchedule.push({
+                    ...lesson,
                     day: day,
-                    time: slot.time.split(':').slice(0, 2).join(':'),
-                    subject: slot.subject,
-                    status: slot.status  // Добавляем статус
+                    time: slot.time.split(':').slice(0, 2).join(':')
                 });
             } else {
-                student.oneTimeLessons.push({
-                    ...lesson,
-                    status: slot.status  // Добавляем статус
-                });
+                student.oneTimeLessons.push(lesson);
             }
         });
 
         result.students = Array.from(studentsMap.values());
-        console.log('Converted data with statuses:', result);
+        console.log('Converted lessons with unique IDs:', result);
         return result;
     }
 
