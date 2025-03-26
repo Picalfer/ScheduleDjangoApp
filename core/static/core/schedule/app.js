@@ -51,6 +51,12 @@ export function initApp() {
         }
     });
 
+    if (userData.isAdmin) {
+        setAdminTools()
+    }
+}
+
+function setAdminTools() {
     // Обработчик для кнопки добавления нового ученика
     document.getElementById('add-student-button').addEventListener('click', () => {
         if (settingsManager.isOpenWindowsMode) {

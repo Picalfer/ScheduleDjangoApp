@@ -274,6 +274,10 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         let currentUserId = {{ current_user_id }};
+        const userData = {
+        isAdmin: {% if request.user.is_staff %}true{% else %}false{% endif %},
+        username: "{{ request.user.username|escapejs }}"
+    };
     </script>
     <script src="{% static 'core/home.js' %}" type="module"></script>
 {% endblock %}
