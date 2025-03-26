@@ -1,5 +1,4 @@
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 
@@ -64,14 +63,39 @@ class TimeSlot(models.Model):
         help_text='Отметьте для регулярных занятий'
     )
     subject = models.CharField(max_length=100)
+
+    STATUS_CHOICES = [
+        ('scheduled', 'Запланирован'),
+        ('completed', 'Проведён'),
+        ('canceled', 'Отменён'),
+    ]
     status = models.CharField(
         max_length=20,
-        choices=[
-            ('scheduled', 'Запланирован'),
-            ('completed', 'Проведён'),
-            ('canceled', 'Отменён'),
-        ],
+        choices=STATUS_CHOICES,
         default='scheduled'
+    )
+
+    # Дополнительные поля для информации о проведённых уроках
+    lesson_topic = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='Тема урока'
+    )
+    lesson_notes = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name='Комментарий к уроку'
+    )
+    homework = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name='Домашнее задание'
+    )
+    completed_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name='Дата и время проведения'
     )
 
     start_date = models.DateField(
@@ -80,21 +104,13 @@ class TimeSlot(models.Model):
         blank=True
     )
 
-    def save(self, *args, **kwargs):
-        # Автоматически устанавливаем start_date для регулярных уроков
-        if self.is_recurring and not self.start_date:
-            self.start_date = self.date
-        super().save(*args, **kwargs)
-
-    def clean(self):
-        if self.status == 'scheduled' and self.student.lesson_balance <= 0:
-            raise ValidationError('У студента недостаточно уроков на балансе')
-
     class Meta:
+        verbose_name = 'Урок'
+        verbose_name_plural = 'Уроки'
         ordering = ['date', 'time']
 
     def __str__(self):
-        return f"{self.date} {self.time} - {self.student.name}"
+        return f"{self.date} {self.time} - {self.student} ({self.get_status_display()})"
 
 
 class LessonLog(models.Model):

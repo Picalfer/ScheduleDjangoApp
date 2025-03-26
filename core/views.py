@@ -4,7 +4,7 @@ from venv import logger
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -29,6 +29,7 @@ from .serializers import TimeSlotSerializer, TeacherSerializer, StudentSerialize
 def complete_lesson(request, lesson_id):
     try:
         lesson = TimeSlot.objects.select_related('student', 'teacher__user').get(id=lesson_id)
+        data = json.loads(request.body)  # Используем request.body для JSON
 
         # Проверки
         if not request.user.is_authenticated:
@@ -43,15 +44,22 @@ def complete_lesson(request, lesson_id):
         # Фиксируем начальный баланс
         old_balance = lesson.student.lesson_balance
 
-        # Проверяем и списываем урок
         if not lesson.student.spend_lesson():
             return JsonResponse({
                 'status': 'error',
                 'message': f'У студента {lesson.student.name} нулевой баланс уроков'
             }, status=402)
 
-        # Создаем запись в логе
-        LessonLog.objects.create(
+        # Сохраняем дополнительную информацию (преобразуем '' в None)
+        lesson.lesson_topic = data.get('lesson_topic') or None
+        lesson.lesson_notes = data.get('lesson_notes') or None
+        lesson.homework = data.get('homework') or None
+        lesson.status = 'completed'
+        lesson.completed_at = now()
+        lesson.save()
+
+        # Логирование
+        log = LessonLog.objects.create(
             lesson=lesson,
             teacher=request.user,
             student=lesson.student,
@@ -61,16 +69,16 @@ def complete_lesson(request, lesson_id):
             notes=f'Урок по {lesson.subject} отмечен как проведенный'
         )
 
-        # Обновляем статус урока
-        lesson.status = 'completed'
-        lesson.completed_at = now()  # Добавьте это поле в модель TimeSlot
-        lesson.save()
-
         return JsonResponse({
             'status': 'success',
             'message': 'Урок успешно проведен',
             'remaining_balance': lesson.student.lesson_balance,
-            'log_id': LessonLog.objects.latest('id').id  # ID созданной записи
+            'log_id': log.id,
+            'lesson_data': {
+                'topic': lesson.lesson_topic,
+                'notes': lesson.lesson_notes,
+                'homework': lesson.homework
+            }
         })
 
     except Exception as e:

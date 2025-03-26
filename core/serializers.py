@@ -9,7 +9,11 @@ class TimeSlotSerializer(serializers.ModelSerializer):
         model = TimeSlot
         fields = '__all__'
         extra_kwargs = {
-            'start_date': {'required': False}
+            'start_date': {'required': False},
+            'lesson_topic': {'required': False},
+            'lesson_notes': {'required': False},
+            'homework': {'required': False},
+            'completed_at': {'required': False},
         }
 
 

@@ -45,35 +45,40 @@ export class LessonModalManager {
     }
 
     admitLesson() {
-        const currentLessonId = this.lessonId
-        // 1. Подтверждение действия
-        if (!confirm("Вы уверены, что хотите отметить урок как проведенный? Баланс студента уменьшится на 1.")) {
+        const currentLessonId = this.lessonId;
+
+        // Собираем данные, преобразуя пустые строки в null
+        const getValue = (id) => {
+            const val = document.getElementById(id).value.trim();
+            return val === '' ? null : val;
+        };
+
+        const lessonData = {
+            topic: getValue('lesson-topic'),
+            notes: getValue('lesson-comment'),
+            homework: getValue('lesson-homework')
+        };
+
+        // Остальной код остаётся без изменений
+        const confirmationMessage = `Вы уверены, что хотите отметить урок как проведенный?\n\n` +
+            `Тема: ${lessonData.topic || 'не указана'}\n` +
+            `Комментарий: ${lessonData.notes || 'нет'}\n` +
+            `ДЗ: ${lessonData.homework || 'не задано'}\n\n` +
+            `Баланс студента уменьшится на 1.`;
+
+        if (!confirm(confirmationMessage)) {
             return;
         }
 
-        // 2. Вызов функции completeLesson
-        completeLesson(currentLessonId)
+        completeLesson(currentLessonId, lessonData)
             .then(response => {
-                // 3. Обработка успешного ответа
                 showNotification(
                     `Урок проведен! Осталось уроков: ${response.remaining_balance}`,
                     "success"
                 );
-
-                // 4. Обновление UI
-                //this.markLessonAsCompleted(response, currentLessonId);
-                calendarManager.loadSchedule()
-
-                // 5. Логирование (опционально)
-                console.log('Lesson completed:', {
-                    lessonId: currentLessonId,
-                    studentId: currentLessonId,
-                    newBalance: response.remaining_balance,
-                    logId: response.log_id
-                });
+                calendarManager.loadSchedule();
             })
             .catch(error => {
-                // 6. Обработка ошибок
                 console.error("Ошибка при проведении урока:", error);
                 showNotification(
                     error.message || "Произошла ошибка при проведении урока",
@@ -123,18 +128,39 @@ export class LessonModalManager {
     }
 
     open(lessonData) {
-        this.lessonId = lessonData.id
+        this.lessonId = lessonData.id;
         this.modal.style.display = 'block';
         this.modal.querySelector('.modal-content').scrollTop = 0;
+
+        console.log(lessonData)
 
         // Добавляем класс типа урока к модальному окну
         const modalContent = this.modal.querySelector('.modal-content');
         modalContent.classList.remove('permanent', 'one-time');
         modalContent.classList.add(lessonData.status);
 
-        // Форматируем сегодняшнюю дату
+        // Проверяем статус урока (только для блокировки полей)
+        const shouldDisable = ['completed', 'canceled'].includes(lessonData.status.toLowerCase());
+
+        // Блокируем поля только если нужно
+        const fields = [
+            "lesson-date",
+            "lesson-course",
+            "lesson-topic",
+            "lesson-homework",
+            "lesson-comment"
+        ];
+
+        fields.forEach(id => {
+            const field = document.getElementById(id);
+            if (field) field.disabled = shouldDisable;
+        });
+
+        this.submitButton.disabled = shouldDisable;
+        this.cancelButton.disabled = shouldDisable;
+
+        // Остальной код остается БЕЗ ИЗМЕНЕНИЙ
         const today = new Date();
-        // Заполняем форму данными урока
         document.getElementById("lesson-date").value = today.toLocaleDateString('ru-RU', {
             year: 'numeric',
             month: 'long',
@@ -142,16 +168,14 @@ export class LessonModalManager {
         });
         document.getElementById("lesson-course").value = lessonData.subject;
 
-        // Очищаем поля ввода
-        document.getElementById("lesson-topic").value = "";
-        document.getElementById("lesson-homework").value = "";
-        document.getElementById("lesson-comment").value = "";
-
-        // Добавляем информацию об уроке
-        const emoji = lessonData.status === 'permanent' ? '🔄' : '1️⃣';
-        const statusText = lessonData.status === 'permanent' ? 'Постоянный урок' : 'Разовый урок';
+        const emoji = lessonData.is_recurring ? '🔄' : '1️⃣';
+        const statusText = lessonData.is_recurring ? 'Постоянный урок' : 'Разовый урок';
         this.modal.querySelector('.lesson-type').innerHTML = `${emoji} ${statusText}`;
-        this.modal.querySelector('.lesson-student').textContent = `Ученик: ${lessonData.student}`;
+        this.modal.querySelector('.lesson-student').textContent = `Ученик: ${lessonData.student_name || lessonData.student}`;
+
+        document.getElementById("lesson-topic").value = lessonData.lesson_topic;
+        document.getElementById("lesson-homework").value = lessonData.homework;
+        document.getElementById("lesson-comment").value = lessonData.lesson_notes;
     }
 
     validateForm() {

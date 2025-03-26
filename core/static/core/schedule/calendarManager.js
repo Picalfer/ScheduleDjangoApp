@@ -191,18 +191,7 @@ export class CalendarManager {
                     if (dayElement) {
                         const hourElement = dayElement.children[hour - this.startHour];
                         if (hourElement) {
-                            const lessonData = {
-                                id: lesson.id,
-                                date: dates[lessonDayIndex].toISOString().split('T')[0],
-                                time: lesson.time,
-                                status: lesson.status,
-                                student: student.id,
-                                student_name: student.name,
-                                subject: lesson.subject,
-                                is_recurring: true,
-                                start_date: lesson.start_date // Добавляем дату начала
-                            };
-                            hourElement.innerHTML = this.createLessonHTML(lessonData);
+                            hourElement.innerHTML = this.createLessonHTML(lesson);
                         }
                     }
                 }
@@ -229,19 +218,7 @@ export class CalendarManager {
                             if (dayElement) {
                                 const hourElement = dayElement.children[hour - this.startHour];
                                 if (hourElement) {
-                                    // Формируем полные данные урока
-                                    const lessonData = {
-                                        id: lesson.id,
-                                        date: lesson.date,
-                                        time: lesson.time,
-                                        status: lesson.status || 'scheduled', // гарантированный статус
-                                        student: student.id,
-                                        student_name: student.name,
-                                        subject: lesson.subject,
-                                        is_recurring: false
-                                    };
-
-                                    hourElement.innerHTML = this.createLessonHTML(lessonData);
+                                    hourElement.innerHTML = this.createLessonHTML(lesson);
                                 }
                             }
                         }
@@ -384,6 +361,9 @@ export class CalendarManager {
                 date: slot.date,
                 start_date: slot.start_date || slot.date, // Используем start_date если есть
                 time: slot.time,
+                lesson_topic: slot.lesson_topic,
+                lesson_notes: slot.lesson_notes,
+                homework: slot.homework,
                 subject: slot.subject,
                 status: slot.status || 'scheduled',
                 is_recurring: slot.is_recurring
@@ -405,6 +385,7 @@ export class CalendarManager {
         });
 
         result.students = Array.from(studentsMap.values());
+        console.log(result)
         return result;
     }
 

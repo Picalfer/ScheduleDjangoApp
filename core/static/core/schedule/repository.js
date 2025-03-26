@@ -1,21 +1,28 @@
 const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-export async function completeLesson(lessonId) {
+export async function completeLesson(lessonId, lessonData = {}) {
     try {
-        // Получаем CSRF токен
         const csrfToken = getCookie('csrftoken');
         if (!csrfToken) {
             throw new Error('CSRF token not found');
         }
+
+        // Преобразуем пустые строки в null
+        const payload = {
+            lesson_topic: lessonData.topic || null,
+            lesson_notes: lessonData.notes || null,
+            homework: lessonData.homework || null
+        };
 
         const response = await fetch(`/api/complete-lesson/${lessonId}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrfToken,
-                'X-Requested-With': 'XMLHttpRequest' // Помогает Django определить AJAX
+                'X-Requested-With': 'XMLHttpRequest'
             },
-            credentials: 'include' // Важно для передачи куки
+            credentials: 'include',
+            body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
