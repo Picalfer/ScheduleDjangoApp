@@ -20,15 +20,15 @@ from rest_framework.permissions import IsAuthenticated
 
 from .forms import ProfileForm
 from .forms import RegisterForm, LoginForm
-from .models import OpenSlots, UserSettings, LessonLog
-from .models import TimeSlot, Teacher, Student
+from .models import OpenSlots, UserSettings
+from .models import Lesson, Teacher, Student
 from .serializers import TimeSlotSerializer, TeacherSerializer, StudentSerializer
 
 
 @require_POST
 def complete_lesson(request, lesson_id):
     try:
-        lesson = TimeSlot.objects.select_related('student', 'teacher__user').get(id=lesson_id)
+        lesson = Lesson.objects.select_related('student', 'teacher__user').get(id=lesson_id)
         data = json.loads(request.body)  # Используем request.body для JSON
 
         # Проверки
@@ -58,22 +58,10 @@ def complete_lesson(request, lesson_id):
         lesson.completed_at = now()
         lesson.save()
 
-        # Логирование
-        log = LessonLog.objects.create(
-            lesson=lesson,
-            teacher=request.user,
-            student=lesson.student,
-            action='completed',
-            old_balance=old_balance,
-            new_balance=lesson.student.lesson_balance,
-            notes=f'Урок по {lesson.subject} отмечен как проведенный'
-        )
-
         return JsonResponse({
             'status': 'success',
             'message': 'Урок успешно проведен',
             'remaining_balance': lesson.student.lesson_balance,
-            'log_id': log.id,
             'lesson_data': {
                 'topic': lesson.lesson_topic,
                 'notes': lesson.lesson_notes,
@@ -93,7 +81,7 @@ class TimeSlotListCreate(generics.ListCreateAPIView):
     filterset_fields = ['date', 'student', 'status']
 
     def get_queryset(self):
-        queryset = TimeSlot.objects.filter(teacher__user=self.request.user)
+        queryset = Lesson.objects.filter(teacher__user=self.request.user)
 
         # Для регулярных уроков фильтруем только актуальные
         if self.request.query_params.get('recurring') == 'true':
@@ -103,11 +91,6 @@ class TimeSlotListCreate(generics.ListCreateAPIView):
                 Q(start_date__lte=today)
             )
         return queryset
-
-
-class TimeSlotRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    queryset = TimeSlot.objects.all()
-    serializer_class = TimeSlotSerializer
 
 
 class TeacherList(generics.ListAPIView):
@@ -124,9 +107,9 @@ class StudentList(generics.ListAPIView):
 def create_lesson(request):
     if request.method == 'POST':
         try:
-            print("Raw request body:", request.body)  # Логируем сырые данные
+            print("Raw request body:", request.body)
             data = json.loads(request.body)
-            print("Parsed data:", data)  # Логируем распарсенные данные
+            print("Parsed data:", data)
 
             # Проверка обязательных полей
             required_fields = ['date', 'time', 'teacher_id', 'student_id', 'subject']
@@ -134,8 +117,7 @@ def create_lesson(request):
                 if field not in data:
                     return JsonResponse({'error': f'Missing field: {field}'}, status=400)
 
-            # Создаем урок
-            lesson = TimeSlot.objects.create(
+            lesson = Lesson.objects.create(
                 date=data['date'],
                 time=data['time'],
                 teacher_id=data['teacher_id'],

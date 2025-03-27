@@ -355,6 +355,8 @@ export class CalendarManager {
                 });
             }
 
+            const is_not_recurring = slot.lesson_type === 'single'
+
             const student = studentsMap.get(slot.student);
             const lessonData = {
                 id: slot.id,
@@ -366,10 +368,10 @@ export class CalendarManager {
                 homework: slot.homework,
                 subject: slot.subject,
                 status: slot.status || 'scheduled',
-                is_recurring: slot.is_recurring
+                is_recurring: !is_not_recurring
             };
 
-            if (slot.is_recurring) {
+            if (!is_not_recurring) {
                 const date = new Date(slot.start_date || slot.date);
                 const day = ['sunday', 'monday', 'tuesday', 'wednesday',
                     'thursday', 'friday', 'saturday'][date.getDay()];

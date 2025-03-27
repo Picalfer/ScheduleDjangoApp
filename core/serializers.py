@@ -1,12 +1,12 @@
 from rest_framework import serializers
 
 from .models import OpenSlots
-from .models import TimeSlot, Teacher, Student
+from .models import Lesson, Teacher, Student
 
 
 class TimeSlotSerializer(serializers.ModelSerializer):
     class Meta:
-        model = TimeSlot
+        model = Lesson
         fields = '__all__'
         extra_kwargs = {
             'start_date': {'required': False},
