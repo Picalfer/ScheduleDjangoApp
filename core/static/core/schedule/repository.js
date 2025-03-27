@@ -44,35 +44,8 @@ function getCookie(name) {
     if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
-// Вспомогательные функции для UI
-function updateLessonUI(lessonId, newBalance) {
-    const lessonElement = document.querySelector(`.lesson[data-lesson-id="${lessonId}"]`);
-    if (lessonElement) {
-        lessonElement.classList.add('completed');
-        const btn = lessonElement.querySelector('.complete-btn');
-        if (btn) btn.remove();
-
-        // Обновляем отображение баланса где-то в интерфейсе
-        const balanceElement = document.querySelector(`#student-balance-${lessonId}`);
-        if (balanceElement) {
-            balanceElement.textContent = newBalance;
-        }
-    }
-}
-
-function showSuccessMessage(studentName, balance) {
-    alert(`Урок студента ${studentName} проведен успешно! Осталось уроков: ${balance}`);
-    // Или используйте вашу систему уведомлений
-}
-
-function showErrorMessage(message) {
-    alert(`Ошибка: ${message}`);
-    // Или используйте вашу систему уведомлений
-}
-
 export async function createLesson(date, time, teacherId, studentId, subject, isRecurring = false) {
     try {
-        // Проверка данных перед отправкой
         if (!date || !time || !teacherId || !studentId || !subject) {
             throw new Error('Missing required fields');
         }
@@ -175,74 +148,9 @@ export async function getLessons({teacherId = null, startDate, endDate} = {}) {
     }
 }
 
-async function cancelLesson(lessonId, date) {
-    try {
-        const response = await fetch('/api/cancel-lesson/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken,  // CSRF-токен, если используется
-            },
-            body: JSON.stringify({
-                lesson_id: lessonId,
-                date: date,
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`Ошибка: ${response.status} ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error("Ошибка при отмене урока:", error);
-        throw error;
-    }
-}
-
 export function updateSchedule(scheduleData, teacherId = null) {
     return true
-    /*return fetch(`/api/teacher-availability/${teacherId}/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(scheduleData.weeklyOpenSlots),
-    })
-        .then(response => response.json())
-        .catch(error => {
-            console.error("Ошибка обновления открытых окон:", error);
-        });*/
 }
-
-/*
-async function rescheduleLesson(lessonId, date, newTime) {
-    try {
-        const response = await fetch('/api/reschedule-lesson/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken,  // CSRF-токен, если используется
-            },
-            body: JSON.stringify({
-                lesson_id: lessonId,
-                date: date,
-                new_time: newTime,
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`Ошибка: ${response.status} ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error("Ошибка при переносе урока:", error);
-        throw error;
-    }
-}*/
 
 export function getSchedule(teacherId = currentUserId) {
     return new Promise(async (resolve, reject) => {
@@ -250,67 +158,14 @@ export function getSchedule(teacherId = currentUserId) {
     });
 }
 
-export function updateLessonBalance(clientId, newBalance) {
-    return new Promise((resolve, reject) => {
-        resolve("заглушка")
-        /*BX24.callMethod(
-            "crm.contact.update",
-            {
-                id: clientId,
-                fields: {
-                    [AMOUNT_LESSONS_FIELD_ID]: newBalance,
-                }
-            },
-            function (result) {
-                if (result.error()) {
-                    console.error("Ошибка при попытке изменить баланс уроков", result.error());
-                    reject(result.error());
-                } else {
-                    let data = result.data()
-                    resolve(data);
-                }
-            }
-        );*/
-    })
-}
-
 export function getClientByID(clientId) {
     return new Promise((resolve, reject) => {
         resolve("true шо")
-        /*BX24.callMethod(
-            "crm.contact.get",
-            {
-                id: clientId
-            },
-            function (result) {
-                if (result.error()) {
-                    console.error("Ошибка получения данных:", result.error());
-                    reject(result.error());
-                } else {
-                    let client = result.data()
-                    console.log("getClientByID" + client); // Выведем в консоль для отладки
-                    resolve(client);
-                }
-            }
-        );*/
     });
 }
 
 export function getTeacherByID(teacherId) {
     return new Promise((resolve, reject) => {
         resolve("true шо")
-        /*BX24.callMethod(
-            "user.get", // Название метода
-            {ID: teacherId}, // ID сотрудника
-            function (result) {
-                if (result.error()) {
-                    console.error("Ошибка:", result.error());
-                    reject(result.error());
-                } else {
-                    console.log("Данные сотрудника под ID " + teacherId + ": ", result.data());
-                    resolve(result.data());
-                }
-            }
-        );*/
     });
 }

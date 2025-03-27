@@ -2,11 +2,11 @@ import * as BX24API from './repository.js';
 import * as utils from './utils.js';
 /*import {Russian} from "flatpickr/dist/l10n/ru.js";
 import flatpickr from "flatpickr";*/
-import {calendarManager} from './app.js'
+import {calendarManager} from './app.js';
 
 export class AddStudentModalManager {
     constructor() {
-        this.initializeDOMElements()
+        this.initializeDOMElements();
         this.setupEventListeners();
     }
 
@@ -23,7 +23,7 @@ export class AddStudentModalManager {
         this.findTeacherButton = document.getElementById('find-teacher-button');
         this.clientIDInput = document.getElementById('client-id');
         this.clientInfo = document.getElementById('client-info');
-        this.teacherIDInput = document.getElementById('teacher-id')
+        this.teacherIDInput = document.getElementById('teacher-id');
         this.teacherInfo = document.getElementById('teacher-info');
         this.addOneTimeLessonButton = document.getElementById('add-one-time-lesson-button');
         this.addRegularLessonButton = document.getElementById('add-regular-lesson-button');
@@ -41,8 +41,8 @@ export class AddStudentModalManager {
             }
         });
 
-        this.findClientButton.onclick = (e) => this.findClient(e)
-        this.findTeacherButton.onclick = (e) => this.findTeacher(e)
+        this.findClientButton.onclick = (e) => this.findClient(e);
+        this.findTeacherButton.onclick = (e) => this.findTeacher(e);
         this.addOneTimeLessonButton.onclick = (e) => this.addOneTimeLesson(e);
         this.addRegularLessonButton.onclick = (e) => this.addRegularLesson(e);
 
@@ -53,11 +53,11 @@ export class AddStudentModalManager {
         this.modal.style.display = "none";
         this.form.reset();
 
-        this.clientIDInput.value = ''
+        this.clientIDInput.value = '';
         this.clientInfo.style.display = 'none';
         this.clientInfo.textContent = '';
 
-        this.teacherIDInput.value = ''
+        this.teacherIDInput.value = '';
         this.teacherInfo.style.display = 'none';
         this.teacherInfo.textContent = '';
 
@@ -152,7 +152,7 @@ export class AddStudentModalManager {
         <option value="olympic-programming">Подготовка к олимпиадам по программированию</option>
         <option value="cpp">Изучение языка C++</option>
     `;
-        courseSelect.style.marginRight = "5px"
+        courseSelect.style.marginRight = "5px";
         // Добавляем селектор курса и кнопку в строку
         lessonRow.appendChild(courseSelect);
 
@@ -355,5 +355,3 @@ export class AddStudentModalManager {
         });
     }
 }
-
-

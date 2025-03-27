@@ -336,8 +336,6 @@ export class CalendarManager {
     }
 
     async getMyId() {
-        // Реализация зависит от вашей системы аутентификации
-        // Например, если ID хранится в localStorage:
         return currentUserId;
     }
 
@@ -391,18 +389,6 @@ export class CalendarManager {
         return result;
     }
 
-    async getStudentName(studentId) {
-        // Здесь нужно реализовать запрос к API для получения имени студента
-        // Например:
-        try {
-            const response = await fetch(`/api/students/${studentId}/`);
-            const data = await response.json();
-            return data.name || `Student ${studentId}`;
-        } catch {
-            return `Student ${studentId}`;
-        }
-    }
-
     updateWorkingHours(start, end) {
         if (!this.lessons) {
             console.warn("Расписание не загружено или не содержит информации о студентах.");
@@ -418,15 +404,6 @@ export class CalendarManager {
     updateCalendarUi() {
         this.generateTimeSlots();
         this.updateScheduleDisplay();
-    }
-
-    async updateSchedule() {
-        try {
-            repository.updateSchedule(this.lessons);
-            console.log("Расписание успешно обновлено в Битриксе.");
-        } catch (error) {
-            console.error("Ошибка при обновлении расписания:", error);
-        }
     }
 
     async updateOpenSlots() {
@@ -451,8 +428,7 @@ export class CalendarManager {
         repository.updateSchedule(teacherSchedule, teacherId)
             .then(async () => {
                 console.log('Расписание успешно добавлено');
-                const myId = await getMyId()
-                if (teacherId === myId) {
+                if (teacherId === currentUserId) {
                     console.log("обновили своё расписание")
                     this.lessons = teacherSchedule;
                     this.updateCalendarUi();
