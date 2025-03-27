@@ -1,4 +1,5 @@
 :root {
+    --bg: #e0f2fe;
     --header-bg: #f0f7ff;
     --border-color: #d4d6ff;
     --primary-color: #6366f1;
@@ -7,16 +8,20 @@
     --danger-hover: #bb2d3b;
     --text-primary: #2d3748;
     --text-secondary: #4a5568;
-    --open-window-bg: #fff1f2;
+    --invert-text-primary: #e2e8f0;
+    --open-window-bg: #b7daff;
     --permanent-lesson-bg: #e0e7ff;
     --one-time-lesson-bg: #dcfce7;
+}
 
-    /* Переменные для темной темы */
-    --dark-bg: #1a1b1e;
-    --dark-header-bg: #2d2e32;
-    --dark-border-color: #3a3b3e;
-    --dark-text-primary: #e2e8f0;
-    --dark-text-secondary: #a0aec0;
+[data-theme="dark"] {
+    --bg: #1a1b1e;
+    --header-bg: #1a1b1e;
+    --border-color: #3a3b3e;
+    --text-primary: #e2e8f0;
+    --text-secondary: #a0aec0;
+    --invert-text-primary: #2d3748;
+    --open-window-bg: rgba(11, 23, 97, 0.71);
 }
 
 * {
@@ -27,6 +32,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: var(--bg);
     color: var(--text-primary);
     line-height: 1.5;
     height: 100vh;
@@ -45,7 +51,7 @@ body {
     height: 100%;
     min-height: 600px;
     overflow: hidden;
-    background: linear-gradient(180deg, white 0%, #f0f7ff 30%, #eef2ff 100%);
+    background: linear-gradient(180deg, var(--bg) 0%, var(--header-bg) 30%, var(--header-bg) 100%);
 }
 
 #week-info {
@@ -77,12 +83,12 @@ body {
     display: block;
 }
 
-/* Сетка расписания */
 #headers {
     display: flex;
     background-color: var(--header-bg);
     border-bottom: 1px solid var(--border-color);
     padding-right: 8px;
+    color: var(--text-primary);
 }
 
 .time-header {
@@ -104,12 +110,12 @@ body {
     display: flex;
     flex-direction: column;
     gap: 2px;
+    color: var(--text-primary);
     background-color: var(--header-bg);
     border-bottom: 2px solid var(--border-color);
     font-weight: 600;
 }
 
-/* Основной контейнер расписания */
 #schedule {
     display: flex;
     scrollbar-gutter: stable;
@@ -121,7 +127,6 @@ body {
     background-color: white;
 }
 
-/* Колонка времени */
 .time-column {
     width: 80px;
     flex: 0 0 80px;
@@ -129,22 +134,20 @@ body {
     flex-direction: column;
     border-right: 1px solid var(--border-color);
     height: max-content;
-    background-color: white;
+    background-color: var(--bg);
 }
 
-/* Дни недели */
 .week-day {
     display: flex;
     height: max-content;
     border-right: 1px solid var(--border-color);
-    background-color: white;
+    background-color: var(--bg);
     flex: 1;
     min-width: 0;
     flex-direction: column;
     position: relative;
 }
 
-/* Вертикальные границы для дней недели */
 .week-day:not(:last-child)::after {
     content: '';
     position: absolute;
@@ -156,7 +159,6 @@ body {
     z-index: 1;
 }
 
-/* Ячейки времени и часов */
 .time,
 .hour {
     height: 100px;
@@ -164,10 +166,10 @@ body {
     border-bottom: 1px solid var(--border-color);
     display: flex;
     flex: 0 0 auto;
+    color: var(--text-primary);
     position: relative;
 }
 
-/* Сам урок */
 .lesson {
     height: 90%;
     width: 90%;
@@ -183,11 +185,13 @@ body {
     flex-direction: column;
     gap: 4px;
     overflow: hidden;
+    background-color: var(--header-bg);
+    color: var(--text-primary);
 }
 
 .lesson:hover {
     transform: translateY(-2px);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
 }
 
 .lesson.permanent {
@@ -204,6 +208,7 @@ body {
     margin: 0;
     font-size: 1em;
     white-space: nowrap;
+    color: var(--text-primary);
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -212,35 +217,34 @@ body {
     margin: 0;
     line-height: 1.2;
     white-space: nowrap;
+    color: var(--text-primary);
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 1em;
 }
 
-/* Добавим немного отступов для смайлов */
 .lesson p span {
     margin-left: 5px;
 }
 
-/* Текущий день */
 .day-header.current-day {
     background: linear-gradient(135deg, var(--primary-color), #818cf8);
     color: white;
     border-bottom: 2px solid var(--primary-hover);
 }
 
-/* Кнопки */
 .nav-button {
     padding: 8px 16px;
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    background-color: white;
     font-weight: 500;
     transition: all 0.2s ease;
+    background-color: var(--header-bg);
+    color: var(--text-primary);
 }
 
 .nav-button:hover {
-    background-color: var(--header-bg);
+    background-color: var(--bg);
     border-color: var(--text-secondary);
 }
 
@@ -260,7 +264,7 @@ body {
 
 .lesson-info {
     margin-top: 10px;
-    color: #666;
+    color: var(--text-secondary);
 }
 
 .lesson-info p {
@@ -280,7 +284,7 @@ body {
     padding: 5px;
     border-radius: 5px;
     max-height: 200px;
-    background-color: #eaeaea;
+    background-color: var(--header-bg);
 }
 
 .required {
@@ -304,14 +308,18 @@ body {
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    background: var(--header-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px 20px;
 }
 
 .form-group label {
     display: block;
     margin-bottom: 5px;
     font-weight: 500;
-    color: #333;
+    color: var(--text-secondary);
 }
 
 .form-group input[type="text"],
@@ -320,15 +328,15 @@ body {
 .form-group select {
     width: 100%;
     padding: 10px;
-    border: 1px solid #ddd;
-    background-color: #eaeaea;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg);
     border-radius: 4px;
     font-size: 14px;
     transition: border-color 0.3s;
 }
 
 .form-group input[readonly] {
-    background-color: #f5f5f5;
+    background-color: var(--header-bg);
     cursor: default;
 }
 
@@ -361,9 +369,9 @@ body {
 }
 
 .modal-content {
-    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    background: var(--bg);
     border-radius: 16px 5px 5px 16px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     border: 1px solid var(--border-color);
     margin: 0 auto;
     padding: 20px;
@@ -391,15 +399,16 @@ body {
 }
 
 .modal-header {
-    background: linear-gradient(135deg, var(--header-bg), #ffffff);
+    background: linear-gradient(135deg, var(--border-color), var(--header-bg));
     border-radius: 16px 16px 0 0;
-    padding: 24px;
+    border-bottom: 1px solid var(--border-color);
+    padding: 20px 24px;
 }
 
 .modal-header h3 {
     color: var(--text-primary);
-    font-size: 1.5em;
-    margin-bottom: 10px;
+    font-size: 1.4em;
+    margin-bottom: 15px;
 }
 
 .modal-body {
@@ -427,32 +436,31 @@ body {
 .cancel-button {
     background-color: white;
     border: 1px solid var(--border-color) !important;
-    color: var(--text-primary);
+    color: var(--invert-text-primary);
 }
 
 .cancel-button:hover {
     background-color: var(--header-bg);
     border-color: var(--text-secondary) !important;
+    color: var(--text-primary);
 }
 
-/* Открытые окошки */
 .open-window {
-    background: linear-gradient(45deg, #f0f9ff, #e0f2fe);
-    border-left: 3px solid #38bdf8;
+    background: linear-gradient(45deg, var(--header-bg), var(--open-window-bg));
+    border-left: 3px solid var(--primary-color);
     position: relative;
     transition: all 0.3s ease-in-out;
+    border-left-color: var(--primary-color);
 }
 
 .open-window:hover {
-    background: linear-gradient(45deg, #e0f2fe, #e0f2fe);
-    border-left: 3px solid #0ea5e9;
+    transform: scale(0.97);
 }
 
-/* Урок в открытом окошке */
 .open-window .lesson {
-    background: white;
-    border: 1px solid #e6e6e6;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    background: var(--header-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     position: relative;
     z-index: 1;
 }
@@ -466,12 +474,20 @@ body {
     border-left: 3px solid var(--primary-color);
 }
 
+[data-theme="dark"] .open-window .lesson.permanent {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.1));
+}
+
 .open-window .lesson.one-time {
     background: linear-gradient(135deg, #f0f7f0 0%, #ffffff 100%);
     border-left: 3px solid #4caf50;
 }
 
-/* Стилизуем сам скроллбар */
+[data-theme="dark"] .open-window .lesson.one-time {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
+    border-left: 3px solid #10b981;
+}
+
 #schedule::-webkit-scrollbar {
     width: 8px;
 }
@@ -489,7 +505,6 @@ body {
     background-color: rgba(0, 0, 0, 0.3);
 }
 
-/* Стили для модального окна в зависимости от типа урока */
 .modal-content.permanent {
     border-left: 4px solid var(--primary-color);
 }
@@ -522,15 +537,14 @@ body {
     background-color: #45a049;
 }
 
-/* Стили для настроек модального окна */
 #settings-modal .modal-content {
     max-width: 500px;
     width: 90%;
 }
 
 #settings-modal .form-group {
-    background: white;
-    padding: 16px;
+    background: var(--header-bg);
+    padding: 16px 20px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
     margin-bottom: 16px;
@@ -541,8 +555,9 @@ body {
     padding: 10px;
     border: 1px solid var(--border-color);
     border-radius: 6px;
+    color: var(--text-primary);
     font-size: 1em;
-    background-color: white;
+    background-color: var(--bg);
     cursor: pointer;
     appearance: none;
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
@@ -555,12 +570,12 @@ body {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+    background-color: var(--header-bg);
 }
 
-/* Обновленные стили для кнопок в модальных окнах */
 .modal-footer {
     padding: 20px 24px;
-    background: white;
+    background: linear-gradient(135deg, var(--border-color), var(--header-bg));;
     border-top: 1px solid var(--border-color);
     border-radius: 0 0 16px 16px;
 }
@@ -578,7 +593,7 @@ body {
     width: 42px;
     height: 42px;
     border-radius: 12px;
-    background: linear-gradient(135deg, var(--header-bg), #ffffff);
+    background: linear-gradient(135deg, var(--header-bg), var(--bg));
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
@@ -588,12 +603,11 @@ body {
     color: var(--primary-color);
     box-shadow: 0 2px 4px rgba(99, 102, 241, 0.1),
     inset 0 1px 2px rgba(255, 255, 255, 0.5);
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    border: 1px solid var(--border-color);
     position: relative;
     overflow: hidden;
 }
 
-/* Градиентный эффект при наведении */
 .icon-button::before {
     content: '';
     position: absolute;
@@ -621,6 +635,11 @@ body {
     transform: translateY(0);
     box-shadow: 0 1px 2px rgba(99, 102, 241, 0.1),
     inset 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.icon-button-rotate:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.1);
 }
 
 .icon-button-rotate:hover span {
@@ -655,40 +674,6 @@ body {
     }
 }
 
-/* Стили для темной темы */
-body.dark-theme {
-    background-color: var(--dark-bg);
-    color: var(--dark-text-primary);
-}
-
-body.dark-theme #schedule-container {
-    background: linear-gradient(180deg,
-    var(--dark-bg) 0%,
-    var(--dark-header-bg) 30%,
-    var(--dark-header-bg) 100%);
-    border-color: var(--dark-border-color);
-}
-
-body.dark-theme .day-header,
-body.dark-theme #headers {
-    background-color: var(--dark-header-bg);
-    border-color: var(--dark-border-color);
-    color: var(--dark-text-primary);
-}
-
-body.dark-theme .week-day,
-body.dark-theme .time-column {
-    background-color: var(--dark-bg);
-    border-color: var(--dark-border-color);
-}
-
-body.dark-theme .hour,
-body.dark-theme .time {
-    border-color: var(--dark-border-color);
-    color: var(--dark-text-primary);
-}
-
-/* Стили для переключателя */
 .theme-toggle {
     display: flex;
     justify-content: space-between;
@@ -740,271 +725,6 @@ input:checked + .slider:before {
     transform: translateX(26px);
 }
 
-/* Дополнительные стили для темной темы */
-body.dark-theme .nav-button {
-    background-color: var(--dark-header-bg);
-    border-color: var(--dark-border-color);
-    color: var(--dark-text-primary);
-}
-
-body.dark-theme .nav-button:hover {
-    background-color: var(--dark-bg);
-    border-color: var(--dark-text-secondary);
-}
-
-body.dark-theme .icon-button {
-    background: linear-gradient(135deg, var(--dark-header-bg), var(--dark-bg));
-    color: var(--dark-text-primary);
-    border-color: var(--dark-border-color);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2),
-    inset 0 1px 2px rgba(255, 255, 255, 0.1);
-}
-
-body.dark-theme .icon-button-rotate:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3),
-    inset 0 1px 2px rgba(255, 255, 255, 0.1);
-}
-
-/* Стили для открытых окошек в темной теме */
-body.dark-theme .open-window {
-    background: linear-gradient(45deg, var(--dark-header-bg), var(--dark-bg));
-    border-left-color: var(--primary-color);
-    transition: all 0.3s ease-in-out;
-}
-
-body.dark-theme .open-window:hover {
-    background: linear-gradient(45deg,
-    var(--dark-header-bg) 0%,
-    var(--dark-header-bg) 100%);
-}
-
-/* Обновленные стили для уроков в темной теме */
-body.dark-theme .lesson {
-    background-color: var(--dark-header-bg);
-    border-color: var(--dark-border-color);
-    color: var(--dark-text-primary);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-}
-
-body.dark-theme .lesson.permanent {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.1));
-    border-color: var(--primary-color);
-    border-width: 1.5px;
-}
-
-body.dark-theme .lesson.one-time {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
-    border-color: #10b981;
-    border-width: 1.5px;
-}
-
-body.dark-theme .lesson:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-}
-
-/* Обновляем стили для уроков в открытых окошках в темной теме */
-body.dark-theme .open-window .lesson {
-    background-color: var(--dark-header-bg);
-    border-color: var(--dark-border-color);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-theme .open-window .lesson.permanent {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.1));
-    border-left: 3px solid var(--primary-color);
-}
-
-body.dark-theme .open-window .lesson.one-time {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
-    border-left: 3px solid #10b981;
-}
-
-/* Обновляем цвет текста для информации об уроке в темной теме */
-body.dark-theme .lesson h4,
-body.dark-theme .lesson p {
-    color: var(--dark-text-primary);
-}
-
-body.dark-theme .lesson-info {
-    color: var(--dark-text-secondary);
-}
-
-body.dark-theme .modal {
-    background-color: rgba(0, 0, 0, 0.75);
-}
-
-body.dark-theme .modal-content {
-    background: var(--dark-bg);
-    border: 1px solid var(--dark-border-color);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
-
-body.dark-theme .modal-header {
-    background: var(--dark-header-bg);
-    border-bottom: 1px solid var(--dark-border-color);
-    padding: 20px 24px;
-}
-
-body.dark-theme .modal-header h3 {
-    color: var(--dark-text-primary);
-    font-size: 1.4em;
-    margin-bottom: 15px;
-}
-
-body.dark-theme .form-group {
-    background: var(--dark-header-bg);
-    border: 1px solid var(--dark-border-color);
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 20px;
-}
-
-body.dark-theme .form-group label {
-    color: var(--dark-text-primary);
-    font-size: 0.95em;
-    margin-bottom: 8px;
-}
-
-body.dark-theme .form-group input[type="text"],
-body.dark-theme .form-group textarea {
-    background-color: var(--dark-bg);
-    border: 1px solid var(--dark-border-color);
-    border-radius: 8px;
-    color: var(--dark-text-primary);
-    padding: 12px 16px;
-    font-size: 0.95em;
-}
-
-body.dark-theme .form-group input[type="text"]:focus,
-body.dark-theme .form-group textarea:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-    background-color: rgba(99, 102, 241, 0.05);
-}
-
-body.dark-theme .form-group input[readonly] {
-    background-color: var(--dark-bg);
-    border-color: transparent;
-    color: var(--dark-text-secondary);
-}
-
-/* Стили для информации об уроке в модальном окне */
-body.dark-theme .lesson-info {
-    color: var(--dark-text-secondary);
-    background: var(--dark-bg);
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-top: 10px;
-}
-
-body.dark-theme .lesson-info p {
-    color: var(--dark-text-primary);
-    margin: 4px 0;
-}
-
-/* Стили для футера модального окна */
-body.dark-theme .modal-footer {
-    background: var(--dark-header-bg);
-    border-top: 1px solid var(--dark-border-color);
-    padding: 20px 24px;
-    border-radius: 0 0 12px 12px;
-}
-
-/* Обновленные стили для разных типов уроков */
-body.dark-theme .modal-content.permanent .modal-header {
-    background: linear-gradient(135deg,
-    rgba(99, 102, 241, 0.15),
-    var(--dark-header-bg));
-}
-
-body.dark-theme .modal-content.one-time .modal-header {
-    background: linear-gradient(135deg,
-    rgba(16, 185, 129, 0.15),
-    var(--dark-header-bg));
-}
-
-/* Стили для крестика в темной теме */
-body.dark-theme .close {
-    color: var(--dark-text-secondary);
-    opacity: 0.8;
-    transition: all 0.2s ease;
-    font-size: 28px;
-    top: 15px;
-    right: 25px;
-}
-
-body.dark-theme .close:hover {
-    color: var(--dark-text-primary);
-    opacity: 1;
-}
-
-/* Стили для скроллбара в темной теме */
-body.dark-theme .modal-content::-webkit-scrollbar,
-body.dark-theme #schedule::-webkit-scrollbar {
-    width: 8px;
-}
-
-body.dark-theme .modal-content::-webkit-scrollbar-track,
-body.dark-theme #schedule::-webkit-scrollbar-track {
-    background: var(--dark-bg);
-}
-
-body.dark-theme .modal-content::-webkit-scrollbar-thumb,
-body.dark-theme #schedule::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-}
-
-body.dark-theme .modal-content::-webkit-scrollbar-thumb:hover,
-body.dark-theme #schedule::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-}
-
-/* Обновленные стили для модального окна настроек в темной теме */
-body.dark-theme #settings-modal .form-group {
-    background: var(--dark-header-bg);
-    border: 1px solid var(--dark-border-color);
-    padding: 16px 20px;
-}
-
-body.dark-theme #settings-modal select {
-    background-color: var(--dark-bg);
-    border: 1px solid var(--dark-border-color);
-    color: var(--dark-text-primary);
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a0aec0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-}
-
-body.dark-theme #settings-modal select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-    background-color: rgba(99, 102, 241, 0.05);
-}
-
-/* Стили для выпадающего списка в темной теме */
-body.dark-theme #settings-modal select option {
-    background-color: var(--dark-bg);
-    color: var(--dark-text-primary);
-}
-
-body.dark-theme #settings-modal select:focus option:checked,
-body.dark-theme #settings-modal select option:hover {
-    background: var(--dark-header-bg);
-    color: var(--dark-text-primary);
-}
-
-/* Стили для выпадающего списка в Firefox */
-body.dark-theme #settings-modal select:-moz-focusring {
-    color: transparent;
-    text-shadow: 0 0 0 var(--dark-text-primary);
-}
-
-body.dark-theme #settings-modal select optgroup {
-    background-color: var(--dark-bg);
-    color: var(--dark-text-secondary);
-}
-
-/* Стилизация скроллбара */
 .modal-content::-webkit-scrollbar {
     width: 8px;
 }
@@ -1019,20 +739,7 @@ body.dark-theme #settings-modal select optgroup {
 }
 
 .modal-content::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-body.dark-theme #week-info {
-    border-bottom: 1px solid var(--dark-border-color);
-}
-
-body.dark-theme .time-header {
-    border-right: 1px solid var(--dark-border-color);
-}
-
-/* Темная тема - вертикальные линии между днями недели */
-body.dark-theme .week-day:not(:last-child)::after {
-    background-color: var(--dark-border-color);
+    background: var(--header-bg);
 }
 
 #week-info-left {
@@ -1046,20 +753,21 @@ body.dark-theme .week-day:not(:last-child)::after {
 #open-windows-controls {
     display: flex;
     align-items: center;
-    background-color: #f0f7ff;
+    background-color: var(--header-bg);
     height: fit-content;
     text-align: center;
     width: fit-content;
+    color: var(--text-primary);
     padding: 7px;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    border: 1px solid #d4d6ff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-color);
 }
 
 #open-windows-controls span {
     margin-right: 10px;
     font-weight: bold;
-    color: #333;
+    color: var(--text-primary);
 }
 
 #open-windows-controls button {
@@ -1068,7 +776,7 @@ body.dark-theme .week-day:not(:last-child)::after {
     border: none;
     border-radius: 4px;
     background-color: var(--primary-color);
-    color: white;
+    color: var(--text-primary);
     cursor: pointer;
     transition: background-color 0.3s;
 }
@@ -1079,31 +787,6 @@ body.dark-theme .week-day:not(:last-child)::after {
 
 #open-windows-controls button:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
-}
-
-/* Темная тема для панели открытых окон */
-body.dark-theme #open-windows-controls {
-    background-color: #2d2e32;
-    color: var(--dark-text-primary);
-    border: 1px solid var(--dark-border-color);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-body.dark-theme #open-windows-controls span {
-    color: var(--dark-text-primary);
-}
-
-body.dark-theme #open-windows-controls button {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-body.dark-theme #open-windows-controls button:hover {
-    background-color: var(--primary-hover);
-}
-
-body.dark-theme #open-windows-controls button:focus {
     box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
 }
 
@@ -1144,15 +827,6 @@ body.dark-theme #open-windows-controls button:focus {
     border: 1px solid var(--border-color);
 }
 
-/* Темная тема */
-.dark-theme #selected-count {
-    background-color: var(--dark-header-bg);
-    color: var(--dark-text-primary);
-    border: 1px solid var(--dark-border-color);
-}
-
-
-/* Стили для кнопки "Да" в модальном окне подтверждения */
 #confirm-change {
     background-color: #4CAF50;
     color: white;
@@ -1167,46 +841,13 @@ body.dark-theme #open-windows-controls button:focus {
     background-color: #45a049;
 }
 
-body.dark-theme .form-group input[type="text"],
-body.dark-theme .form-group input[type="tel"],
-body.dark-theme .form-group input[type="email"],
-body.dark-theme .form-group select {
-    background-color: var(--dark-bg);
-    border: 1px solid var(--dark-border-color);
-    color: var(--dark-text-primary);
-}
-
-body.dark-theme .form-group input[type="text"]:focus,
-body.dark-theme .form-group input[type="tel"]:focus,
-body.dark-theme .form-group input[type="email"]:focus,
-body.dark-theme .form-group select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-}
-
-body.dark-theme .form-group input::placeholder,
-body.dark-theme .form-group select::placeholder {
-    color: var(--dark-text-secondary);
-}
-
-body.dark-theme .form-group input#schedule {
-    background-color: var(--dark-bg);
-    border: 1px solid var(--dark-border-color);
-    color: var(--dark-text-primary);
-}
-
 #permanent-schedule-section {
     margin-top: 20px;
     padding: 15px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
+    color: var(--text-primary);
     background-color: var(--header-bg);
-}
-
-body.dark-theme #permanent-schedule-section {
-    background-color: var(--dark-header-bg);
-    border-color: var(--dark-border-color);
-    color: var(--dark-text-primary);
 }
 
 .regular-lesson-row,
@@ -1221,16 +862,11 @@ body.dark-theme #permanent-schedule-section {
     margin-right: 10px;
     width: 150px;
     padding: 10px;
-    border: 1px solid #ddd;
+    background-color: var(--bg);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
+    color: var(--text-primary);
     font-size: 14px;
-}
-
-body.dark-theme .day-select,
-body.dark-theme .time-select {
-    background-color: var(--dark-bg);
-    border: 1px solid var(--dark-border-color);
-    color: var(--dark-text-primary);
 }
 
 #add-permanent-lesson-button,
@@ -1239,7 +875,7 @@ body.dark-theme .time-select {
     border: 1px solid var(--border-color);
     border-radius: 4px;
     background-color: var(--primary-color);
-    color: white;
+    color: var(--text-primary);
     cursor: pointer;
     transition: background-color 0.3s;
 }
@@ -1247,14 +883,6 @@ body.dark-theme .time-select {
 #add-permanent-lesson-button:hover,
 #add-one-time-lesson-button:hover {
     background-color: var(--primary-hover);
-}
-
-/* Стили для темной темы */
-body.dark-theme #add-permanent-lesson-button,
-body.dark-theme #add-one-time-lesson-button {
-    border: 1px solid var(--dark-border-color);
-    background-color: var(--dark-header-bg);
-    color: var(--dark-text-primary);
 }
 
 .delete-lesson-button {
@@ -1277,16 +905,11 @@ body.dark-theme #add-one-time-lesson-button {
 
 #client-info {
     margin-top: 10px;
-    color: #333;
-}
-
-/* Стили для темной темы */
-body.dark-theme #client-info {
-    color: var(--dark-text-primary);
-    background-color: var(--dark-header-bg);
+    color: var(--text-primary);
+    background-color: var(--header-bg);
     padding: 10px;
     border-radius: 4px;
-    border: 1px solid var(--dark-border-color);
+    border: 1px solid var(--border-color);
 }
 
 #find-client-button,
@@ -1295,26 +918,13 @@ body.dark-theme #client-info {
     border: 1px solid var(--border-color);
     border-radius: 4px;
     background-color: var(--primary-color);
-    color: white;
+    color: var(--text-primary);
     cursor: pointer;
     transition: background-color 0.3s;
 }
 
 #find-client-button:hover,
 #find-teacher-button:hover {
-    background-color: var(--primary-hover);
-}
-
-/* Стили для темной темы */
-body.dark-theme #find-client-button,
-body.dark-theme #find-teacher-button {
-    border: 1px solid var(--dark-border-color);
-    background-color: var(--dark-header-bg);
-    color: var(--dark-text-primary);
-}
-
-body.dark-theme #find-client-button:hover,
-body.dark-theme #find-teacher-button:hover {
     background-color: var(--primary-hover);
 }
 
@@ -1332,7 +942,6 @@ input[type="text"]:focus {
     outline: none;
 }
 
-/* Стили для секции одноразового урока */
 #one-time-lesson-section {
     margin-top: 20px;
     padding: 15px;
@@ -1341,45 +950,25 @@ input[type="text"]:focus {
     background-color: var(--header-bg);
 }
 
-/* Стили для темной темы */
-body.dark-theme #one-time-lesson-section {
-    background-color: var(--dark-header-bg);
-    border-color: var(--dark-border-color);
-}
-
-/* Стили для элемента с информацией о одноразовом уроке */
 #one-time-lesson-info {
     color: var(--text-primary);
 }
 
-/* Стили для темной темы */
-body.dark-theme #one-time-lesson-info {
-    color: var(--dark-text-primary);
-}
-
-/* Стили для заголовка секции одноразового урока */
 #one-time-lesson-section h3 {
     margin-bottom: 10px;
 }
 
-/* Стили для поля ввода даты */
 #new-one-time-lesson-date {
     padding: 10px;
     border: 1px solid var(--border-color);
     border-radius: 4px;
     margin-right: 10px;
+    background-color: var(--bg);
     flex: 1;
+    color: var(--text-primary);
     cursor: text;
 }
 
-/* Стили для темной темы */
-body.dark-theme #new-one-time-lesson-date {
-    background-color: var(--dark-bg);
-    border: 1px solid var(--dark-border-color);
-    color: var(--dark-text-primary);
-}
-
-/* Стили для скроллбара */
 .time-select {
     overflow-y: auto;
     max-height: 150px;
@@ -1410,11 +999,6 @@ body.dark-theme #new-one-time-lesson-date {
     overflow: hidden;
 }
 
-body.dark-theme #schedule-info-panel {
-    background-color: var(--dark-header-bg);
-    border-color: var(--dark-border-color);
-}
-
 .toggle-button {
     background: none;
     border: none;
@@ -1437,14 +1021,12 @@ body.dark-theme #schedule-info-panel {
     padding: 5px;
 }
 
-/* Прячем текст при сворачивании */
 #schedule-info-panel.collapsed #schedule-info-text {
     opacity: 0;
     width: 0;
     visibility: hidden;
 }
 
-/* Поворот стрелки */
 #toggle-icon {
     transition: transform 0.3s ease;
 }
@@ -1453,32 +1035,29 @@ body.dark-theme #schedule-info-panel {
     transform: rotate(180deg);
 }
 
-/* Стили ТОЛЬКО для проведённых уроков (светлая тема) */
 .lesson.completed {
     opacity: 0.8;
-    background-color: #f5f5f5 !important;
-    border-left-color: #bdbdbd !important; /* Серая обводка */
-    filter: grayscale(20%) !important;
     position: relative;
     color: #616161;
+    background-color: var(--header-bg);
+    border-left-color: var(--text-secondary);
+    filter: grayscale(30%);
 }
 
-/* Метка "Проведён" (светлая тема) */
 .lesson.completed::after {
     content: "✓ Проведён";
     position: absolute;
     bottom: 10px;
     right: 10px;
-    color: #2e7d32; /* Темно-зеленый */
+    color: #33a539;
     font-weight: bold;
     font-size: 0.8em;
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--bg);
     padding: 2px 8px;
     border-radius: 12px;
     border: 1px solid #e0e0e0;
 }
 
-/* Стили для режима открытых окон (светлая тема) */
 .hour.open-window-mode {
     background-color: #fafafa;
     border: 1px solid #e0e0e0;
@@ -1489,35 +1068,19 @@ body.dark-theme #schedule-info-panel {
 }
 
 .hour.open-window-mode.open-window {
-    background-color: #e1f5fe; /* Светло-голубой */
+    background-color: #e1f5fe;
     border-color: #4fc3f7;
 }
 
-/* Чекбокс в светлой теме */
 .hour.open-window-mode .open-window-checkbox {
-    accent-color: #2196F3; /* Цвет чекбокса */
+    accent-color: #2196F3;
 }
 
-/* Темная тема - оставляем как было */
-body.dark-theme .lesson.completed {
-    opacity: 0.7 !important;
-    background-color: #434343 !important;
-    border-left-color: #9e9e9e !important;
-    filter: grayscale(30%) !important;
-}
-
-body.dark-theme .lesson.completed::after {
-    color: #4CAF50;
-    background: rgba(0, 0, 0, 0.7);
-}
-
-/* Стили для режима редактирования окон */
 .hour.open-window-mode {
     position: relative;
     cursor: pointer;
 }
 
-/* Видимый чекбокс */
 .hour.open-window-mode .open-window-checkbox {
     position: absolute;
     right: 10px;
@@ -1525,22 +1088,19 @@ body.dark-theme .lesson.completed::after {
     width: 18px;
     height: 18px;
     cursor: pointer;
-    opacity: 1; /* Делаем видимым */
+    opacity: 1;
     z-index: 2;
 }
 
-/* Стиль для выбранного окошка */
 .hour.open-window-mode.open-window {
     background-color: #e3f2fd;
     border: 2px solid #2196f3;
 }
 
-/* Затемнение окошка при наведении */
 .hour.open-window-mode:hover {
     background-color: rgba(0, 0, 0, 0.03);
 }
 
-/* Чтобы клик по уроку работал как обычно */
 .hour.open-window-mode .lesson {
     pointer-events: auto;
     position: relative;

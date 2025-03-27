@@ -29,9 +29,8 @@ export class SettingsManager {
             const response = await fetch('/get-user-settings/');
             const data = await response.json();
 
-            // Применяем настройки
             if (data.theme) {
-                document.body.classList.toggle('dark-theme', data.theme === 'dark');
+                document.documentElement.setAttribute('data-theme', data.theme);
                 this.themeSwitch.checked = data.theme === 'dark';
             }
             if (data.workingHours) {
@@ -174,7 +173,7 @@ export class SettingsManager {
 
         this.themeSwitch.addEventListener('change', () => {
             const theme = this.themeSwitch.checked ? 'dark' : 'light';
-            document.body.classList.toggle('dark-theme', this.themeSwitch.checked);
+            document.documentElement.setAttribute('data-theme', theme);
             this.saveSettingsToServer({theme});
         });
 
@@ -336,7 +335,6 @@ export class SettingsManager {
             checkbox.addEventListener('change', () => {
                 hourElement.classList.toggle('open-window', checkbox.checked);
 
-                // Ваша существующая логика обновления состояния...
                 if (!this.openWindowStates[day]) {
                     this.openWindowStates[day] = [];
                 }
