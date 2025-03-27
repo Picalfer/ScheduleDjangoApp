@@ -156,7 +156,7 @@ export async function getLessons({teacherId = null, startDate, endDate} = {}) {
         if (startDate) params.append('date_after', startDate);
         if (endDate) params.append('date_before', endDate);
 
-        const response = await fetch(`/timeslots/?${params.toString()}`, {
+        const response = await fetch(`/lessons/?${params.toString()}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

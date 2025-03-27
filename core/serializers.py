@@ -4,7 +4,7 @@ from .models import OpenSlots
 from .models import Lesson, Teacher, Student
 
 
-class TimeSlotSerializer(serializers.ModelSerializer):
+class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
         fields = '__all__'

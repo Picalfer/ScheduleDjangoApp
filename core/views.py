@@ -22,7 +22,7 @@ from .forms import ProfileForm
 from .forms import RegisterForm, LoginForm
 from .models import OpenSlots, UserSettings
 from .models import Lesson, Teacher, Student
-from .serializers import TimeSlotSerializer, TeacherSerializer, StudentSerializer
+from .serializers import LessonSerializer, TeacherSerializer, StudentSerializer
 
 
 @require_POST
@@ -74,8 +74,8 @@ def complete_lesson(request, lesson_id):
         return JsonResponse({'status': 'error', 'message': 'Внутренняя ошибка сервера'}, status=500)
 
 
-class TimeSlotListCreate(generics.ListCreateAPIView):
-    serializer_class = TimeSlotSerializer
+class LessonListCreate(generics.ListCreateAPIView):
+    serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['date', 'student', 'status']
