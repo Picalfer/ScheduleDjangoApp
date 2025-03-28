@@ -1072,7 +1072,7 @@ input[type="text"]:focus {
     position: absolute;
     right: 10px;
     top: 10px;
-    accent-color: #2196F3;
+    accent-color: var(--one-time-lesson-primary);
     width: 18px;
     height: 18px;
     cursor: pointer;
