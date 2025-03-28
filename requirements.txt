@@ -1,0 +1,6 @@
+django-environ==0.8.1
+whitenoise==5.3.0
+gunicorn==23.0.0
+Django~=4.0
+django-filter~=25.1
+djangorestframework~=3.15.2

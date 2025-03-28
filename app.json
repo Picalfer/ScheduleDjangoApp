@@ -1,0 +1,11 @@
+{
+  "name": "Kodama Schedule",
+  "description": "School Schedule",
+  "image": "heroku/python",
+  "repository": "",
+  "keywords": [
+    "django",
+    "python",
+    "web"
+  ]
+}
