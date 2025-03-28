@@ -29,9 +29,8 @@ from .serializers import LessonSerializer, TeacherSerializer, StudentSerializer
 def complete_lesson(request, lesson_id):
     try:
         lesson = Lesson.objects.select_related('student', 'teacher__user').get(id=lesson_id)
-        data = json.loads(request.body)  # Используем request.body для JSON
+        data = json.loads(request.body)
 
-        # Проверки
         if not request.user.is_authenticated:
             return JsonResponse({'status': 'error', 'message': 'Требуется авторизация'}, status=401)
 
@@ -41,16 +40,12 @@ def complete_lesson(request, lesson_id):
         if lesson.status == 'completed':
             return JsonResponse({'status': 'error', 'message': 'Урок уже проведен'}, status=400)
 
-        # Фиксируем начальный баланс
-        old_balance = lesson.student.lesson_balance
-
         if not lesson.student.spend_lesson():
             return JsonResponse({
                 'status': 'error',
                 'message': f'У студента {lesson.student.name} нулевой баланс уроков'
             }, status=402)
 
-        # Сохраняем дополнительную информацию (преобразуем '' в None)
         lesson.lesson_topic = data.get('lesson_topic') or None
         lesson.lesson_notes = data.get('lesson_notes') or None
         lesson.homework = data.get('homework') or None
@@ -58,17 +53,36 @@ def complete_lesson(request, lesson_id):
         lesson.completed_at = now()
         lesson.save()
 
-        return JsonResponse({
+        response_data = {
             'status': 'success',
             'message': 'Урок успешно проведен',
             'remaining_balance': lesson.student.lesson_balance,
-            'lesson_data': {
+            'lesson': {
+                'id': lesson.id,
+                'date': lesson.date.strftime('%Y-%m-%d'),
+                'time': lesson.time.strftime('%H:%M'),
                 'topic': lesson.lesson_topic,
                 'notes': lesson.lesson_notes,
                 'homework': lesson.homework
             }
-        })
+        }
 
+        # Создаем следующий урок для повторяющихся занятий
+        if lesson.lesson_type == 'recurring':
+            next_lesson = lesson.create_next_lesson()
+            if next_lesson:
+                response_data['next_lesson'] = {
+                    'id': next_lesson.id,
+                    'date': next_lesson.date.strftime('%Y-%m-%d'),
+                    'time': next_lesson.time.strftime('%H:%M')
+                }
+
+        return JsonResponse(response_data)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Неверный JSON'}, status=400)
+    except Lesson.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Урок не найден'}, status=404)
     except Exception as e:
         logger.error(f'Ошибка проведения урока: {str(e)}', exc_info=True)
         return JsonResponse({'status': 'error', 'message': 'Внутренняя ошибка сервера'}, status=500)
@@ -118,9 +132,7 @@ class StudentList(generics.ListAPIView):
 def create_lesson(request):
     if request.method == 'POST':
         try:
-            print("Raw request body:", request.body)
             data = json.loads(request.body)
-            print("Parsed data:", data)
 
             # Проверка обязательных полей
             required_fields = ['date', 'time', 'teacher_id', 'student_id', 'subject']
@@ -128,15 +140,32 @@ def create_lesson(request):
                 if field not in data:
                     return JsonResponse({'error': f'Missing field: {field}'}, status=400)
 
-            lesson = Lesson.objects.create(
-                date=data['date'],
-                time=data['time'],
-                teacher_id=data['teacher_id'],
-                student_id=data['student_id'],
-                subject=data['subject'],
-                lesson_type=data.get('lesson_type', 'single')
-            )
-            return JsonResponse({'status': 'success', 'id': lesson.id})
+            lesson_data = {
+                'date': data['date'],
+                'time': data['time'],
+                'teacher_id': data['teacher_id'],
+                'student_id': data['student_id'],
+                'subject': data['subject'],
+                'lesson_type': data.get('lesson_type', 'single'),
+                'course': data.get('course', 'Не выбран'),
+                'status': 'scheduled'
+            }
+
+            # Добавляем данные для повторяющихся уроков
+            if lesson_data['lesson_type'] == 'recurring':
+                lesson_data.update({
+                    'schedule': data.get('schedule', []),
+                    'start_date': data.get('start_date', data['date'])
+                })
+
+            lesson = Lesson.objects.create(**lesson_data)
+
+            return JsonResponse({
+                'status': 'success',
+                'id': lesson.id,
+                'lesson_type': lesson.lesson_type
+            })
+
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
         except Exception as e:

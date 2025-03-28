@@ -97,7 +97,6 @@ function initTestBtn() {
     })
 }
 
-// Глобальная функция для открытия модального окна урока
 window.openLessonModal = (lessonData) => {
     if (settingsManager.isOpenWindowsMode) {
         showNotification("Недоступно в режиме выбора открытых окон", "error");

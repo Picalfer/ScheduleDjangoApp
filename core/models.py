@@ -1,6 +1,11 @@
+import logging
+from datetime import date as date_type, datetime, timedelta
+
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.db import models
+
+logger = logging.getLogger(__name__)
 
 
 class Teacher(models.Model):
@@ -125,6 +130,61 @@ class Lesson(models.Model):
         verbose_name='Фактическое время проведения'
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+
+    def create_next_lesson(self):
+        """Создает следующий урок в цепочке повторяющихся занятий"""
+        if self.lesson_type != 'recurring' or not self.schedule:
+            return None
+
+        next_date = self.calculate_next_date()
+        if not next_date:
+            return None
+
+        return Lesson.objects.create(
+            student=self.student,
+            student_name=self.student.name,
+            teacher=self.teacher,
+            course=self.course,
+            lesson_type='recurring',
+            status='scheduled',
+            date=next_date,
+            time=self.time,
+            schedule=self.schedule,
+            start_date=self.start_date or self.date,
+        )
+
+    def calculate_next_date(self):
+        """Вычисляет следующую дату на основе расписания"""
+        try:
+            weekday_mapping = {
+                'monday': 0, 'tuesday': 1, 'wednesday': 2,
+                'thursday': 3, 'friday': 4, 'saturday': 5, 'sunday': 6
+            }
+
+            # Получаем дни расписания
+            schedule_days = [item['day'] for item in self.schedule]
+            if not schedule_days:
+                return None
+
+            # Обрабатываем self.date (может быть date или datetime)
+            current_date = self.date
+            if isinstance(current_date, datetime):
+                current_date = current_date.date()
+            elif not isinstance(current_date, date_type):
+                raise ValueError("Поле date должно быть datetime.date или datetime.datetime")
+
+            # Находим следующий учебный день после текущей даты
+            for days_ahead in range(1, 8):  # Проверяем 7 дней вперед
+                next_date = current_date + timedelta(days=days_ahead)
+                next_day_name = list(weekday_mapping.keys())[next_date.weekday()]
+                if next_day_name in schedule_days:
+                    return next_date
+
+            return None
+
+        except Exception as e:
+            logger.error(f'Ошибка расчета даты для урока {self.id}: {str(e)}')
+            return None
 
     class Meta:
         verbose_name = 'Урок'

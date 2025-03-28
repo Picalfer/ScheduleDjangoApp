@@ -17,6 +17,11 @@ export class CalendarManager {
         this.endHour = 18;
     }
 
+    getDayOfWeek(date) {
+        return ['sunday', 'monday', 'tuesday', 'wednesday',
+            'thursday', 'friday', 'saturday'][date.getDay()];
+    }
+
     /**
      * Получает даты недели относительно текущей с учетом смещения
      * @param {number} offset - Смещение в неделях (0 - текущая неделя)
@@ -110,9 +115,7 @@ export class CalendarManager {
      */
     createLessonHTML(lesson) {
         const isRecurring = lesson.lesson_type === 'recurring';
-        const isCompleted = lesson.status?.toLowerCase() === 'completed';
-        const studentName = lesson.student_name || `Student ${lesson.student || '?'}`;
-        const subject = lesson.course || 'Без темы';
+        const isCompleted = lesson.status === 'completed';
 
         return `
                     <div class="lesson ${isRecurring ? 'permanent' : 'one-time'} ${isCompleted ? 'completed' : ''}" 
@@ -120,8 +123,8 @@ export class CalendarManager {
                          data-status="${lesson.status || 'scheduled'}"
                          onclick="window.openLessonModal(${JSON.stringify(lesson).replace(/"/g, '&quot;')})">
                         <h4>${isRecurring ? '🔄 Постоянный' : '1️⃣ Разовый'} урок</h4>
-                        <p>👩‍🎓 ${studentName}</p>
-                        <p>📚 ${subject}</p>
+                        <p>👩‍🎓 ${lesson.student_name}</p>
+                        <p>📚 ${lesson.course}</p>
                     </div>
                 `;
     }
@@ -207,8 +210,9 @@ export class CalendarManager {
             return;
         }
 
+        // Очищаем все ячейки
         document.querySelectorAll('.week-day .hour').forEach(hourElement => {
-            hourElement.innerHTML = ''; // Полная очистка ячейки
+            hourElement.innerHTML = '';
             hourElement.classList.remove('has-lesson');
         });
 
@@ -218,28 +222,13 @@ export class CalendarManager {
 
         this.lessons.forEach(lesson => {
             try {
-                const isRecurring = lesson.lesson_type === 'recurring';
-
-                if (!isRecurring) {
-                    if (!currentWeekDates.includes(lesson.date)) {
-                        return;
-                    }
-                } else {
-                    const lessonDate = new Date(lesson.date);
-                    const startDate = new Date(lesson.start_date || lesson.date);
-                    const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday',
-                        'thursday', 'friday', 'saturday'][lessonDate.getDay()];
-
-                    const dayIndex = CalendarManager.DAYS_OF_WEEK.indexOf(dayOfWeek);
-                    if (dayIndex === -1) return;
-
-                    const currentDate = new Date(currentWeekDates[dayIndex]);
-                    if (currentDate < startDate) return;
+                // Для всех уроков (и разовых, и постоянных) проверяем точное совпадение даты
+                if (!currentWeekDates.includes(lesson.date)) {
+                    return;
                 }
 
                 const lessonDate = new Date(lesson.date);
-                const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday',
-                    'thursday', 'friday', 'saturday'][lessonDate.getDay()];
+                const dayOfWeek = this.getDayOfWeek(lessonDate);
                 const hour = parseInt(lesson.time.split(':')[0]);
 
                 const dayElement = document.getElementById(dayOfWeek);
