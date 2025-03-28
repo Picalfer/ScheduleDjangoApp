@@ -12,6 +12,8 @@
     --open-window-bg: #b7daff;
     --permanent-lesson-bg: #e0e7ff;
     --one-time-lesson-bg: #dcfce7;
+    --one-time-lesson-primary: rgb(16, 185, 129);
+    --permanent-lesson-primary: #6366f1;;
 }
 
 [data-theme="dark"] {
@@ -21,7 +23,7 @@
     --text-primary: #e2e8f0;
     --text-secondary: #a0aec0;
     --invert-text-primary: #2d3748;
-    --open-window-bg: rgba(11, 23, 97, 0.71);
+    --open-window-bg: rgba(47, 47, 48, 0.71);
 }
 
 * {
@@ -32,7 +34,6 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: var(--bg);
     color: var(--text-primary);
     line-height: 1.5;
     height: 100vh;
@@ -75,12 +76,6 @@ body {
 .week-navigation h2 {
     text-align: center;
     font-size: 1.2em;
-}
-
-#admin-label {
-    color: #666;
-    font-size: 1em;
-    display: block;
 }
 
 #headers {
@@ -163,6 +158,7 @@ body {
 .hour {
     height: 100px;
     padding: 5px 8px;
+    background: var(--header-bg);
     border-bottom: 1px solid var(--border-color);
     display: flex;
     flex: 0 0 auto;
@@ -199,9 +195,17 @@ body {
     border-color: #bbdefb;
 }
 
+.lesson.permanent:hover {
+    border-color: var(--permanent-lesson-primary);
+}
+
 .lesson.one-time {
     background-color: var(--one-time-lesson-bg);
     border-color: #a5d6a7;
+}
+
+.lesson.one-time:hover {
+    border-color: var(--one-time-lesson-primary);
 }
 
 .lesson h4 {
@@ -436,7 +440,6 @@ body {
 .cancel-button {
     background-color: white;
     border: 1px solid var(--border-color) !important;
-    color: var(--invert-text-primary);
 }
 
 .cancel-button:hover {
@@ -449,12 +452,11 @@ body {
     background: linear-gradient(45deg, var(--header-bg), var(--open-window-bg));
     border-left: 3px solid var(--primary-color);
     position: relative;
-    transition: all 0.3s ease-in-out;
-    border-left-color: var(--primary-color);
+    transition: all 0.1s ease-in-out;
 }
 
 .open-window:hover {
-    transform: scale(0.97);
+    background: var(--open-window-bg);
 }
 
 .open-window .lesson {
@@ -463,10 +465,6 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     position: relative;
     z-index: 1;
-}
-
-.open-window .lesson:hover {
-    border-color: var(--primary-color);
 }
 
 .open-window .lesson.permanent {
@@ -1059,32 +1057,22 @@ input[type="text"]:focus {
 }
 
 .hour.open-window-mode {
-    background-color: #fafafa;
-    border: 1px solid #e0e0e0;
-}
-
-.hour.open-window-mode:hover {
-    background-color: #f0f0f0;
+    background: var(--header-bg);
+    border: 1px solid var(--border-color);
+    position: relative;
+    cursor: pointer;
 }
 
 .hour.open-window-mode.open-window {
-    background-color: #e1f5fe;
-    border-color: #4fc3f7;
-}
-
-.hour.open-window-mode .open-window-checkbox {
-    accent-color: #2196F3;
-}
-
-.hour.open-window-mode {
-    position: relative;
-    cursor: pointer;
+    background: linear-gradient(45deg, var(--header-bg), var(--open-window-bg));
+    border-left: 3px solid var(--primary-color);
 }
 
 .hour.open-window-mode .open-window-checkbox {
     position: absolute;
     right: 10px;
     top: 10px;
+    accent-color: #2196F3;
     width: 18px;
     height: 18px;
     cursor: pointer;
@@ -1092,17 +1080,7 @@ input[type="text"]:focus {
     z-index: 2;
 }
 
-.hour.open-window-mode.open-window {
-    background-color: #e3f2fd;
-    border: 2px solid #2196f3;
-}
-
 .hour.open-window-mode:hover {
-    background-color: rgba(0, 0, 0, 0.03);
-}
-
-.hour.open-window-mode .lesson {
-    pointer-events: auto;
-    position: relative;
-    z-index: 1;
+    background: linear-gradient(45deg, var(--header-bg), var(--open-window-bg));
+    border-left: 3px solid var(--primary-color);
 }
