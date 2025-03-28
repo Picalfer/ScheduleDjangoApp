@@ -25,7 +25,7 @@ class LessonAdmin(admin.ModelAdmin):
     list_filter = ('lesson_type', 'status', 'date')
 
     def save_model(self, request, obj, form, change):
-        if obj.is_recurring and not obj.start_date:
+        if obj.lesson_type and not obj.start_date:
             obj.start_date = obj.date
         super().save_model(request, obj, form, change)
 
@@ -41,5 +41,5 @@ class LessonAdmin(admin.ModelAdmin):
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     @admin.display(boolean=True, description='Регулярный?')
-    def is_recurring_display(self, obj):
-        return obj.is_recurring
+    def lesson_type_display(self, obj):
+        return obj.lesson_type == 'recurring'

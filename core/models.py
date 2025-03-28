@@ -67,6 +67,7 @@ class Lesson(models.Model):
 
     # Основные связи
     student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name='Студент')
+    student_name = models.CharField(max_length=100, blank=True, verbose_name='Имя студента')
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, verbose_name='Преподаватель')
     course = models.CharField(max_length=100, default='Не выбран', verbose_name='Курс')
 

@@ -133,10 +133,10 @@ export class LessonModalManager {
             month: 'long',
             day: 'numeric'
         });
-        document.getElementById("lesson-course").value = lessonData.subject;
+        document.getElementById("lesson-course").value = lessonData.course;
 
-        const emoji = lessonData.is_recurring ? '🔄' : '1️⃣';
-        const statusText = lessonData.is_recurring ? 'Постоянный урок' : 'Разовый урок';
+        const emoji = lessonData.lesson_type === 'recurring' ? '🔄' : '1️⃣';
+        const statusText = lessonData.lesson_type === 'recurring' ? 'Постоянный урок' : 'Разовый урок';
         this.modal.querySelector('.lesson-type').innerHTML = `${emoji} ${statusText}`;
         this.modal.querySelector('.lesson-student').textContent = `Ученик: ${lessonData.student_name || lessonData.student}`;
 

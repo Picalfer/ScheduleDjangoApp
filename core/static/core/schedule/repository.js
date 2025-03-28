@@ -71,9 +71,9 @@ function getCookie(name) {
     if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
-export async function createLesson(date, time, teacherId, studentId, subject, isRecurring = false) {
+export async function createLesson(date, time, teacherId, studentId, subject, lesson_type) {
     try {
-        if (!date || !time || !teacherId || !studentId || !subject) {
+        if (!date || !time || !teacherId || !studentId || !subject || !lesson_type) {
             throw new Error('Missing required fields');
         }
 
@@ -89,7 +89,7 @@ export async function createLesson(date, time, teacherId, studentId, subject, is
                 teacher_id: teacherId,
                 student_id: studentId,
                 subject: subject,
-                is_recurring: isRecurring
+                lesson_type: lesson_type
             }),
         });
 

@@ -20,8 +20,8 @@ from rest_framework.permissions import IsAuthenticated
 
 from .forms import ProfileForm
 from .forms import RegisterForm, LoginForm
-from .models import OpenSlots, UserSettings
 from .models import Lesson, Teacher, Student
+from .models import OpenSlots, UserSettings
 from .serializers import LessonSerializer, TeacherSerializer, StudentSerializer
 
 
@@ -78,16 +78,27 @@ class LessonListCreate(generics.ListCreateAPIView):
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['date', 'student', 'status']
+    filterset_fields = [
+        'date',
+        'student',
+        'status',
+        'lesson_type',  # Добавляем фильтр по типу урока
+        'start_date'  # Для регулярных уроков
+    ]
 
     def get_queryset(self):
-        queryset = Lesson.objects.filter(teacher__user=self.request.user)
+        queryset = (Lesson.objects
+        .filter(teacher__user=self.request.user)
+        .select_related(
+            'student',  # Оптимизация запросов к студенту
+            'teacher'
+        ))
 
         # Для регулярных уроков фильтруем только актуальные
         if self.request.query_params.get('recurring') == 'true':
             today = timezone.now().date()
             queryset = queryset.filter(
-                Q(is_recurring=True) &
+                Q(lesson_type='recurring') &
                 Q(start_date__lte=today)
             )
         return queryset
@@ -123,7 +134,7 @@ def create_lesson(request):
                 teacher_id=data['teacher_id'],
                 student_id=data['student_id'],
                 subject=data['subject'],
-                is_recurring=data.get('is_recurring', False)
+                lesson_type=data.get('lesson_type', 'single')
             )
             return JsonResponse({'status': 'success', 'id': lesson.id})
         except json.JSONDecodeError:

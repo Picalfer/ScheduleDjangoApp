@@ -111,8 +111,8 @@ export class CalendarManager {
     createLessonHTML(lesson) {
         const isRecurring = lesson.lesson_type === 'recurring';
         const isCompleted = lesson.status?.toLowerCase() === 'completed';
-        const studentName = lesson.student?.name || `Student ${lesson.student || '?'}`;
-        const subject = lesson.subject || 'Без темы';
+        const studentName = lesson.student_name || `Student ${lesson.student || '?'}`;
+        const subject = lesson.course || 'Без темы';
 
         return `
                     <div class="lesson ${isRecurring ? 'permanent' : 'one-time'} ${isCompleted ? 'completed' : ''}" 
