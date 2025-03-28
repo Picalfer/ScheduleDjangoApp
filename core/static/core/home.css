@@ -459,7 +459,7 @@ body {
     background: var(--open-window-bg);
 }
 
-.open-window .lesson {
+.hour .lesson {
     background: var(--header-bg);
     border: 1px solid var(--border-color);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
@@ -467,21 +467,21 @@ body {
     z-index: 1;
 }
 
-.open-window .lesson.permanent {
+.hour .lesson.permanent {
     background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
     border-left: 3px solid var(--primary-color);
 }
 
-[data-theme="dark"] .open-window .lesson.permanent {
+[data-theme="dark"] .hour .lesson.permanent {
     background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.1));
 }
 
-.open-window .lesson.one-time {
+.hour .lesson.one-time {
     background: linear-gradient(135deg, #f0f7f0 0%, #ffffff 100%);
     border-left: 3px solid #4caf50;
 }
 
-[data-theme="dark"] .open-window .lesson.one-time {
+[data-theme="dark"] .hour .lesson.one-time {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
     border-left: 3px solid #10b981;
 }
@@ -491,16 +491,12 @@ body {
 }
 
 #schedule::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--bg);
 }
 
 #schedule::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: var(--primary-color);
     border-radius: 4px;
-}
-
-#schedule::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(0, 0, 0, 0.3);
 }
 
 .modal-content.permanent {

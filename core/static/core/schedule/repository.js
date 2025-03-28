@@ -1,5 +1,33 @@
 const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
+export function getLessons(teacherId = null, startDate = null, endDate = null) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const params = new URLSearchParams();
+
+            if (teacherId) params.append('teacher_id', teacherId);
+            if (startDate) params.append('date_after', startDate);
+            if (endDate) params.append('date_before', endDate);
+
+            const response = await fetch(`/lessons/?${params.toString()}`, {
+                method: 'GET',
+                headers: {'Content-Type': 'application/json'},
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error(`Ошибка: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            resolve(data);
+        } catch (error) {
+            console.error("Ошибка при получении уроков:", error);
+            reject(error);
+        }
+    });
+}
+
 export async function completeLesson(lessonId, lessonData = {}) {
     try {
         const csrfToken = getCookie('csrftoken');
@@ -37,7 +65,6 @@ export async function completeLesson(lessonId, lessonData = {}) {
     }
 }
 
-// Функция для получения куки
 function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
@@ -114,38 +141,6 @@ export function updateOpenSlots(openSlots, teacherId = currentUserId) {
             console.error("Ошибка при обновлении свободных слотов:", error);
             throw error;
         });
-}
-
-export async function getLessons({teacherId = null, startDate, endDate} = {}) {
-    try {
-        const params = new URLSearchParams();
-
-        // Добавляем teacher_id только если он указан
-        if (teacherId) {
-            params.append('teacher_id', teacherId);
-        }
-
-        // Добавляем даты
-        if (startDate) params.append('date_after', startDate);
-        if (endDate) params.append('date_before', endDate);
-
-        const response = await fetch(`/lessons/?${params.toString()}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include'
-        });
-
-        if (!response.ok) {
-            throw new Error(`Ошибка: ${response.status} ${response.statusText}`);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error("Ошибка при получении уроков:", error);
-        throw error;
-    }
 }
 
 export function updateSchedule(scheduleData, teacherId = null) {
