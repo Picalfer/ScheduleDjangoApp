@@ -35,30 +35,63 @@ export function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-export function showConfirmationModal({text, onConfirm, onCancel}) {
+export function showConfirmationModal({
+    text,
+    onConfirm,
+    onCancel,
+    inputConfig = null  // Новый параметр для настройки ввода
+}) {
     const confirmationModal = document.getElementById('confirmation-modal');
-    if (confirmationModal) {
-        const confirmationText = document.getElementById('confirmation-text');
-        confirmationText.innerHTML = text;
-        confirmationModal.style.display = 'block';
-        confirmationModal.style.zIndex = '10001';
+    if (!confirmationModal) return;
 
-        const confirmButton = document.getElementById('confirm-change');
-        if (confirmButton) {
-            confirmButton.onclick = () => {
-                onConfirm();
-                this.closeConfirmationModal();
-            };
+    // Обновляем текст
+    const confirmationText = document.getElementById('confirmation-text');
+    confirmationText.innerHTML = text;
+
+    // Элементы для ввода (добавляем динамически)
+    const inputContainer = document.getElementById('input-container');
+    let inputElement = null;
+
+    if (inputConfig) {
+        inputContainer.innerHTML = ''; // Очищаем предыдущий ввод
+
+        // Создаем input/textarea в зависимости от конфига
+        inputElement = document.createElement(inputConfig.type === 'textarea' ? 'textarea' : 'input');
+        inputElement.placeholder = inputConfig.placeholder || '';
+        inputElement.required = inputConfig.required || false;
+
+        if (inputConfig.type === 'number') {
+            inputElement.type = 'number';
+            inputElement.min = inputConfig.min || '';
+            inputElement.max = inputConfig.max || '';
         }
 
-        const cancelButton = document.getElementById('cancel-change');
-        if (cancelButton) {
-            cancelButton.onclick = () => {
-                onCancel();
-                this.closeConfirmationModal();
-            };
-        }
+        inputContainer.appendChild(inputElement);
+        inputContainer.style.display = 'block';
+    } else {
+        inputContainer.style.display = 'none';
     }
+
+    // Показываем модалку
+    confirmationModal.style.display = 'block';
+    confirmationModal.style.zIndex = '10001';
+
+    // Обработчики кнопок
+    document.getElementById('confirm-change').onclick = () => {
+        if (inputConfig?.required && (!inputElement || !inputElement.value.trim())) {
+            alert(inputConfig.errorMessage || 'Поле обязательно для заполнения');
+            return;
+        }
+
+        const inputValue = inputElement ? inputElement.value : null;
+        onConfirm(inputValue);  // Передаем введенное значение
+        this.closeConfirmationModal();
+    };
+
+    document.getElementById('cancel-change').onclick = () => {
+        onCancel?.();
+        this.closeConfirmationModal();
+    };
 }
 
 export function closeConfirmationModal() {

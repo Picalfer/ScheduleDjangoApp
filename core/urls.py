@@ -21,4 +21,5 @@ urlpatterns = [
     path('students/', views.StudentList.as_view(), name='student-list'),
     path('api/create-lesson/', views.create_lesson, name='create-lesson'),
     path('api/complete-lesson/<int:lesson_id>/', views.complete_lesson, name='complete-lesson'),
+    path('api/cancel-lesson/<int:lesson_id>/', views.cancel_lesson, name='cancel-lesson'),
 ]

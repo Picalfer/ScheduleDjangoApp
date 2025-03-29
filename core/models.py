@@ -122,9 +122,20 @@ class Lesson(models.Model):
         null=True,
         verbose_name='Домашнее задание'
     )
+    cancel_reason = models.TextField(
+        blank=True,
+        null=True,
+        default=None,
+        verbose_name='Причина отмены урока'
+    )
 
     # Системные поля
     completed_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name='Фактическое время проведения'
+    )
+    canceled_at = models.DateTimeField(
         blank=True,
         null=True,
         verbose_name='Фактическое время проведения'

@@ -30,12 +30,14 @@ export function getLessons(teacherId = null, startDate = null, endDate = null) {
 
 export async function completeLesson(lessonId, lessonData = {}) {
     try {
+        if (!lessonId) {
+            throw new Error('Lesson ID is required');
+        }
         const csrfToken = getCookie('csrftoken');
         if (!csrfToken) {
             throw new Error('CSRF token not found');
         }
 
-        // Преобразуем пустые строки в null
         const payload = {
             lesson_topic: lessonData.topic || null,
             lesson_notes: lessonData.notes || null,
@@ -61,6 +63,43 @@ export async function completeLesson(lessonId, lessonData = {}) {
         return await response.json();
     } catch (error) {
         console.error('Ошибка при завершении урока:', error);
+        throw error;
+    }
+}
+
+export async function cancelLesson(lessonId, reason) {
+    try {
+        if (!lessonId) {
+            throw new Error('Lesson ID is required');
+        }
+        const csrfToken = getCookie('csrftoken');
+        if (!csrfToken) {
+            throw new Error('CSRF token not found');
+        }
+
+        const payload = {
+            cancel_reason: reason || null
+        };
+
+        const response = await fetch(`/api/cancel-lesson/${lessonId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка при отмене урока:', error);
         throw error;
     }
 }

@@ -249,12 +249,15 @@
             <div class="modal-header">
                 <h3>Подтверждение</h3>
             </div>
-            <div class="modal-body">
-                <p id="confirmation-text"></p>
+            <div class="modal-body form-group" style="margin-top: 20px">
+                <p id="confirmation-text" class="modal-text"></p>
+                <div id="input-container" class="modal-input-container" style="display: none; margin-top: 20px">
+                    <!-- Сюда будет добавляться input/textarea динамически -->
+                </div>
             </div>
-            <div class="modal-footer">
-                <button id="confirm-change" class="confirm-button">Да</button>
-                <button class="cancel-button" id="cancel-change">Отмена</button>
+            <div class="modal-actions">
+                <button id="confirm-change" class="confirm-button">Подтвердить</button>
+                <button id="cancel-change" class="cancel-button">Отменить</button>
             </div>
         </div>
     </div>

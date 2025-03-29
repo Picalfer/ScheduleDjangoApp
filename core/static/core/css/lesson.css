@@ -105,7 +105,7 @@
     border-left: 3px solid #10b981;
 }
 
-.lesson.completed {
+.lesson.completed, .lesson.cancelled {
     opacity: 0.8;
     position: relative;
     color: #616161;
@@ -114,16 +114,24 @@
     filter: grayscale(30%);
 }
 
-.lesson.completed::after {
-    content: "✓ Проведён";
+.lesson.completed::after, .lesson.cancelled::after {
     position: absolute;
     bottom: 10px;
     right: 10px;
-    color: #33a539;
     font-weight: bold;
     font-size: 0.8em;
     background: var(--bg);
     padding: 2px 8px;
     border-radius: 12px;
     border: 1px solid #e0e0e0;
+}
+
+.lesson.completed::after {
+    content: "✓ Проведён";
+    color: var(--success-color);
+}
+
+.lesson.cancelled::after {
+    content: "✕ Отменён";
+    color: var(--danger-color);
 }

@@ -116,9 +116,10 @@ export class CalendarManager {
     createLessonHTML(lesson) {
         const isRecurring = lesson.lesson_type === 'recurring';
         const isCompleted = lesson.status === 'completed';
+        const isCanceled = lesson.status === 'canceled';
 
         return `
-                    <div class="lesson ${isRecurring ? 'permanent' : 'one-time'} ${isCompleted ? 'completed' : ''}" 
+                    <div class="lesson ${isRecurring ? 'permanent' : 'one-time'} ${isCanceled ? 'cancelled' : ''} ${isCompleted ? 'completed' : ''}" 
                          data-lesson-id="${lesson.id}"
                          data-status="${lesson.status || 'scheduled'}"
                          onclick="window.openLessonModal(${JSON.stringify(lesson).replace(/"/g, '&quot;')})">

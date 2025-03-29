@@ -1,5 +1,6 @@
+import * as utils from "./utils.js";
 import {showNotification} from "./utils.js";
-import {completeLesson} from "./repository.js";
+import {cancelLesson, completeLesson} from "./repository.js";
 import {calendarManager} from "./app.js";
 
 export class LessonModalManager {
@@ -20,7 +21,10 @@ export class LessonModalManager {
 
     setupEventListeners() {
         this.closeButton.onclick = () => this.close();
-        this.cancelButton.onclick = () => this.close();
+        this.cancelButton.onclick = (e) => {
+            e.preventDefault()
+            this.cancelLesson()
+        };
 
         document.addEventListener('click', (e) => {
             if (e.target === this.modal) {
@@ -86,11 +90,40 @@ export class LessonModalManager {
             });
     }
 
+    cancelLesson() {
+        const currentLessonId = this.lessonId;
+        utils.showConfirmationModal({
+            text: "Введите причину отмены:",
+            inputConfig: {
+                type: 'textarea',
+                placeholder: 'Минимум 5 символов',
+                required: true
+            },
+            onConfirm: (reason) => {
+                cancelLesson(currentLessonId, reason)
+                    .then(response => {
+                        showNotification(
+                            `Урок Отменен!`,
+                            "success"
+                        );
+                        calendarManager.loadSchedule();
+                    })
+                    .catch(error => {
+                        console.error("Ошибка при отмене урока:", error);
+                        showNotification(
+                            error.message || "Произошла ошибка при отмене урока",
+                            "error"
+                        );
+                    });
+            }
+        });
+        this.close()
+    }
+
     close() {
         this.modal.style.display = "none";
         this.form.reset();
         this.lessonId = null;
-        // Убираем ошибки при закрытии
         this.topicInput.closest('.form-group').classList.remove('error');
     }
 

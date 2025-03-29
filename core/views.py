@@ -88,6 +88,58 @@ def complete_lesson(request, lesson_id):
         return JsonResponse({'status': 'error', 'message': 'Внутренняя ошибка сервера'}, status=500)
 
 
+@require_POST
+def cancel_lesson(request, lesson_id):
+    try:
+        lesson = Lesson.objects.select_related('student', 'teacher__user').get(id=lesson_id)
+        data = json.loads(request.body)
+
+        if not request.user.is_authenticated:
+            return JsonResponse({'status': 'error', 'message': 'Требуется авторизация'}, status=401)
+
+        if request.user != lesson.teacher.user:
+            return JsonResponse({'status': 'error', 'message': 'Можно отменять только свои уроки'}, status=403)
+
+        if lesson.status != 'scheduled':
+            return JsonResponse({'status': 'error', 'message': 'Этот урок нельзя отменить'}, status=400)
+
+        lesson.cancel_reason = data.get('cancel_reason') or None
+        lesson.status = 'canceled'
+        lesson.canceled_at = now()
+        lesson.save()
+
+        response_data = {
+            'status': 'success',
+            'message': 'Урок успешно отменен',
+            'remaining_balance': lesson.student.lesson_balance,
+            'lesson': {
+                'id': lesson.id,
+                'date': lesson.date.strftime('%Y-%m-%d'),
+                'time': lesson.time.strftime('%H:%M'),
+                'reason': lesson.cancel_reason
+            }
+        }
+
+        # Создаем следующий урок для повторяющихся занятий
+        if lesson.lesson_type == 'recurring':
+            next_lesson = lesson.create_next_lesson()
+            if next_lesson:
+                response_data['next_lesson'] = {
+                    'id': next_lesson.id,
+                    'date': next_lesson.date.strftime('%Y-%m-%d'),
+                    'time': next_lesson.time.strftime('%H:%M')
+                }
+
+        return JsonResponse(response_data)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Неверный JSON'}, status=400)
+    except Lesson.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Урок не найден'}, status=404)
+    except Exception as e:
+        logger.error(f'Ошибка проведения урока: {str(e)}', exc_info=True)
+        return JsonResponse({'status': 'error', 'message': 'Внутренняя ошибка сервера'}, status=500)
+
 class LessonListCreate(generics.ListCreateAPIView):
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated]

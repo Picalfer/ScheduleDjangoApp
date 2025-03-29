@@ -5,6 +5,7 @@
     min-height: 60px;
     padding: 5px;
     border-radius: 5px;
+    color: var(--text-primary);
     max-height: 200px;
     background-color: var(--header-bg);
 }
@@ -235,14 +236,14 @@
     background-color: var(--header-bg);
 }
 
-.modal-footer {
+.modal-actions {
     padding: 20px 24px;
     background: linear-gradient(135deg, var(--border-color), var(--header-bg));;
     border-top: 1px solid var(--border-color);
     border-radius: 0 0 16px 16px;
 }
 
-.modal-footer button {
+.modal-actions button {
     padding: 10px 24px;
     border-radius: 8px;
     font-weight: 500;
