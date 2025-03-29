@@ -1,8 +1,7 @@
 import os
 from pathlib import Path
-import environ
 import dj_database_url
-from decouple import config
+import environ
 from django.conf.global_settings import DATABASES
 
 env = environ.Env()
@@ -14,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('DJANGO_SECRET_KEY', default = 'django-insecure-&2ce*-1i(v#76_*648-%9b19td3%mu3d#i2_y5#n!^*e@!u-z5')
+SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-&2ce*-1i(v#76_*648-%9b19td3%mu3d#i2_y5#n!^*e@!u-z5')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DJANGO_DEBUG", True)
@@ -35,7 +34,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-   'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -68,8 +67,24 @@ WSGI_APPLICATION = 'scheduleApp.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# Базовые настройки SQLite (для разработки)
+db_config = {
+    'ENGINE': 'django.db.backends.sqlite3',
+    'NAME': BASE_DIR / 'db.sqlite3',
+}
 
-DATABASES['default'] = dj_database_url.parse(config('DATABASE_URL'), conn_max_age=600)
+# Переопределяем если есть DATABASE_URL
+if 'DATABASE_URL' in os.environ:
+    db_config = dj_database_url.parse(
+        os.environ['DATABASE_URL'],
+        conn_max_age=600,
+        ssl_require=not DEBUG
+    )
+
+# Итоговый словарь
+DATABASES = {
+    'default': db_config
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -103,7 +118,7 @@ LANGUAGES = [
 TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True  # Включение интернационализации
 USE_L10N = True  # Локализация форматов
-USE_TZ = True    # Работа с часовыми поясами
+USE_TZ = True  # Работа с часовыми поясами
 
 # Форматы даты и времени
 DATE_FORMAT = 'd.m.Y'
