@@ -9,6 +9,17 @@ env = environ.Env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Настройки для работы с HTTPS
+CSRF_COOKIE_SECURE = True  # Передавать CSRF-куки только по HTTPS
+SESSION_COOKIE_SECURE = True  # Передавать сессионные куки только по HTTPS
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Для работы за прокси (Dokku/Nginx)
+
+# Дополнительные настройки HTTPS
+SECURE_SSL_REDIRECT = True  # Автоматически перенаправлять HTTP на HTTPS
+SECURE_HSTS_SECONDS = 31536000  # 1 год HSTS
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -18,7 +29,17 @@ SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-&2ce*-1i(v#76_*64
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    'schedule-app.dokka2.duckdns.org',  # Основной домен
+    '.dokka2.duckdns.org',              # Все поддомены (*.dokka2.duckdns.org)
+    'localhost',                        # Для локального тестирования (если нужно)
+    '127.0.0.1',                       # Для дебага
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://schedule-app.dokka2.duckdns.org',
+    'https://dokka2.duckdns.org',
+]
 
 # Application definition
 
