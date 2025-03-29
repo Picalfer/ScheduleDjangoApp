@@ -9,16 +9,24 @@ env = environ.Env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Настройки для работы с HTTPS
-CSRF_COOKIE_SECURE = True  # Передавать CSRF-куки только по HTTPS
-SESSION_COOKIE_SECURE = True  # Передавать сессионные куки только по HTTPS
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Для работы за прокси (Dokku/Nginx)
 
-# Дополнительные настройки HTTPS
-SECURE_SSL_REDIRECT = True  # Автоматически перенаправлять HTTP на HTTPS
-SECURE_HSTS_SECONDS = 31536000  # 1 год HSTS
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = False
+
+# Настройки HTTPS
+if not DEBUG:
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+else:
+    # Настройки для разработки
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+    SECURE_SSL_REDIRECT = False
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -26,8 +34,6 @@ SECURE_HSTS_PRELOAD = True
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-&2ce*-1i(v#76_*648-%9b19td3%mu3d#i2_y5#n!^*e@!u-z5')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
 
 ALLOWED_HOSTS = [
     'schedule-app.dokka2.duckdns.org',  # Основной домен
