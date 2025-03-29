@@ -30,10 +30,6 @@
             {% endif %}
         </div>
         <nav>
-            <button id="test-button">Тестовая кнопка</button>
-            |
-            <button id="test-button2">Тестовая кнопка 2</button>
-            |
             <a href="{% url 'home' %}">Домой</a> |
             {% if user.is_authenticated %}
                 <a href="{% url 'profile' %}">Профиль</a> |

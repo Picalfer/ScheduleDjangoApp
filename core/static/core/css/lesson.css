@@ -1,0 +1,129 @@
+.lesson {
+    height: 90%;
+    width: 90%;
+    padding: 8px 10px;
+    margin: auto 0 auto 5px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85em;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow: hidden;
+    background-color: var(--header-bg);
+    color: var(--text-primary);
+}
+
+.lesson:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.lesson.permanent {
+    background-color: var(--permanent-lesson-bg);
+    border-color: #bbdefb;
+}
+
+.lesson.permanent:hover {
+    border-color: var(--permanent-lesson-primary);
+}
+
+.lesson.one-time {
+    background-color: var(--one-time-lesson-bg);
+    border-color: #a5d6a7;
+}
+
+.lesson.one-time:hover {
+    border-color: var(--one-time-lesson-primary);
+}
+
+.lesson h4 {
+    margin: 0;
+    font-size: 1em;
+    white-space: nowrap;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lesson p {
+    margin: 0;
+    line-height: 1.2;
+    white-space: nowrap;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1em;
+}
+
+.lesson p span {
+    margin-left: 5px;
+}
+
+.lesson-info {
+    margin-top: 10px;
+    color: var(--text-secondary);
+}
+
+.lesson-info p {
+    margin: 5px 0;
+}
+
+.lesson-type {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.hour .lesson {
+    background: var(--header-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+.hour .lesson.permanent {
+    background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
+    border-left: 3px solid var(--primary-color);
+}
+
+[data-theme="dark"] .hour .lesson.permanent {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.1));
+}
+
+.hour .lesson.one-time {
+    background: linear-gradient(135deg, #f0f7f0 0%, #ffffff 100%);
+    border-left: 3px solid #4caf50;
+}
+
+[data-theme="dark"] .hour .lesson.one-time {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
+    border-left: 3px solid #10b981;
+}
+
+.lesson.completed {
+    opacity: 0.8;
+    position: relative;
+    color: #616161;
+    background-color: var(--header-bg);
+    border-left-color: var(--text-secondary);
+    filter: grayscale(30%);
+}
+
+.lesson.completed::after {
+    content: "✓ Проведён";
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    color: #33a539;
+    font-weight: bold;
+    font-size: 0.8em;
+    background: var(--bg);
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+}

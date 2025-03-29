@@ -1,0 +1,487 @@
+
+.form-group textarea {
+    resize: vertical;
+    width: 100%;
+    min-height: 60px;
+    padding: 5px;
+    border-radius: 5px;
+    max-height: 200px;
+    background-color: var(--header-bg);
+}
+
+.required {
+    color: #f44336;
+    margin-left: 3px;
+}
+
+.error-message {
+    display: none;
+    color: #f44336;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.form-group.error input {
+    border-color: #f44336;
+}
+
+.form-group.error .error-message {
+    display: block;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    background: var(--header-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.form-group input[type="text"],
+.form-group input[type="tel"],
+.form-group input[type="email"],
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg);
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.form-group input[readonly] {
+    background-color: var(--header-bg);
+    cursor: default;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="tel"]:focus,
+.form-group input[type="email"]:focus,
+.form-group select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.form-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 1em;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.modal-content {
+    background: var(--bg);
+    border-radius: 16px 5px 5px 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    margin: 0 auto;
+    padding: 20px;
+    width: 30%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: auto;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.close {
+    position: absolute;
+    top: -5px;
+    right: 10px;
+    font-size: 30px;
+    cursor: pointer;
+    color: #333;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--border-color), var(--header-bg));
+    border-radius: 16px 16px 0 0;
+    border-bottom: 1px solid var(--border-color);
+    padding: 20px 24px;
+}
+
+.modal-header h3 {
+    color: var(--text-primary);
+    font-size: 1.4em;
+    margin-bottom: 15px;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.submit-button,
+.cancel-button {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.submit-button {
+    background: linear-gradient(135deg, var(--primary-color), #818cf8);
+    color: white;
+}
+
+.submit-button:hover {
+    background: linear-gradient(135deg, var(--primary-hover), #6366f1);
+    transform: translateY(-1px);
+}
+
+.cancel-button {
+    background-color: white;
+    border: 1px solid var(--border-color) !important;
+}
+
+.cancel-button:hover {
+    background-color: var(--header-bg);
+    border-color: var(--text-secondary) !important;
+    color: var(--text-primary);
+}
+
+
+.modal-content.permanent {
+    border-left: 4px solid var(--primary-color);
+}
+
+.modal-content.permanent .modal-header {
+    background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
+}
+
+.modal-content.permanent .submit-button {
+    background-color: var(--primary-color);
+}
+
+.modal-content.permanent .submit-button:hover {
+    background-color: var(--primary-hover);
+}
+
+.modal-content.one-time {
+    border-left: 4px solid #4caf50;
+}
+
+.modal-content.one-time .modal-header {
+    background: linear-gradient(135deg, #f0f7f0 0%, #ffffff 100%);
+}
+
+.modal-content.one-time .submit-button {
+    background-color: #4caf50;
+}
+
+.modal-content.one-time .submit-button:hover {
+    background-color: #45a049;
+}
+
+#settings-modal .modal-content {
+    max-width: 500px;
+    width: 90%;
+}
+
+#settings-modal .form-group {
+    background: var(--header-bg);
+    padding: 16px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 16px;
+}
+
+#settings-modal select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 1em;
+    background-color: var(--bg);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 1em;
+}
+
+#settings-modal select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+    background-color: var(--header-bg);
+}
+
+.modal-footer {
+    padding: 20px 24px;
+    background: linear-gradient(135deg, var(--border-color), var(--header-bg));;
+    border-top: 1px solid var(--border-color);
+    border-radius: 0 0 16px 16px;
+}
+
+.modal-footer button {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.95em;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.theme-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: var(--header-bg);
+}
+
+
+#permanent-schedule-section {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    background-color: var(--header-bg);
+}
+
+.regular-lesson-row,
+.one-time-lesson-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.day-select,
+.time-select {
+    margin-right: 10px;
+    width: 150px;
+    padding: 10px;
+    background-color: var(--bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+#add-permanent-lesson-button,
+#add-one-time-lesson-button {
+    padding: 10px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--primary-color);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#add-permanent-lesson-button:hover,
+#add-one-time-lesson-button:hover {
+    background-color: var(--primary-hover);
+}
+
+.delete-lesson-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 16px;
+    color: var(--danger-color);
+}
+
+.delete-lesson-button:hover {
+    color: var(--danger-hover);
+}
+
+.fade-out {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#client-info {
+    margin-top: 10px;
+    color: var(--text-primary);
+    background-color: var(--header-bg);
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+#find-client-button,
+#find-teacher-button {
+    padding: 10px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--primary-color);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#find-client-button:hover,
+#find-teacher-button:hover {
+    background-color: var(--primary-hover);
+}
+
+input[type="text"] {
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 10px;
+    color: var(--text-primary);
+    transition: border-color 0.3s;
+}
+
+input[type="text"]:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+#one-time-lesson-section {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--header-bg);
+}
+
+#one-time-lesson-info {
+    color: var(--text-primary);
+}
+
+#one-time-lesson-section h3 {
+    margin-bottom: 10px;
+}
+
+#new-one-time-lesson-date {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-right: 10px;
+    background-color: var(--bg);
+    flex: 1;
+    color: var(--text-primary);
+    cursor: text;
+}
+
+.time-select {
+    overflow-y: auto;
+    max-height: 150px;
+}
+
+.time-select::-webkit-scrollbar {
+    width: 8px;
+}
+
+.cancel-lesson-btn {
+    background: linear-gradient(
+            135deg,
+            var(--danger-color),
+            color-mix(in srgb, var(--danger-color) 50%, white)
+    );
+    transition: background 0.3s ease;
+}
+
+.admit-lesson-btn {
+    background: linear-gradient(
+            135deg,
+            var(--success-color),
+            color-mix(in srgb, var(--success-color) 50%, white)
+    );
+    transition: background 0.3s ease;
+}
+
+
+.cancel-lesson-btn:hover {
+    background: linear-gradient(135deg,
+            color-mix(in srgb, var(--danger-color) 50%, black), /* Осветленный success */ var(--danger-color)); /* Исходный цвет */
+}
+
+.admit-lesson-btn:hover {
+    background: linear-gradient(135deg,
+    color-mix(in srgb, var(--success-color) 50%, black), /* Осветленный danger */ var(--success-color)); /* Исходный цвет */
+}

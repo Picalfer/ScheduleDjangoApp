@@ -3,7 +3,6 @@ import {SettingsManager} from './settingsManager.js';
 import {LessonModalManager} from './lessonModalManager.js';
 import {AddStudentModalManager} from './addStudentModalManager.js';
 import {showNotification} from "./utils.js";
-import {completeLesson, createLesson} from "./repository.js";
 
 export const calendarManager = new CalendarManager();
 const settingsManager = new SettingsManager(calendarManager);
@@ -12,8 +11,6 @@ const addStudentModalManager = new AddStudentModalManager();
 
 
 export function initApp() {
-    initTestBtn()
-
     calendarManager.loadSchedule();
     calendarManager.updateCalendarUi()
     calendarManager.goToCurrentWeek();
@@ -65,36 +62,6 @@ function setAdminTools() {
             addStudentModalManager.open()
         }
     });
-}
-
-function initTestBtn() {
-    document.getElementById('test-button').addEventListener('click', async () => {
-        try {
-            const result = await createLesson(
-                '2025-03-26',  // date (YYYY-MM-DD)
-                '20:00',       // time (HH:MM)
-                2,             // teacher_id (должен существовать в БД)
-                1,             // student_id (должен существовать в БД)
-                'Math',        // subject
-                false          // is_recurring (опционально)
-            );
-            console.log('Lesson created:', result);
-        } catch (error) {
-            console.error('Failed to create lesson:', error.message);
-            alert(`Error: ${error.message}`);  // Показываем пользователю
-        }
-    });
-
-    document.getElementById('test-button2').addEventListener('click', async () => {
-        try {
-            const result = await completeLesson(7); // Тестовый ID урока
-            console.log('Урок проведен:', result);
-            alert(`Урок проведен! Осталось: ${result.remaining_balance} уроков`);
-        } catch (error) {
-            console.error('Ошибка:', error);
-            alert(`Ошибка: ${error.message}`);
-        }
-    })
 }
 
 window.openLessonModal = (lessonData) => {
