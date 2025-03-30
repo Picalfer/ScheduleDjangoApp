@@ -222,7 +222,7 @@ export class SettingsManager {
     }
 
     applyOpenSlotsUpdate() {
-        const newOpenSlots = {};
+        const newOpenSlots = {"monday": [], "tuesday": [], "wednesday": [], "thursday": [], "friday": [], "saturday": [], "sunday": []};
         document.querySelectorAll('.hour.open-window').forEach((hourElement) => {
             const day = hourElement.getAttribute('data-day');
             const hour = hourElement.getAttribute('data-hour');

@@ -28,6 +28,12 @@ class OpenSlotsAdmin(admin.ModelAdmin):
 
     teacher_name.short_description = 'ФИО'
 
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == 'weekly_open_slots':
+            kwargs['help_text'] = 'Пустой вариант: {"monday": [], "tuesday": [], "wednesday": [], "thursday": [], "friday": [], "saturday": [], "sunday": []}'
+
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
