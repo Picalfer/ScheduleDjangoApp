@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+
 import dj_database_url
 import environ
 from django.conf.global_settings import DATABASES
@@ -8,7 +9,6 @@ env = environ.Env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
@@ -34,12 +34,11 @@ else:
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-&2ce*-1i(v#76_*648-%9b19td3%mu3d#i2_y5#n!^*e@!u-z5')
 
-
 ALLOWED_HOSTS = [
     'schedule-app.dokka2.duckdns.org',  # Основной домен
-    '.dokka2.duckdns.org',              # Все поддомены (*.dokka2.duckdns.org)
-    'localhost',                        # Для локального тестирования (если нужно)
-    '127.0.0.1',                        # Для дебага
+    '.dokka2.duckdns.org',  # Все поддомены (*.dokka2.duckdns.org)
+    'localhost',  # Для локального тестирования (если нужно)
+    '127.0.0.1',  # Для дебага
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -92,16 +91,16 @@ TEMPLATES = [
 WSGI_APPLICATION = 'scheduleApp.wsgi.application'
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
         },
     },
-    'root': {
-        'handlers': ['console'],
-        'level': 'DEBUG',
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
     },
 }
 
@@ -174,13 +173,21 @@ FORMAT_MODULE_PATH = [
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
-STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'staticfiles'),
-)
 
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Для collectstatic
+
+if DEBUG:
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'core/static'),  # Путь к вашей статике в приложении core
+    ]
+else:
+    # Новая система STORAGES для Django 4.2+
+    STORAGES = {
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 

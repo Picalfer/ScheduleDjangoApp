@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
 from core.models import Lesson
-from core.static.core.widgets import ScheduleWidget
+from core.widgets import ScheduleWidget
 
 
 class RegisterForm(UserCreationForm):

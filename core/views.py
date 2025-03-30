@@ -30,7 +30,6 @@ from .serializers import LessonSerializer, TeacherSerializer, StudentSerializer
 @require_POST
 def complete_lesson(request, lesson_id):
     try:
-        logger.info(f"Начало проведения урока {lesson_id}")
         lesson = Lesson.objects.select_related(
             'student',
             'student__client',
@@ -48,14 +47,12 @@ def complete_lesson(request, lesson_id):
             return JsonResponse({'status': 'error', 'message': 'Урок уже проведен'}, status=400)
 
         try:
-            logger.info(f"Попытка списания урока. Текущий баланс: {lesson.student.client.balance}")
             if not lesson.student.spend_lesson():
                 logger.warning("Недостаточно средств на балансе")
                 return JsonResponse({
                     'status': 'error',
                     'message': f'У клиента {lesson.student.client.name} нулевой баланс уроков'
                 }, status=402)
-            logger.info(f"Урок проведен. Новый баланс: {lesson.student.client.balance}")
         except ValueError as e:
             return JsonResponse({
                 'status': 'error',
