@@ -222,5 +222,9 @@ class OpenSlots(models.Model):
     teacher = models.OneToOneField(User, on_delete=models.CASCADE, related_name='open_slots')
     weekly_open_slots = models.JSONField(default=dict)
 
+    class Meta:
+        verbose_name = 'Открытые часы'
+        verbose_name_plural = 'Открытые часы'
+
     def __str__(self):
         return f"Open slots for {self.teacher.username}"

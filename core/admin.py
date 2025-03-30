@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib import admin
 
-from core.models import Teacher, Student, Lesson
+from core.models import Teacher, Student, Lesson, OpenSlots
 
 
 @admin.register(Teacher)
@@ -9,9 +9,9 @@ class TeacherAdmin(admin.ModelAdmin):
     list_display = ('id', 'get_full_name', 'user')
 
     def get_full_name(self, obj):
-        return obj.user.get_full_name()  # Метод для отображения ФИО
+        return obj.user.get_full_name()
 
-    get_full_name.short_description = 'ФИО'  # Заголовок колонки
+    get_full_name.short_description = 'ФИО'
 
 
 @admin.register(Student)
@@ -19,9 +19,19 @@ class StudentAdmin(admin.ModelAdmin):
     list_display = ('name', 'teacher', 'bitrix_link', 'lesson_balance')
 
 
+@admin.register(OpenSlots)
+class OpenSlotsAdmin(admin.ModelAdmin):
+    list_display = ('teacher', 'teacher_name', 'weekly_open_slots')
+
+    def teacher_name(self, obj):
+        return obj.teacher.get_full_name()
+
+    teacher_name.short_description = 'ФИО'
+
+
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    list_display = ('date', 'lesson_type', 'teacher', 'start_date', 'time', 'student')
+    list_display = ('date', 'status', 'lesson_type', 'teacher', 'start_date', 'time', 'student')
     list_filter = ('lesson_type', 'status', 'date')
 
     def save_model(self, request, obj, form, change):

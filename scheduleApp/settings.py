@@ -39,7 +39,7 @@ ALLOWED_HOSTS = [
     'schedule-app.dokka2.duckdns.org',  # Основной домен
     '.dokka2.duckdns.org',              # Все поддомены (*.dokka2.duckdns.org)
     'localhost',                        # Для локального тестирования (если нужно)
-    '127.0.0.1',                       # Для дебага
+    '127.0.0.1',                        # Для дебага
 ]
 
 CSRF_TRUSTED_ORIGINS = [
