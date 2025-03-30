@@ -5,7 +5,7 @@ from django.dispatch import receiver
 
 from .models import OpenSlots, Teacher, Lesson
 
-"""
+
 @receiver(pre_save, sender=Lesson)
 def check_lesson_balance(sender, instance, **kwargs):
     if instance.status == 'completed' and instance.student.lesson_balance <= 0:
@@ -30,4 +30,3 @@ def init_teacher_and_open_slots(sender, instance, created, **kwargs):
                 "sunday": []
             }
         )
-"""

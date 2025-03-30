@@ -7,5 +7,4 @@ class CoreConfig(AppConfig):
     verbose_name = 'Расписание'
 
     def ready(self):
-        pass
-        #import core.signals
+        import core.signals
