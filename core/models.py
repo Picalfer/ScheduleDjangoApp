@@ -22,7 +22,7 @@ class Teacher(models.Model):
 class Student(models.Model):
     name = models.CharField(
         max_length=100,
-        default='Новый ученик',
+        default='',
         verbose_name='Имя ученика'
     )
     teacher = models.ForeignKey(
