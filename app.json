@@ -3,6 +3,11 @@
   "description": "School Schedule",
   "image": "heroku/python",
   "repository": "",
+  "scripts": {
+    "dokku": {
+      "postdeploy": "python manage.py migrate"
+    }
+  },
   "keywords": [
     "django",
     "python",
