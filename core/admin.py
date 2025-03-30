@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib import admin
 
+from core.forms import LessonAdminForm
 from core.models import Teacher, Student, Lesson, OpenSlots, BalanceOperation, Client
 
 
@@ -61,13 +62,19 @@ class OpenSlotsAdmin(admin.ModelAdmin):
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    list_display = ('date', 'status', 'lesson_type', 'teacher', 'start_date', 'time', 'student')
+    form = LessonAdminForm
+    list_display = ('date', 'status', 'lesson_type', 'teacher', 'time', 'student')
     list_filter = ('lesson_type', 'status', 'date')
 
-    def save_model(self, request, obj, form, change):
-        if obj.lesson_type and not obj.start_date:
-            obj.start_date = obj.date
-        super().save_model(request, obj, form, change)
+    def get_fields(self, request, obj=None):
+        # Для создания нового урока (когда obj=None)
+        if obj is None:
+            return [
+                'student', 'teacher', 'course',
+                'lesson_type', 'date', 'time', 'schedule', 'start_date'
+            ]
+        # Для редактирования существующего урока
+        return super().get_fields(request, obj)
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == 'time':
@@ -77,6 +84,10 @@ class LessonAdmin(admin.ModelAdmin):
             # Используем Select-виджет с ограниченными вариантами
             kwargs['widget'] = forms.Select(choices=time_choices)
             kwargs['help_text'] = 'Выберите час (минуты будут установлены в 00 автоматически)'
+
+        if db_field.name == 'course':
+            courses = ["Не выбран", "Roblox", "Scratch", "Создание сайтов", "Python", "Unity", "Figma", "Комп с нуля", "Blender", "Android", "C++"]
+            kwargs['widget'] = forms.Select(choices=[(c, c) for c in courses])
 
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 

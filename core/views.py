@@ -1,5 +1,7 @@
 import json
-from venv import logger
+import logging
+
+logger = logging.getLogger(__name__)
 
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
@@ -28,7 +30,12 @@ from .serializers import LessonSerializer, TeacherSerializer, StudentSerializer
 @require_POST
 def complete_lesson(request, lesson_id):
     try:
-        lesson = Lesson.objects.select_related('student', 'teacher__user').get(id=lesson_id)
+        logger.info(f"Начало проведения урока {lesson_id}")
+        lesson = Lesson.objects.select_related(
+            'student',
+            'student__client',
+            'teacher__user'
+        ).get(id=lesson_id)
         data = json.loads(request.body)
 
         if not request.user.is_authenticated:
@@ -40,11 +47,20 @@ def complete_lesson(request, lesson_id):
         if lesson.status == 'completed':
             return JsonResponse({'status': 'error', 'message': 'Урок уже проведен'}, status=400)
 
-        if not lesson.student.spend_lesson():
+        try:
+            logger.info(f"Попытка списания урока. Текущий баланс: {lesson.student.client.balance}")
+            if not lesson.student.spend_lesson():
+                logger.warning("Недостаточно средств на балансе")
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'У клиента {lesson.student.client.name} нулевой баланс уроков'
+                }, status=402)
+            logger.info(f"Урок проведен. Новый баланс: {lesson.student.client.balance}")
+        except ValueError as e:
             return JsonResponse({
                 'status': 'error',
-                'message': f'У студента {lesson.student.name} нулевой баланс уроков'
-            }, status=402)
+                'message': str(e)
+            }, status=400)
 
         lesson.lesson_topic = data.get('lesson_topic') or None
         lesson.lesson_notes = data.get('lesson_notes') or None
@@ -56,7 +72,7 @@ def complete_lesson(request, lesson_id):
         response_data = {
             'status': 'success',
             'message': 'Урок успешно проведен',
-            'remaining_balance': lesson.student.lesson_balance,
+            'remaining_balance': lesson.student.client.balance,
             'lesson': {
                 'id': lesson.id,
                 'date': lesson.date.strftime('%Y-%m-%d'),
@@ -85,7 +101,7 @@ def complete_lesson(request, lesson_id):
         return JsonResponse({'status': 'error', 'message': 'Урок не найден'}, status=404)
     except Exception as e:
         logger.error(f'Ошибка проведения урока: {str(e)}', exc_info=True)
-        return JsonResponse({'status': 'error', 'message': 'Внутренняя ошибка сервера'}, status=500)
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
 @require_POST
@@ -140,6 +156,7 @@ def cancel_lesson(request, lesson_id):
         logger.error(f'Ошибка проведения урока: {str(e)}', exc_info=True)
         return JsonResponse({'status': 'error', 'message': 'Внутренняя ошибка сервера'}, status=500)
 
+
 class LessonListCreate(generics.ListCreateAPIView):
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated]
@@ -148,8 +165,8 @@ class LessonListCreate(generics.ListCreateAPIView):
         'date',
         'student',
         'status',
-        'lesson_type',  # Добавляем фильтр по типу урока
-        'start_date'  # Для регулярных уроков
+        'lesson_type',
+        'start_date'
     ]
 
     def get_queryset(self):

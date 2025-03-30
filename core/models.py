@@ -29,7 +29,7 @@ class Client(models.Model):
         validators=[MinValueValidator(0)]
     )
 
-    def add_lessons(self, amount, note='', student=None):
+    def add_lessons(self, amount, student, note=''):
         """Пополнение баланса с логированием"""
         if amount <= 0:
             raise ValueError("Количество уроков должно быть положительным")
@@ -49,9 +49,6 @@ class Client(models.Model):
         """Списание урока с баланса"""
         if self.balance <= 0:
             return False
-
-        self.balance -= 1
-        self.save()
 
         BalanceOperation.objects.create(
             client=self,
@@ -75,10 +72,25 @@ class Student(models.Model):
         Client,
         on_delete=models.CASCADE,
         related_name='students',
-        verbose_name='Клиент (родитель)'
+        verbose_name='Клиент (родитель)',
+        null=True,
+        blank=True
     )
     name = models.CharField(max_length=100, verbose_name='Имя ученика')
     notes = models.TextField(blank=True, verbose_name='Примечания')
+
+    @property
+    def lesson_balance(self):
+        """Свойство для совместимости с фронтендом (возвращает баланс клиента)"""
+        if not hasattr(self, 'client') or not self.client:
+            return 0
+        return self.client.balance
+
+    def spend_lesson(self, note=''):
+        """Списание урока через клиента (для совместимости)"""
+        if not hasattr(self, 'client') or not self.client:
+            return False
+        return self.client.spend_lesson(self, note)
 
     teacher = models.ForeignKey(
         'Teacher',
@@ -114,6 +126,13 @@ class BalanceOperation(models.Model):
         on_delete=models.CASCADE,
         related_name='operations'
     )
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Ученик'
+    )
     operation_type = models.CharField(
         max_length=10,
         choices=OPERATION_TYPES,
@@ -125,14 +144,15 @@ class BalanceOperation(models.Model):
 
     def save(self, *args, **kwargs):
         # Обновляем баланс клиента
-        if self.operation_type == 'add':
-            self.client.balance += self.amount
-        elif self.operation_type == 'spend':
-            if self.client.balance < self.amount:
-                raise ValueError("Недостаточно средств на балансе")
-            self.client.balance -= self.amount
-        elif self.operation_type == 'correction':
-            self.client.balance = self.amount
+        if not self.pk:  # Проверяем, что операция новая
+            if self.operation_type == 'add':
+                self.client.balance += self.amount
+            elif self.operation_type == 'spend':
+                if self.client.balance < self.amount:
+                    raise ValueError("Недостаточно средств на балансе")
+                self.client.balance -= self.amount
+            elif self.operation_type == 'correction':
+                self.client.balance = self.amount
 
         self.client.save()  # Сохраняем изменения в клиенте
         super().save(*args, **kwargs)  # Сохраняем саму операцию
@@ -157,10 +177,14 @@ class Lesson(models.Model):
         ('completed', 'Проведён'),
         ('canceled', 'Отменён'),
     ]
+    student_name = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name='Имя ученика'
+    )
 
     # Основные связи
     student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name='Студент')
-    student_name = models.CharField(max_length=100, blank=True, verbose_name='Имя студента')
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, verbose_name='Преподаватель')
     course = models.CharField(max_length=100, default='Не выбран', verbose_name='Курс')
 
@@ -178,7 +202,7 @@ class Lesson(models.Model):
     )
 
     # Для разовых уроков
-    date = models.DateField(null=True, blank=True, verbose_name='Дата')
+    date = models.DateField(null=True, verbose_name='Дата')
     time = models.TimeField(null=True, blank=True, verbose_name='Время')
 
     # Для регулярных уроков
@@ -200,17 +224,20 @@ class Lesson(models.Model):
         null=True,
         verbose_name='Тема урока'
     )
-    lesson_notes = models.TextField(
+    lesson_notes = models.CharField(
+        max_length=255,
         blank=True,
         null=True,
         verbose_name='Комментарий преподавателя'
     )
-    homework = models.TextField(
+    homework = models.CharField(
+        max_length=255,
         blank=True,
         null=True,
         verbose_name='Домашнее задание'
     )
-    cancel_reason = models.TextField(
+    cancel_reason = models.CharField(
+        max_length=255,
         blank=True,
         null=True,
         default=None,
@@ -294,31 +321,6 @@ class Lesson(models.Model):
         if self.lesson_type == 'single':
             return f"{self.date} {self.time} - {self.course} ({self.get_status_display()})"
         return f"Регулярный: {self.course} ({self.get_status_display()})"
-
-
-class LessonLog(models.Model):
-    """Логирование списаний и начислений уроков"""
-    student = models.ForeignKey(
-        Student,
-        on_delete=models.CASCADE,
-        related_name='lesson_logs'
-    )
-    lesson_type = models.CharField(
-        max_length=10,
-        choices=[('spent', 'Списание'), ('added', 'Начисление')],
-        verbose_name='Тип операции'
-    )
-    amount = models.PositiveIntegerField(verbose_name='Количество уроков')
-    date = models.DateTimeField(auto_now_add=True, verbose_name='Дата операции')
-    notes = models.TextField(blank=True, verbose_name='Примечания')
-
-    class Meta:
-        verbose_name = 'Лог уроков'
-        verbose_name_plural = 'Логи уроков'
-        ordering = ['-date']
-
-    def __str__(self):
-        return f"{self.student.name} - {self.get_lesson_type_display()} {self.amount} уроков"
 
 
 class UserSettings(models.Model):
