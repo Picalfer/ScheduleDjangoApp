@@ -7,6 +7,7 @@ ENV PYTHONUNBUFFERED=1 \
     DJANGO_SETTINGS_MODULE=scheduleApp.settings \
     PORT=8000 \
     WEB_CONCURRENCY=3
+    DJANGO_DEBUG=False
 
 # Установка системных зависимостей
 RUN apt-get update --yes --quiet && \
