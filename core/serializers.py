@@ -6,16 +6,19 @@ from .models import OpenSlots
 
 class LessonSerializer(serializers.ModelSerializer):
     student_name = serializers.CharField(source='student.name', read_only=True)
+    start_date = serializers.DateField(source='date', read_only=True)
 
     class Meta:
         model = Lesson
         fields = '__all__'
         extra_kwargs = {
-            'start_date': {'required': False},
             'lesson_topic': {'required': False},
             'lesson_notes': {'required': False},
             'homework': {'required': False},
             'completed_at': {'required': False},
+            'date': {'required': True},
+            'time': {'required': False},
+            'schedule': {'required': False},
         }
 
 

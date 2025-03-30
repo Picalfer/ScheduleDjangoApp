@@ -202,19 +202,13 @@ class Lesson(models.Model):
     )
 
     # Для разовых уроков
-    date = models.DateField(null=True, verbose_name='Дата')
-    time = models.TimeField(null=True, blank=True, verbose_name='Время')
+    date = models.DateField(null=True, verbose_name='Дата урока')
+    time = models.TimeField(null=True, blank=True, verbose_name='Время урока')
 
     # Для регулярных уроков
     schedule = models.JSONField(
         default=list,
-        verbose_name='Расписание',
-        help_text='''Формат: [{"day": "monday", "time": "14:00"}, {"day": "wednesday", "time": "16:00"}]'''
-    )
-    start_date = models.DateField(
-        verbose_name='Дата начала повторений',
-        null=True,
-        blank=True
+        verbose_name='Регулярное расписание',
     )
 
     # Информация об уроке
@@ -276,7 +270,6 @@ class Lesson(models.Model):
             date=next_date,
             time=self.time,
             schedule=self.schedule,
-            start_date=self.start_date or self.date,
         )
 
     def calculate_next_date(self):

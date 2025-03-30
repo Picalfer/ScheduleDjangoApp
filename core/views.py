@@ -162,15 +162,14 @@ class LessonListCreate(generics.ListCreateAPIView):
         'date',
         'student',
         'status',
-        'lesson_type',
-        'start_date'
+        'lesson_type'
     ]
 
     def get_queryset(self):
         queryset = (Lesson.objects
         .filter(teacher__user=self.request.user)
         .select_related(
-            'student',  # Оптимизация запросов к студенту
+            'student',
             'teacher'
         ))
 
@@ -179,7 +178,7 @@ class LessonListCreate(generics.ListCreateAPIView):
             today = timezone.now().date()
             queryset = queryset.filter(
                 Q(lesson_type='recurring') &
-                Q(start_date__lte=today)
+                Q(date__lte=today)
             )
         return queryset
 
@@ -217,11 +216,11 @@ def create_lesson(request):
                 'status': 'scheduled'
             }
 
-            # Добавляем данные для повторяющихся уроков
+            # Обновленная логика для повторяющихся уроков
             if lesson_data['lesson_type'] == 'recurring':
                 lesson_data.update({
                     'schedule': data.get('schedule', []),
-                    'start_date': data.get('start_date', data['date'])
+                    # УДАЛЕНО: 'start_date' - используем только date
                 })
 
             lesson = Lesson.objects.create(**lesson_data)

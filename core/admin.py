@@ -71,7 +71,7 @@ class LessonAdmin(admin.ModelAdmin):
         if obj is None:
             return [
                 'student', 'teacher', 'course',
-                'lesson_type', 'date', 'time', 'schedule', 'start_date'
+                'lesson_type', 'date', 'time', 'schedule'
             ]
         # Для редактирования существующего урока
         return super().get_fields(request, obj)
