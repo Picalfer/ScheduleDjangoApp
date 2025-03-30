@@ -19,43 +19,131 @@ class Teacher(models.Model):
         verbose_name_plural = 'Преподаватели'
 
 
-class Student(models.Model):
-    name = models.CharField(
-        max_length=100,
-        default='',
-        verbose_name='Имя ученика'
-    )
-    teacher = models.ForeignKey(
-        Teacher,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='students'
-    )
-    bitrix_link = models.URLField(max_length=500, blank=True)
-
-    lesson_balance = models.PositiveIntegerField(
+class Client(models.Model):
+    name = models.CharField(max_length=100, verbose_name='Имя родителя')
+    email = models.EmailField(blank=True, verbose_name='Email')
+    phone = models.CharField(max_length=20, blank=True, verbose_name='Телефон')
+    balance = models.PositiveIntegerField(
         default=0,
         verbose_name='Баланс уроков',
         validators=[MinValueValidator(0)]
     )
 
-    def spend_lesson(self):
-        if self.lesson_balance > 0:
-            self.lesson_balance -= 1
-            self.save()
-            return True
-        return False
+    def add_lessons(self, amount, note='', student=None):
+        """Пополнение баланса с логированием"""
+        if amount <= 0:
+            raise ValueError("Количество уроков должно быть положительным")
 
-    def add_lessons(self, count):
-        self.lesson_balance += count
+        self.balance += amount
         self.save()
 
+        BalanceOperation.objects.create(
+            client=self,
+            student=student,
+            operation_type='add',
+            amount=amount,
+            notes=note or f"Пополнение баланса на {amount} уроков"
+        )
+
+    def spend_lesson(self, student, note=''):
+        """Списание урока с баланса"""
+        if self.balance <= 0:
+            return False
+
+        self.balance -= 1
+        self.save()
+
+        BalanceOperation.objects.create(
+            client=self,
+            student=student,
+            operation_type='spend',
+            amount=1,
+            notes=note or f"Занятие с {student.name}"
+        )
+        return True
+
     def __str__(self):
-        return f"{self.name} - осталось уроков: {self.lesson_balance}"
+        return f"{self.name} (Баланс: {self.balance})"
+
+    class Meta:
+        verbose_name = 'Клиент'
+        verbose_name_plural = 'Клиенты'
+
+
+class Student(models.Model):
+    client = models.ForeignKey(
+        Client,
+        on_delete=models.CASCADE,
+        related_name='students',
+        verbose_name='Клиент (родитель)'
+    )
+    name = models.CharField(max_length=100, verbose_name='Имя ученика')
+    notes = models.TextField(blank=True, verbose_name='Примечания')
+
+    teacher = models.ForeignKey(
+        'Teacher',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Преподаватель'
+    )
+
+    @property
+    def family_balance(self):
+        return self.client.balance
+
+    family_balance.fget.short_description = "Баланс"
+
+    def __str__(self):
+        return f"{self.name} (Клиент: {self.client.name})"
 
     class Meta:
         verbose_name = 'Ученик'
         verbose_name_plural = 'Ученики'
+
+
+class BalanceOperation(models.Model):
+    OPERATION_TYPES = [
+        ('add', 'Пополнение'),
+        ('spend', 'Списание'),
+        ('correction', 'Корректировка')
+    ]
+
+    client = models.ForeignKey(
+        Client,
+        on_delete=models.CASCADE,
+        related_name='operations'
+    )
+    operation_type = models.CharField(
+        max_length=10,
+        choices=OPERATION_TYPES,
+        verbose_name='Тип операции'
+    )
+    amount = models.PositiveIntegerField(verbose_name='Количество уроков')
+    date = models.DateTimeField(auto_now_add=True, verbose_name='Дата операции')
+    notes = models.CharField(max_length=100, blank=True, verbose_name='Комментарий')
+
+    def save(self, *args, **kwargs):
+        # Обновляем баланс клиента
+        if self.operation_type == 'add':
+            self.client.balance += self.amount
+        elif self.operation_type == 'spend':
+            if self.client.balance < self.amount:
+                raise ValueError("Недостаточно средств на балансе")
+            self.client.balance -= self.amount
+        elif self.operation_type == 'correction':
+            self.client.balance = self.amount
+
+        self.client.save()  # Сохраняем изменения в клиенте
+        super().save(*args, **kwargs)  # Сохраняем саму операцию
+
+    class Meta:
+        verbose_name = 'Операция с балансом'
+        verbose_name_plural = 'Операции с балансом'
+        ordering = ['-date']
+
+    def __str__(self):
+        return f"{self.get_operation_type_display()} {self.amount} уроков ({self.client.name})"
 
 
 class Lesson(models.Model):
@@ -206,6 +294,31 @@ class Lesson(models.Model):
         if self.lesson_type == 'single':
             return f"{self.date} {self.time} - {self.course} ({self.get_status_display()})"
         return f"Регулярный: {self.course} ({self.get_status_display()})"
+
+
+class LessonLog(models.Model):
+    """Логирование списаний и начислений уроков"""
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name='lesson_logs'
+    )
+    lesson_type = models.CharField(
+        max_length=10,
+        choices=[('spent', 'Списание'), ('added', 'Начисление')],
+        verbose_name='Тип операции'
+    )
+    amount = models.PositiveIntegerField(verbose_name='Количество уроков')
+    date = models.DateTimeField(auto_now_add=True, verbose_name='Дата операции')
+    notes = models.TextField(blank=True, verbose_name='Примечания')
+
+    class Meta:
+        verbose_name = 'Лог уроков'
+        verbose_name_plural = 'Логи уроков'
+        ordering = ['-date']
+
+    def __str__(self):
+        return f"{self.student.name} - {self.get_lesson_type_display()} {self.amount} уроков"
 
 
 class UserSettings(models.Model):

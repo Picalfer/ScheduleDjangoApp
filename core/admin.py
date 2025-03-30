@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib import admin
 
-from core.models import Teacher, Student, Lesson, OpenSlots
+from core.models import Teacher, Student, Lesson, OpenSlots, BalanceOperation, Client
 
 
 @admin.register(Teacher)
@@ -14,9 +14,32 @@ class TeacherAdmin(admin.ModelAdmin):
     get_full_name.short_description = 'ФИО'
 
 
+class StudentInline(admin.TabularInline):
+    model = Student
+    extra = 1
+    fields = ('name', 'teacher')
+
+
+class BalanceOperationInline(admin.TabularInline):
+    model = BalanceOperation
+    extra = 0
+    readonly_fields = ('date',)
+    fields = ('operation_type', 'amount', 'date', 'notes')
+
+
+@admin.register(Client)
+class ClientAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'phone')
+    readonly_fields = ('balance',)
+    search_fields = ('name', 'email', 'phone')
+    inlines = [StudentInline, BalanceOperationInline]
+
+
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'teacher', 'bitrix_link', 'lesson_balance')
+    list_display = ('name', 'client', 'teacher', 'family_balance')
+    list_select_related = ('client', 'teacher')
+    search_fields = ('name', 'client__name')
 
 
 @admin.register(OpenSlots)
@@ -30,7 +53,8 @@ class OpenSlotsAdmin(admin.ModelAdmin):
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == 'weekly_open_slots':
-            kwargs['help_text'] = 'Пустой вариант: {"monday": [], "tuesday": [], "wednesday": [], "thursday": [], "friday": [], "saturday": [], "sunday": []}'
+            kwargs[
+                'help_text'] = 'Пустой вариант: {"monday": [], "tuesday": [], "wednesday": [], "thursday": [], "friday": [], "saturday": [], "sunday": []}'
 
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
