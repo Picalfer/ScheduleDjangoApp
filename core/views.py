@@ -199,7 +199,7 @@ def create_lesson(request):
         try:
             data = json.loads(request.body)
 
-            # Проверка обязательных полей
+            # Базовые обязательные поля для всех уроков
             required_fields = ['date', 'time', 'teacher_id', 'student_id', 'subject']
             for field in required_fields:
                 if field not in data:
@@ -216,12 +216,17 @@ def create_lesson(request):
                 'status': 'scheduled'
             }
 
-            # Обновленная логика для повторяющихся уроков
+            # Для регулярных уроков проверяем наличие расписания
             if lesson_data['lesson_type'] == 'recurring':
-                lesson_data.update({
-                    'schedule': data.get('schedule', []),
-                    # УДАЛЕНО: 'start_date' - используем только date
-                })
+                if 'schedule' not in data:
+                    return JsonResponse(
+                        {'error': 'Schedule is required for recurring lessons'},
+                        status=400
+                    )
+                lesson_data['schedule'] = data['schedule']
+            else:
+                # Для разовых уроков гарантируем отсутствие schedule
+                lesson_data['schedule'] = []
 
             lesson = Lesson.objects.create(**lesson_data)
 

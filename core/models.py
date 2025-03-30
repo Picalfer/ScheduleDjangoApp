@@ -209,6 +209,7 @@ class Lesson(models.Model):
     schedule = models.JSONField(
         default=list,
         verbose_name='Регулярное расписание',
+        help_text='Поле для постоянного расписания'
     )
 
     # Информация об уроке
@@ -304,6 +305,11 @@ class Lesson(models.Model):
         except Exception as e:
             logger.error(f'Ошибка расчета даты для урока {self.id}: {str(e)}')
             return None
+
+    def save(self, *args, **kwargs):
+        if self.lesson_type == 'single':
+            self.schedule = []  # Очищаем расписание для разовых уроков
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Урок'
