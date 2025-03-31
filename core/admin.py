@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import admin
 
 from core.forms import LessonAdminForm
-from core.models import Teacher, Student, Lesson, OpenSlots, BalanceOperation, Client
+from core.models import Teacher, Student, Lesson, OpenSlots, BalanceOperation, Client, PhoneNumber
 
 
 @admin.register(Teacher)
@@ -14,6 +14,12 @@ class TeacherAdmin(admin.ModelAdmin):
 
     get_full_name.short_description = 'ФИО'
 
+class PhoneNumberInline(admin.TabularInline):
+    model = PhoneNumber
+    extra = 1
+    fields = ('number', 'note', 'is_primary')
+    verbose_name = 'Номер телефона'
+    verbose_name_plural = 'Номера телефонов'
 
 class StudentInline(admin.TabularInline):
     model = Student
@@ -30,10 +36,16 @@ class BalanceOperationInline(admin.TabularInline):
 
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ('name', 'email', 'phone')
+    list_display = ('name', 'balance', 'email', 'display_phones')
     readonly_fields = ('balance',)
-    search_fields = ('name', 'email', 'phone')
-    inlines = [StudentInline, BalanceOperationInline]
+    search_fields = ('name', 'email', 'phone_numbers__number')
+    inlines = [PhoneNumberInline, StudentInline, BalanceOperationInline]
+
+    def display_phones(self, obj):
+        phones = obj.phone_numbers.all()
+        return ", ".join(str(phone) for phone in phones)
+
+    display_phones.short_description = 'Телефоны'
 
 
 @admin.register(Student)

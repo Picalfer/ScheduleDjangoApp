@@ -8,6 +8,35 @@ from django.db import models
 logger = logging.getLogger(__name__)
 
 
+class PhoneNumber(models.Model):
+    client = models.ForeignKey(
+        'Client',
+        on_delete=models.CASCADE,
+        related_name='phone_numbers',
+        verbose_name='Клиент'
+    )
+    number = models.CharField(
+        max_length=20,
+        verbose_name='Номер телефона'
+    )
+    note = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name='Заметка (например, "Бабушка Алла")'
+    )
+    is_primary = models.BooleanField(
+        default=False,
+        verbose_name='Основной номер'
+    )
+
+    class Meta:
+        verbose_name = 'Номер телефона'
+        verbose_name_plural = 'Номера телефонов'
+        ordering = ['-is_primary', 'id']
+
+    def __str__(self):
+        return f"{self.number} ({self.note})" if self.note else self.number
+
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
@@ -22,7 +51,12 @@ class Teacher(models.Model):
 class Client(models.Model):
     name = models.CharField(max_length=100, verbose_name='Имя родителя')
     email = models.EmailField(blank=True, verbose_name='Email')
-    phone = models.CharField(max_length=20, blank=True, verbose_name='Телефон')
+
+    @property
+    def primary_phone(self):
+        """Возвращает основной номер телефона"""
+        return self.phone_numbers.filter(is_primary=True).first() or self.phone_numbers.first()
+
     balance = models.PositiveIntegerField(
         default=0,
         verbose_name='Баланс уроков',

@@ -124,7 +124,7 @@ export class CalendarManager {
                          data-lesson-id="${lesson.id}"
                          data-status="${lesson.status || 'scheduled'}"
                          onclick="${isFuture ? 'event.preventDefault(); window.showNotification(\'Это запланированный урок\', \'info\')' : `window.openLessonModal(${JSON.stringify(lesson).replace(/"/g, '&quot;')})`}">
-                        <h4>${isFuture ? '⏳ Запланирован' : isRecurring ? '🔄 Постоянный' : '1️⃣ Разовый'} урок</h4>
+                        <h4>${isRecurring ? '🔄 Постоянный' : '1️⃣ Разовый'} урок</h4>
                         <p>👩‍🎓 ${lesson.student_name}</p>
                         <p>📚 ${lesson.course}</p>
                     </div>
