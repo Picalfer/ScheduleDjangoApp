@@ -36,11 +36,11 @@ export function showNotification(message, type = 'info') {
 }
 
 export function showConfirmationModal({
-    text,
-    onConfirm,
-    onCancel,
-    inputConfig = null  // Новый параметр для настройки ввода
-}) {
+                                          text,
+                                          onConfirm,
+                                          onCancel,
+                                          inputConfig = null  // Новый параметр для настройки ввода
+                                      }) {
     const confirmationModal = document.getElementById('confirmation-modal');
     if (!confirmationModal) return;
 
@@ -93,6 +93,10 @@ export function showConfirmationModal({
         this.closeConfirmationModal();
     };
 }
+
+window.showNotification = function (message, type) {
+    showNotification(message, type)
+};
 
 export function closeConfirmationModal() {
     const confirmationModal = document.getElementById('confirmation-modal');
