@@ -3,6 +3,8 @@ import {SettingsManager} from './settingsManager.js';
 import {LessonModalManager} from './lessonModalManager.js';
 import {AddStudentModalManager} from './addStudentModalManager.js';
 import {showNotification} from "./utils.js";
+import {getTeachers} from "./repository.js";
+import {openTeachersModal} from "./seeTeacherSchedule.js";
 
 export const calendarManager = new CalendarManager();
 const settingsManager = new SettingsManager(calendarManager);
@@ -54,14 +56,16 @@ export function initApp() {
 }
 
 function setAdminTools() {
-    // Обработчик для кнопки добавления нового ученика
+    openTeachersModal()
+
+    /*// Обработчик для кнопки добавления нового ученика
     document.getElementById('add-student-button').addEventListener('click', () => {
         if (settingsManager.isOpenWindowsMode) {
             showNotification("Недоступно в режиме выбора открытых окон", "error");
         } else {
             addStudentModalManager.open()
         }
-    });
+    });*/
 }
 
 window.openLessonModal = (lessonData) => {

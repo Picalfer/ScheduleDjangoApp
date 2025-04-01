@@ -323,13 +323,14 @@ export class CalendarManager {
      * @param {string|null} startDate - Начальная дата (YYYY-MM-DD)
      * @param {string|null} endDate - Конечная дата (YYYY-MM-DD)
      */
-    async loadSchedule(teacherId = null, startDate = null, endDate = null) {
+    async loadSchedule(teacherId = currentUserId, startDate = null, endDate = null) {
         try {
             const {start: weekStart, end: weekEnd} = this.getWeekRange(this.currentWeekOffset);
             const formatDate = (date) => date.toISOString().split('T')[0];
             const queryStartDate = startDate || formatDate(weekStart);
             const queryEndDate = endDate || formatDate(weekEnd);
             const effectiveTeacherId = teacherId || this.getMyId();
+            console.log(effectiveTeacherId)
 
             const response = await repository.getLessons(effectiveTeacherId, queryStartDate, queryEndDate);
             console.log('Server response:', response);
@@ -361,7 +362,7 @@ export class CalendarManager {
                 this.lessons = [];
             }
 
-            this.openSlots = await repository.getOpenSlots();
+            this.openSlots = await repository.getOpenSlots(teacherId);
             this.generateTimeSlots();
             this.updateCalendar();
             this.updateScheduleDisplay();

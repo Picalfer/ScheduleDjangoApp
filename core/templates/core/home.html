@@ -11,17 +11,17 @@
         {% csrf_token %}
         <div id="week-info">
             <div id="week-info-left">
-                <button id="settings-button" title="Настройки расписание"
+                <button id="settings-button" title="Настройки"
                         class="icon-button icon-button-rotate"><span>⚙️</span></button>
                 {% if user.is_staff %}
                     <div id="admin-panel" style="display: inline-block">
                         <button id="teachers-button" title="Преподаватели" class="icon-button icon-button-float"
                                 style="display: inline-block;"><span>‍👨‍🏫</span></button>
-                        <button id="students-button" title="Ученики" class="icon-button icon-button-float"
+                        {% comment %}<button id="students-button" title="Ученики" class="icon-button icon-button-float"
                                 style="display: inline-block;"><span>‍🎓</span></button>
                         <button id="add-student-button" title="Добавить расписание ученика"
                                 class="icon-button icon-button-float"
-                                style="display: inline-block;"><span>➕</span></button>
+                                style="display: inline-block;"><span>➕</span></button>{% endcomment %}
                     </div>
                 {% endif %}
                 <div id="open-windows-controls" style="display: none;">

@@ -37,8 +37,13 @@ class PhoneNumber(models.Model):
     def __str__(self):
         return f"{self.number} ({self.note})" if self.note else self.number
 
+
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    @property
+    def name(self):
+        return f"{self.user.first_name} {self.user.last_name}".strip()
 
     def __str__(self):
         return self.user.get_full_name() or self.user.username

@@ -23,9 +23,14 @@ class LessonSerializer(serializers.ModelSerializer):
 
 
 class TeacherSerializer(serializers.ModelSerializer):
+    user_email = serializers.CharField(source='user.email', read_only=True)  # если нужно email
+
     class Meta:
         model = Teacher
-        fields = '__all__'
+        fields = ['id', 'user', 'name', 'user_email']
+        extra_kwargs = {
+            'user': {'read_only': True}  # если user не должен изменяться через этот API
+        }
 
 
 class StudentSerializer(serializers.ModelSerializer):

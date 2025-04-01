@@ -14,12 +14,14 @@ class TeacherAdmin(admin.ModelAdmin):
 
     get_full_name.short_description = 'ФИО'
 
+
 class PhoneNumberInline(admin.TabularInline):
     model = PhoneNumber
     extra = 1
     fields = ('number', 'note', 'is_primary')
     verbose_name = 'Номер телефона'
     verbose_name_plural = 'Номера телефонов'
+
 
 class StudentInline(admin.TabularInline):
     model = Student
@@ -98,7 +100,8 @@ class LessonAdmin(admin.ModelAdmin):
             kwargs['help_text'] = 'Выберите час (минуты будут установлены в 00 автоматически)'
 
         if db_field.name == 'course':
-            courses = ["Не выбран", "Roblox", "Scratch", "Создание сайтов", "Python", "Unity", "Figma", "Комп с нуля", "Blender", "Android", "C++"]
+            courses = ["Не выбран", "Roblox", "Scratch", "Создание сайтов", "Python", "Unity", "Figma", "Комп с нуля",
+                       "Blender", "Android", "C++"]
             kwargs['widget'] = forms.Select(choices=[(c, c) for c in courses])
 
         return super().formfield_for_dbfield(db_field, request, **kwargs)

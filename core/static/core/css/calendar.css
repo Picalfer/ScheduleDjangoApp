@@ -367,7 +367,6 @@
     background-color: #45a049;
 }
 
-
 #schedule-info-panel {
     position: fixed;
     bottom: 20px;
@@ -424,7 +423,6 @@
 #schedule-info-panel.collapsed #toggle-icon {
     transform: rotate(180deg);
 }
-
 
 .hour.open-window-mode {
     background: var(--header-bg);

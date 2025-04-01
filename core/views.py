@@ -1,6 +1,8 @@
 import json
 import logging
 
+from rest_framework.pagination import PageNumberPagination
+
 logger = logging.getLogger(__name__)
 
 from django.contrib.auth import login, logout, authenticate
@@ -17,7 +19,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.decorators.http import require_http_methods
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics
+from rest_framework import generics, filters
 from rest_framework.permissions import IsAuthenticated
 
 from .forms import ProfileForm
@@ -154,38 +156,63 @@ def cancel_lesson(request, lesson_id):
         return JsonResponse({'status': 'error', 'message': 'Внутренняя ошибка сервера'}, status=500)
 
 
+class LessonPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
 class LessonListCreate(generics.ListCreateAPIView):
+    pagination_class = LessonPagination
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = [
-        'date',
-        'student',
-        'status',
-        'lesson_type'
-    ]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['date', 'student', 'status', 'lesson_type']
+    search_fields = ['teacher__user__username']
 
     def get_queryset(self):
-        queryset = (Lesson.objects
-        .filter(teacher__user=self.request.user)
-        .select_related(
-            'student',
-            'teacher'
-        ))
+        queryset = Lesson.objects.select_related('student', 'teacher', 'teacher__user')
 
-        # Для регулярных уроков фильтруем только актуальные
+        # Обрабатываем teacher_id
+        teacher_id = self.request.query_params.get('teacher_id')
+        if teacher_id:
+            try:
+                teacher_id = int(teacher_id)  # Явное преобразование в число
+                queryset = queryset.filter(teacher_id=teacher_id)
+            except (ValueError, TypeError):
+                raise ValidationError("Invalid teacher_id format")
+
+        # Если teacher_id не указан, фильтруем по текущему пользователю
+        if not teacher_id:
+            queryset = queryset.filter(teacher__user=self.request.user)
+
+        # Фильтрация по датам
+        date_after = self.request.query_params.get('date_after')
+        date_before = self.request.query_params.get('date_before')
+
+        if date_after:
+            queryset = queryset.filter(date__gte=date_after)
+        if date_before:
+            queryset = queryset.filter(date__lte=date_before)
+
+        # Фильтрация регулярных уроков
         if self.request.query_params.get('recurring') == 'true':
             today = timezone.now().date()
             queryset = queryset.filter(
                 Q(lesson_type='recurring') &
                 Q(date__lte=today)
             )
-        return queryset
+
+        return queryset.order_by('date', 'time')
 
 
-class TeacherList(generics.ListAPIView):
-    queryset = Teacher.objects.all()
+class TeacherListCreate(generics.ListCreateAPIView):
     serializer_class = TeacherSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+
+    def get_queryset(self):
+        return Teacher.objects.select_related('user').all()
 
 
 class StudentList(generics.ListAPIView):

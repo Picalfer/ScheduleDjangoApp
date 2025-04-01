@@ -1,31 +1,93 @@
 const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-export function getLessons(teacherId = null, startDate = null, endDate = null) {
+export function getTeachers() {
     return new Promise(async (resolve, reject) => {
         try {
-            const params = new URLSearchParams();
-
-            if (teacherId) params.append('teacher_id', teacherId);
-            if (startDate) params.append('date_after', startDate);
-            if (endDate) params.append('date_before', endDate);
-
-            const response = await fetch(`/lessons/?${params.toString()}`, {
+            const response = await fetch('/teachers/', {
                 method: 'GET',
                 headers: {'Content-Type': 'application/json'},
                 credentials: 'include'
             });
 
             if (!response.ok) {
-                throw new Error(`Ошибка: ${response.status} ${response.statusText}`);
+                throw new Error(`Ошибка ${response.status} ${response.statusText}`);
             }
 
             const data = await response.json();
-            resolve(data);
+            resolve(data)
         } catch (error) {
-            console.error("Ошибка при получении уроков:", error);
+            console.error("Ошибка при получении данных об учителях:", error);
             reject(error);
         }
-    });
+    })
+}
+
+export async function getLessons(teacherId = null, startDate = null, endDate = null) {
+    try {
+        const params = new URLSearchParams();
+
+        // Важно: убеждаемся, что teacherId - это число
+        if (teacherId !== null && !isNaN(teacherId)) {
+            params.append('teacher_id', parseInt(teacherId).toString());
+        }
+
+        if (startDate) params.append('date_after', startDate);
+        if (endDate) params.append('date_before', endDate);
+
+        const response = await fetch(`/lessons/?${params.toString()}`, {
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to fetch lessons');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching lessons:', error);
+        throw error;
+    }
+}
+
+
+export function getOpenSlots(teacherId = currentUserId) {
+    return fetch(`/api/open-slots/${teacherId}/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Ошибка: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => data.weekly_open_slots)
+        .catch(error => {
+            console.error("Ошибка при получении свободных слотов:", error);
+            throw error;
+        });
+}
+
+export function updateOpenSlots(openSlots, teacherId = currentUserId) {
+    return fetch(`/api/open-slots/${teacherId}/update/`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+        },
+        body: JSON.stringify({weekly_open_slots: openSlots}),
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Ошибка: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => data.weekly_open_slots)
+        .catch(error => {
+            console.error("Ошибка при обновлении свободных слотов:", error);
+            throw error;
+        });
 }
 
 export async function completeLesson(lessonId, lessonData = {}) {
@@ -143,43 +205,6 @@ export async function createLesson(date, time, teacherId, studentId, subject, le
         console.error('Error creating lesson:', error);
         throw error;
     }
-}
-
-export function getOpenSlots(teacherId = currentUserId) {
-    return fetch(`/api/open-slots/${teacherId}/`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Ошибка: ${response.status} ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(data => data.weekly_open_slots)
-        .catch(error => {
-            console.error("Ошибка при получении свободных слотов:", error);
-            throw error;
-        });
-}
-
-export function updateOpenSlots(openSlots, teacherId = currentUserId) {
-    return fetch(`/api/open-slots/${teacherId}/update/`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken,
-        },
-        body: JSON.stringify({weekly_open_slots: openSlots}),
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Ошибка: ${response.status} ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(data => data.weekly_open_slots)
-        .catch(error => {
-            console.error("Ошибка при обновлении свободных слотов:", error);
-            throw error;
-        });
 }
 
 export function updateSchedule(scheduleData, teacherId = null) {
