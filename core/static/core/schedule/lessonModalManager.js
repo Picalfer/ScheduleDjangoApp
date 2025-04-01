@@ -161,7 +161,7 @@ export class LessonModalManager {
 
         // Остальной код остается БЕЗ ИЗМЕНЕНИЙ
         const today = new Date();
-        document.getElementById("lesson-date").value = today.toLocaleDateString('ru-RU', {
+        document.getElementById("lesson-date").value = new Date(lessonData.date).toLocaleDateString('ru-RU', {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
