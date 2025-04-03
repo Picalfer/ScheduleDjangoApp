@@ -70,7 +70,7 @@ export class PaymentsModal extends Modal {
 
 
         const paymentsHTML = payments.map(payment => `
-      <div class="payment-item">
+      <div class="form-group">
         <div class="payment-row">
           <span class="payment-label">Преподаватель:</span>
           <span class="payment-value">${payment.teacher}</span>

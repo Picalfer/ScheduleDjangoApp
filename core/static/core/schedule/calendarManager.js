@@ -362,7 +362,6 @@ export class CalendarManager {
             const queryStartDate = startDate || formatDate(weekStart);
             const queryEndDate = endDate || formatDate(weekEnd);
             const effectiveTeacherId = teacherId || this.getMyId();
-            console.log(effectiveTeacherId)
 
             const response = await repository.getLessons(effectiveTeacherId, queryStartDate, queryEndDate);
             console.log('Server response:', response);
@@ -381,9 +380,15 @@ export class CalendarManager {
 
                 lessons.forEach(lesson => {
                     if (lesson.lesson_type === 'recurring' && lesson.schedule && lesson.schedule.length > 0 && lesson.status === 'scheduled') {
-
                         const generatedLessons = this.generateFutureLessons(lesson, endDateGeneration);
                         fakeLessons.push(...generatedLessons);
+
+                        // Фильтруем фейки, которые совпадают с оригиналом по дате/времени
+                        const filteredGenerated = generatedLessons.filter(fake =>
+                            fake.date !== lesson.date || fake.time !== lesson.time
+                        );
+
+                        fakeLessons.push(...filteredGenerated);
                     }
                 });
 
@@ -407,66 +412,53 @@ export class CalendarManager {
     }
 
     generateFutureLessons(lesson, endDate) {
-        // Правильное соответствие дней недели (JS: 0=Вс, 1=Пн, ... 6=Сб)
         const weekdayMapping = {
             'monday': 1, 'tuesday': 2, 'wednesday': 3,
             'thursday': 4, 'friday': 5, 'saturday': 6, 'sunday': 0
         };
 
         const fakeLessons = [];
-        // Создаем дату в локальном часовом поясе
-        const startDate = new Date(lesson.date);
-        startDate.setHours(0, 0, 0, 0); // Сбрасываем время
+        const originalDate = new Date(lesson.date + 'T' + lesson.time);
+        originalDate.setSeconds(0, 0); // Чистим секунды и мс
 
-        function formatDate(date) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        function formatTime(date) {
+            return date.toTimeString().slice(0, 8); // "HH:MM:SS"
         }
 
-        // Для каждого элемента расписания
         lesson.schedule.forEach(scheduleItem => {
             const targetWeekday = weekdayMapping[scheduleItem.day.toLowerCase()];
             const [hours, minutes] = scheduleItem.time.split(':').map(Number);
 
-            // Начинаем со следующего дня после startDate
-            let currentDate = new Date(startDate);
+            // Начинаем со следующего дня после оригинала
+            let currentDate = new Date(originalDate);
             currentDate.setDate(currentDate.getDate() + 1);
 
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            // Находим все подходящие дни до endDate
             while (currentDate <= endDate) {
-                // Если текущий день недели совпадает с целевым
                 if (currentDate.getDay() === targetWeekday) {
-                    // Проверяем что дата в будущем (включая сегодня)
-                    if (currentDate >= today) {
-                        // Создаем копию даты без времени для сравнения
-                        const lessonDate = new Date(currentDate);
-                        lessonDate.setHours(hours, minutes, 0, 0);
+                    const lessonDate = new Date(currentDate);
+                    lessonDate.setHours(hours, minutes, 0, 0);
 
-                        // Создаем fake-урок
-                        const fakeLesson = {
+                    // Проверяем, что это не дубликат оригинала
+                    if (lessonDate > originalDate) {
+                        fakeLessons.push({
                             ...lesson,
                             id: `fake_${lesson.id}_${lessonDate.getTime()}`,
-                            date: formatDate(lessonDate),
-                            time: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`,
-                            is_future: true,
+                            date: lessonDate.toISOString().split('T')[0],
+                            time: formatTime(lessonDate),
+                            is_future: lessonDate >= new Date(),
                             original_lesson_id: lesson.id
-                        };
-                        fakeLessons.push(fakeLesson);
+                        });
                     }
                 }
-                // Переходим к следующему дню
                 currentDate.setDate(currentDate.getDate() + 1);
             }
         });
 
         return fakeLessons;
     }
-
 
     /**
      * Возвращает ID текущего пользователя

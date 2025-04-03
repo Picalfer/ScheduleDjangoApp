@@ -82,6 +82,7 @@ export class LessonModal extends Modal {
 
     open(lessonData) {
         this.lessonId = lessonData.id;
+        console.log(this.lessonId)
 
         // Устанавливаем данные урока
         this.setLessonData(lessonData);
