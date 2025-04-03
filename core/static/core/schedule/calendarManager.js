@@ -1,6 +1,5 @@
-import * as repository from './repository.js';
 import {DAYS_OF_WEEK, showNotification} from "./utils.js";
-import {settingsManager} from "../home.js";
+import {settingsManager, repository} from "../home.js";
 import {WeekManager} from "./weekManager.js";
 import {LessonManager} from "./lessonManager.js";
 
@@ -191,7 +190,7 @@ export class CalendarManager {
             const effectiveTeacherId = teacherId || await this.getMyId();
 
             const response = await repository.getLessons(effectiveTeacherId, queryStartDate, queryEndDate);
-            console.log('Server response:', response);
+            console.log('Lessons: ', response);
 
             let lessons = [];
             if (response && typeof response === 'object' && Array.isArray(response.results)) {

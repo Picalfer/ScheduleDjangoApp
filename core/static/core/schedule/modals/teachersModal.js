@@ -1,6 +1,5 @@
 import {Modal} from './modal.js';
-import {calendarManager} from '../../home.js';
-import {getTeachers} from '../repository.js';
+import {calendarManager, repository} from '../../home.js';
 
 export class TeachersModal extends Modal {
     constructor(options = {}) {
@@ -16,7 +15,7 @@ export class TeachersModal extends Modal {
 
     async initTeachersContent() {
         try {
-            const response = await getTeachers();
+            const response = await repository.getTeachers();
             this.teachers = response?.results || [];
 
             if (this.teachers.length === 0) {

@@ -4,6 +4,7 @@ import {TeachersModal} from "./schedule/modals/teachersModal.js";
 import {PaymentsModal} from "./schedule/modals/paymentsModal.js";
 import {showNotification} from "./schedule/utils.js";
 import {LessonModal} from "./schedule/modals/lessonModal.js";
+import {Repository} from "./schedule/repository.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     if (userData.isAdmin) {
@@ -20,6 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+export const repository = new Repository();
 export const calendarManager = new CalendarManager();
 export const settingsManager = new SettingsManager(calendarManager);
 

@@ -1,6 +1,5 @@
 import {Modal} from './modal.js';
-import {calendarManager} from "../../home.js";
-import {cancelLesson, completeLesson} from '../repository.js';
+import {calendarManager, repository} from "../../home.js";
 import * as utils from '../utils.js';
 import {showNotification} from '../utils.js';
 
@@ -163,7 +162,7 @@ export class LessonModal extends Modal {
         }
 
         try {
-            const response = await completeLesson(this.lessonId, lessonData);
+            const response = await repository.completeLesson(this.lessonId, lessonData);
             showNotification(
                 `Урок проведен! Осталось уроков: ${response.remaining_balance}`,
                 "success"
@@ -189,7 +188,7 @@ export class LessonModal extends Modal {
             },
             onConfirm: async (reason) => {
                 try {
-                    await cancelLesson(this.lessonId, reason);
+                    await repository.cancelLesson(this.lessonId, reason);
                     showNotification(`Урок отменен!`, "success");
                     calendarManager.loadSchedule();
                     this.close();
