@@ -37,7 +37,7 @@ def complete_lesson(request, lesson_id):
             'student',
             'student__client',
             'teacher__user'
-        ).get(id=lesson_id)
+        ).select_for_update().get(id=lesson_id)
         data = json.loads(request.body)
 
         if not request.user.is_authenticated:
@@ -54,7 +54,8 @@ def complete_lesson(request, lesson_id):
                 logger.warning("Недостаточно средств на балансе")
                 return JsonResponse({
                     'status': 'error',
-                    'message': f'У клиента {lesson.student.client.name} нулевой баланс уроков'
+                    'message': f'У клиента {lesson.student.client.name} текущий баланс уроков: {lesson.student.client.balance}',
+                    'current_balance': lesson.student.client.balance
                 }, status=402)
         except ValueError as e:
             return JsonResponse({
@@ -69,10 +70,14 @@ def complete_lesson(request, lesson_id):
         lesson.completed_at = now()
         lesson.save()
 
+        from django.db.models import F
+        client = lesson.student.client
+        client.refresh_from_db()
+
         response_data = {
             'status': 'success',
             'message': 'Урок успешно проведен',
-            'remaining_balance': lesson.student.client.balance,
+            'remaining_balance': client.balance,
             'lesson': {
                 'id': lesson.id,
                 'date': lesson.date.strftime('%Y-%m-%d'),
@@ -107,7 +112,7 @@ def complete_lesson(request, lesson_id):
 @require_POST
 def cancel_lesson(request, lesson_id):
     try:
-        lesson = Lesson.objects.select_related('student', 'teacher__user').get(id=lesson_id)
+        lesson = Lesson.objects.select_related('student', 'teacher__user').select_for_update().get(id=lesson_id)
         data = json.loads(request.body)
 
         if not request.user.is_authenticated:

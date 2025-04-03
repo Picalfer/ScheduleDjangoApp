@@ -406,20 +406,16 @@ export class CalendarManager {
 
         const fakeLessons = [];
         const originalDate = new Date(lesson.date + 'T' + lesson.time);
-        originalDate.setSeconds(0, 0); // Чистим секунды и мс
-
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        originalDate.setSeconds(0, 0);
 
         function formatTime(date) {
-            return date.toTimeString().slice(0, 8); // "HH:MM:SS"
+            return date.toTimeString().slice(0, 8);
         }
 
         lesson.schedule.forEach(scheduleItem => {
             const targetWeekday = weekdayMapping[scheduleItem.day.toLowerCase()];
             const [hours, minutes] = scheduleItem.time.split(':').map(Number);
 
-            // Начинаем со следующего дня после оригинала
             let currentDate = new Date(originalDate);
             currentDate.setDate(currentDate.getDate() + 1);
 
@@ -428,14 +424,13 @@ export class CalendarManager {
                     const lessonDate = new Date(currentDate);
                     lessonDate.setHours(hours, minutes, 0, 0);
 
-                    // Проверяем, что это не дубликат оригинала
                     if (lessonDate > originalDate) {
                         fakeLessons.push({
                             ...lesson,
                             id: `fake_${lesson.id}_${lessonDate.getTime()}`,
                             date: lessonDate.toISOString().split('T')[0],
                             time: formatTime(lessonDate),
-                            is_future: lessonDate >= new Date(),
+                            is_future: true,
                             original_lesson_id: lesson.id
                         });
                     }

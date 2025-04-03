@@ -3,7 +3,7 @@ from datetime import date as date_type, datetime, timedelta, time
 
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
-from django.db import models
+from django.db import models, transaction
 
 logger = logging.getLogger(__name__)
 
@@ -85,18 +85,23 @@ class Client(models.Model):
         )
 
     def spend_lesson(self, student, note=''):
-        """Списание урока с баланса"""
-        if self.balance <= 0:
-            return False
+        """Атомарное списание урока с баланса"""
+        with transaction.atomic():
+            # Блокируем запись клиента для изменения
+            client = Client.objects.select_for_update().get(pk=self.pk)
 
-        BalanceOperation.objects.create(
-            client=self,
-            student=student,
-            operation_type='spend',
-            amount=1,
-            notes=note or f"Занятие с {student.name}"
-        )
-        return True
+            if client.balance <= 0:
+                return False
+
+            # Создаем операцию (которая в save() обновит баланс)
+            BalanceOperation.objects.create(
+                client=client,
+                student=student,
+                operation_type='spend',
+                amount=1,
+                notes=note or f"Занятие с {student.name}"
+            )
+            return True
 
     def __str__(self):
         return f"{self.name} (Баланс: {self.balance})"
@@ -178,23 +183,34 @@ class BalanceOperation(models.Model):
         verbose_name='Тип операции'
     )
     amount = models.PositiveIntegerField(verbose_name='Количество уроков')
+    balance_before = models.IntegerField(verbose_name='Баланс до операции')
+    balance_after = models.IntegerField(verbose_name='Баланс после операции')
     date = models.DateTimeField(auto_now_add=True, verbose_name='Дата операции')
     notes = models.CharField(max_length=100, blank=True, verbose_name='Комментарий')
 
     def save(self, *args, **kwargs):
-        # Обновляем баланс клиента
-        if not self.pk:  # Проверяем, что операция новая
-            if self.operation_type == 'add':
-                self.client.balance += self.amount
-            elif self.operation_type == 'spend':
-                if self.client.balance < self.amount:
-                    raise ValueError("Недостаточно средств на балансе")
-                self.client.balance -= self.amount
-            elif self.operation_type == 'correction':
-                self.client.balance = self.amount
+        with transaction.atomic():
+            # Блокируем клиента для изменения
+            client = Client.objects.select_for_update().get(pk=self.client.pk)
 
-        self.client.save()  # Сохраняем изменения в клиенте
-        super().save(*args, **kwargs)  # Сохраняем саму операцию
+            if not self.pk:  # Только для новых операций
+                self.balance_before = client.balance
+
+                if self.operation_type == 'spend' and client.balance < self.amount:
+                    raise ValueError("Недостаточно средств на балансе")
+
+                # Обновляем баланс
+                if self.operation_type == 'add':
+                    client.balance += self.amount
+                elif self.operation_type == 'spend':
+                    client.balance -= self.amount
+                elif self.operation_type == 'correction':
+                    client.balance = self.amount
+
+                self.balance_after = client.balance
+                client.save()
+
+            super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Операция с балансом'
@@ -202,7 +218,8 @@ class BalanceOperation(models.Model):
         ordering = ['-date']
 
     def __str__(self):
-        return f"{self.get_operation_type_display()} {self.amount} уроков ({self.client.name})"
+        return (f"{self.get_operation_type_display()} {self.amount} уроков | "
+                f"Баланс: {self.balance_before}→{self.balance_after} ({self.client.name})")
 
 
 class Lesson(models.Model):

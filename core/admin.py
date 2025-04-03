@@ -67,8 +67,8 @@ class StudentInline(admin.TabularInline):
 class BalanceOperationInline(admin.TabularInline):
     model = BalanceOperation
     extra = 0
-    readonly_fields = ('date',)
-    fields = ('operation_type', 'amount', 'date', 'notes')
+    readonly_fields = ('date', 'balance_before', 'balance_after')
+    fields = ('operation_type', 'amount', 'date', 'notes', 'balance_before', 'balance_after')
 
 
 @admin.register(Client)

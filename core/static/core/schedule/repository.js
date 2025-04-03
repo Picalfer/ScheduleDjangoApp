@@ -52,7 +52,6 @@ export async function getLessons(teacherId = null, startDate = null, endDate = n
     }
 }
 
-
 export function getOpenSlots(teacherId = currentUserId) {
     return fetch(`/api/open-slots/${teacherId}/`)
         .then(response => {
