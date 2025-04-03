@@ -1,13 +1,8 @@
 import * as repository from './repository.js';
-import {showNotification} from "./utils.js";
+import {DAYS_OF_WEEK, formatDate, showNotification} from "./utils.js";
 import {settingsManager} from "../home.js";
 
 export class CalendarManager {
-    static DAYS_OF_WEEK = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-    static MONTH_NAMES = [
-        'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
-        'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
-    ];
 
     constructor() {
         this.currentWeekOffset = 0;
@@ -76,15 +71,6 @@ export class CalendarManager {
     }
 
     /**
-     * Форматирует дату в строку вида "день месяц"
-     * @param {Date} date - Дата для форматирования
-     * @returns {string} Отформатированная дата
-     */
-    formatDate(date) {
-        return `${date.getDate()} ${CalendarManager.MONTH_NAMES[date.getMonth()]}`;
-    }
-
-    /**
      * Обновляет даты в заголовках календаря и подсвечивает текущий день
      */
     updateHeaderDates() {
@@ -99,7 +85,7 @@ export class CalendarManager {
 
         dateElements.forEach((element, index) => {
             const displayedDate = dates[index]; // Используем уже вычисленные даты из getWeekDates
-            element.textContent = this.formatDate(displayedDate);
+            element.textContent = formatDate(displayedDate);
 
             // Проверяем, является ли день текущим
             const isCurrentDay = displayedDate.getDate() === currentDate &&
@@ -118,7 +104,7 @@ export class CalendarManager {
         const [monday, sunday] = [dates[0], dates[6]]; // Первый и последний день недели
 
         const weekRangeElement = document.getElementById('week-range');
-        weekRangeElement.textContent = `${this.formatDate(monday)} - ${this.formatDate(sunday)}`;
+        weekRangeElement.textContent = `${formatDate(monday)} - ${formatDate(sunday)}`;
     }
 
     /**
@@ -190,7 +176,7 @@ export class CalendarManager {
                 weekDays.forEach((day, dayIndex) => {
                     day.insertAdjacentHTML('beforeend', `
                     <div class="hour" 
-                         data-day="${CalendarManager.DAYS_OF_WEEK[dayIndex]}" 
+                         data-day="${DAYS_OF_WEEK[dayIndex]}" 
                          data-hour="${formattedHour}">
                     </div>
                 `);
@@ -213,7 +199,7 @@ export class CalendarManager {
         });
 
         // Добавляем актуальные открытые окна
-        CalendarManager.DAYS_OF_WEEK.forEach(day => {
+        DAYS_OF_WEEK.forEach(day => {
             const dayElement = document.getElementById(day);
             if (!dayElement) {
                 console.error("Элемент дня не найден:", day);

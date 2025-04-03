@@ -397,13 +397,14 @@ class WeeklyPaymentsList(generics.ListAPIView):
 
 
 @require_GET
-def test_weekly_payments(request):
+def weekly_payments(request):
     try:
         calculate_weekly_payments()
         payments = TeacherPayment.objects.filter(is_paid=False).select_related('teacher')
         data = [{
             'teacher': p.teacher.user.get_full_name(),
             'week_start': p.week_start_date,
+            'week_end': p.week_end_date,
             'lessons': p.lessons_count,
             'amount': float(p.amount),
             'currency': 'RUB'

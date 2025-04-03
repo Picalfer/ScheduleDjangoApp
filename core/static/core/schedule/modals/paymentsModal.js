@@ -1,4 +1,5 @@
 import {Modal} from './modal.js';
+import {formatDate} from "../utils.js";
 
 export class PaymentsModal extends Modal {
     constructor(options = {}) {
@@ -42,8 +43,9 @@ export class PaymentsModal extends Modal {
             btn.disabled = true;
             btn.textContent = 'Загрузка...';
 
-            const response = await fetch('/test-payments/');
+            const response = await fetch('/payments/');
             const data = await response.json();
+            console.log(data)
 
             if (data.status === 'success') {
                 this.displayPayments(data.payments);
@@ -77,7 +79,7 @@ export class PaymentsModal extends Modal {
         </div>
         <div class="payment-row">
           <span class="payment-label">Период:</span>
-          <span class="payment-value">${payment.week_start} - нету пока</span>
+          <span class="payment-value">${formatDate(new Date(payment.week_start))} - ${formatDate(new Date(payment.week_end))}</span>
         </div>
         <div class="payment-row">
           <span class="payment-label">Уроков:</span>

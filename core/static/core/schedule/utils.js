@@ -1,3 +1,18 @@
+export const DAYS_OF_WEEK = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+export const MONTH_NAMES = [
+    'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+    'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
+];
+
+/**
+ * Форматирует дату в строку вида "день месяц"
+ * @param {Date} date - Дата для форматирования
+ * @returns {string} Отформатированная дата
+ */
+export function formatDate(date) {
+    return `${date.getDate()} ${MONTH_NAMES[date.getMonth()]}`;
+}
+
 export function showNotification(message, type = 'info') {
     const notification = document.getElementById('notification');
 

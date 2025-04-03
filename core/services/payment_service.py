@@ -29,6 +29,7 @@ def calculate_weekly_payments():
             TeacherPayment.objects.update_or_create(
                 teacher=teacher,
                 week_start_date=last_monday,
+                week_end_date=last_sunday,
                 defaults={
                     'lessons_count': count,
                     'amount': amount,

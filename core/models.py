@@ -392,6 +392,7 @@ class OpenSlots(models.Model):
 class TeacherPayment(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='payments')
     week_start_date = models.DateField()  # Понедельник расчетной недели
+    week_end_date = models.DateField()  # Воскресенье расчетной недели
     lessons_count = models.PositiveIntegerField(default=0)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     is_paid = models.BooleanField(default=False)
