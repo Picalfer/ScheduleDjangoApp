@@ -1,4 +1,5 @@
 import * as utils from "./utils.js";
+import {showNotification} from "./utils.js";
 
 export class SettingsManager {
     constructor(calendarManager) {
@@ -160,6 +161,14 @@ export class SettingsManager {
     }
 
     setupEventListeners() {
+        document.getElementById('settings-button').addEventListener('click', () => {
+            if (this.isOpenWindowsMode) {
+                showNotification("Недоступно в режиме выбора открытых окон", "error");
+            } else {
+                this.open();
+            }
+        });
+
         this.closeButton.onclick = () => this.close();
         this.cancelButton.onclick = () => this.close();
 
@@ -222,7 +231,15 @@ export class SettingsManager {
     }
 
     applyOpenSlotsUpdate() {
-        const newOpenSlots = {"monday": [], "tuesday": [], "wednesday": [], "thursday": [], "friday": [], "saturday": [], "sunday": []};
+        const newOpenSlots = {
+            "monday": [],
+            "tuesday": [],
+            "wednesday": [],
+            "thursday": [],
+            "friday": [],
+            "saturday": [],
+            "sunday": []
+        };
         document.querySelectorAll('.hour.open-window').forEach((hourElement) => {
             const day = hourElement.getAttribute('data-day');
             const hour = hourElement.getAttribute('data-hour');

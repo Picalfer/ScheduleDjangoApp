@@ -1,6 +1,6 @@
-@import "css/calendar.css";
-@import "css/lesson.css";
-@import "css/forms.css";
+@import "calendar.css";
+@import "lesson.css";
+@import "modal.css";
 
 :root {
     --bg: #e0f2fe;

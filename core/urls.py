@@ -2,7 +2,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import path
 
 from . import views
-from .views import get_open_slots, update_open_slots
+from .views import get_open_slots, update_open_slots, test_weekly_payments
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -22,4 +22,5 @@ urlpatterns = [
     path('api/create-lesson/', views.create_lesson, name='create-lesson'),
     path('api/complete-lesson/<int:lesson_id>/', views.complete_lesson, name='complete-lesson'),
     path('api/cancel-lesson/<int:lesson_id>/', views.cancel_lesson, name='cancel-lesson'),
+    path('test-payments/', test_weekly_payments, name='test-payments'),
 ]

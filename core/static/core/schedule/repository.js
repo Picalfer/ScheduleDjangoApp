@@ -30,9 +30,9 @@ export async function getLessons(teacherId = null, startDate = null, endDate = n
         if (teacherId !== null && !isNaN(teacherId)) {
             params.append('teacher_id', parseInt(teacherId).toString());
         }
-
-        if (startDate) params.append('date_after', startDate);
-        if (endDate) params.append('date_before', endDate);
+        /*
+                if (startDate) params.append('date_after', startDate);
+                if (endDate) params.append('date_before', endDate);*/
 
         const response = await fetch(`/lessons/?${params.toString()}`, {
             method: 'GET',

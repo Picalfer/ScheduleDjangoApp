@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'core/home.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/home.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 {% endblock %}
 
@@ -17,8 +17,9 @@
                     <div id="admin-panel" style="display: inline-block">
                         <button id="teachers-button" title="Преподаватели" class="icon-button icon-button-float"
                                 style="display: inline-block;"><span>‍👨‍🏫</span></button>
-                        {% comment %}<button id="students-button" title="Ученики" class="icon-button icon-button-float"
-                                style="display: inline-block;"><span>‍🎓</span></button>
+                        <button id="payments-button" title="Выплаты" class="icon-button icon-button-float"
+                                style="display: inline-block;"><span>‍💰</span></button>
+                        {% comment %}
                         <button id="add-student-button" title="Добавить расписание ученика"
                                 class="icon-button icon-button-float"
                                 style="display: inline-block;"><span>➕</span></button>{% endcomment %}
@@ -96,48 +97,6 @@
             </div>
             <div id="sunday" class="week-day">
                 <!-- Слоты часов будут добавляться динамически -->
-            </div>
-        </div>
-    </div>
-
-    <div id="lesson-modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div class="modal-header">
-                <h3>Информация об уроке</h3>
-                <div class="lesson-info">
-                    <p class="lesson-type"></p>
-                    <p class="lesson-student"></p>
-                </div>
-            </div>
-            <div class="modal-body">
-                <form id="lesson-form">
-                    <div class="form-group">
-                        <label for="lesson-date">Дата</label>
-                        <input type="text" id="lesson-date" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="lesson-course">Курс</label>
-                        <input type="text" id="lesson-course" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="lesson-topic">Тема урока <span class="required">*</span></label>
-                        <input type="text" id="lesson-topic" required>
-                        <div class="error-message">Это поле обязательно для заполнения</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="lesson-homework">Домашнее задание</label>
-                        <textarea id="lesson-homework" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="lesson-comment">Комментарий</label>
-                        <textarea id="lesson-comment" rows="3"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="cancel-button cancel-lesson-btn">Отменить урок</button>
-                <button class="submit-button admit-lesson-btn">Отметить проведённым</button>
             </div>
         </div>
     </div>

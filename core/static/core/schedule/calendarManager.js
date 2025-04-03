@@ -1,5 +1,6 @@
 import * as repository from './repository.js';
 import {showNotification} from "./utils.js";
+import {settingsManager} from "../home.js";
 
 export class CalendarManager {
     static DAYS_OF_WEEK = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -15,6 +16,37 @@ export class CalendarManager {
         this.displayedLessons = new Set();
         this.startHour = 6;
         this.endHour = 18;
+
+        this.loadSchedule();
+        this.updateCalendarUi()
+        this.goToCurrentWeek();
+        this.setupEventListeners()
+    }
+
+    setupEventListeners() {
+        document.getElementById('prev-week').addEventListener('click', () => {
+            if (settingsManager.isOpenWindowsMode) {
+                showNotification("Недоступно в режиме выбора открытых окон", "error");
+            } else {
+                this.prevWeek();
+            }
+        });
+
+        document.getElementById('next-week').addEventListener('click', () => {
+            if (settingsManager.isOpenWindowsMode) {
+                showNotification("Недоступно в режиме выбора открытых окон", "error");
+            } else {
+                this.nextWeek();
+            }
+        });
+
+        document.getElementById('current-week').addEventListener('click', () => {
+            if (settingsManager.isOpenWindowsMode) {
+                showNotification("Недоступно в режиме выбора открытых окон", "error");
+            } else {
+                this.goToCurrentWeek();
+            }
+        });
     }
 
     getDayOfWeek(date) {

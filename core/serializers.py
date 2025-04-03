@@ -1,6 +1,8 @@
+from datetime import timedelta
+
 from rest_framework import serializers
 
-from .models import Lesson, Teacher, Student
+from .models import Lesson, Teacher, Student, TeacherPayment
 from .models import OpenSlots
 
 
@@ -45,3 +47,16 @@ class OpenSlotsSerializer(serializers.ModelSerializer):
     class Meta:
         model = OpenSlots
         fields = ['teacher', 'weekly_open_slots']
+
+
+class TeacherPaymentSerializer(serializers.ModelSerializer):
+    teacher_name = serializers.CharField(source='teacher.user.get_full_name', read_only=True)
+    week_range = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TeacherPayment
+        fields = ['id', 'teacher', 'teacher_name', 'week_start_date',
+                  'week_range', 'lessons_count', 'amount', 'is_paid']
+
+    def get_week_range(self, obj):
+        return f"{obj.week_start_date} - {obj.week_start_date + timedelta(days=6)}"

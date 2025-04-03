@@ -387,3 +387,15 @@ class OpenSlots(models.Model):
 
     def __str__(self):
         return f"Open slots for {self.teacher.username}"
+
+
+class TeacherPayment(models.Model):
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='payments')
+    week_start_date = models.DateField()  # Понедельник расчетной недели
+    lessons_count = models.PositiveIntegerField(default=0)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    is_paid = models.BooleanField(default=False)
+    payment_date = models.DateField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ['teacher', 'week_start_date']

@@ -1,7 +1,10 @@
 import json
 import logging
+from datetime import timedelta
 
 from rest_framework.pagination import PageNumberPagination
+
+from .services.payment_service import calculate_weekly_payments
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +19,7 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.http import require_http_methods
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, filters
@@ -24,9 +27,9 @@ from rest_framework.permissions import IsAuthenticated
 
 from .forms import ProfileForm
 from .forms import RegisterForm, LoginForm
-from .models import Lesson, Teacher, Student
+from .models import Lesson, Teacher, Student, TeacherPayment
 from .models import OpenSlots, UserSettings
-from .serializers import LessonSerializer, TeacherSerializer, StudentSerializer
+from .serializers import LessonSerializer, TeacherSerializer, StudentSerializer, TeacherPaymentSerializer
 
 
 @require_POST
@@ -185,15 +188,15 @@ class LessonListCreate(generics.ListCreateAPIView):
         # Если teacher_id не указан, фильтруем по текущему пользователю
         if not teacher_id:
             queryset = queryset.filter(teacher__user=self.request.user)
-
+        """
         # Фильтрация по датам
         date_after = self.request.query_params.get('date_after')
         date_before = self.request.query_params.get('date_before')
-
+        
         if date_after:
             queryset = queryset.filter(date__gte=date_after)
         if date_before:
-            queryset = queryset.filter(date__lte=date_before)
+            queryset = queryset.filter(date__lte=date_before)"""
 
         # Фильтрация регулярных уроков
         if self.request.query_params.get('recurring') == 'true':
@@ -383,3 +386,35 @@ def profile(request):
     else:
         form = ProfileForm(instance=user)
     return render(request, 'core/profile.html', {'form': form})
+
+
+class WeeklyPaymentsList(generics.ListAPIView):
+    serializer_class = TeacherPaymentSerializer
+
+    def get_queryset(self):
+        today = timezone.now().date()
+        last_sunday = today - timedelta(days=today.weekday() + 1)
+        last_monday = last_sunday - timedelta(days=6)
+
+        return TeacherPayment.objects.filter(
+            week_start_date=last_monday,
+            is_paid=False
+        ).select_related('teacher')
+
+
+@require_GET
+def test_weekly_payments(request):
+    try:
+        calculate_weekly_payments()
+        payments = TeacherPayment.objects.filter(is_paid=False).select_related('teacher')
+        data = [{
+            'teacher': p.teacher.user.get_full_name(),
+            'week_start': p.week_start_date,
+            'lessons': p.lessons_count,
+            'amount': float(p.amount),
+            'currency': 'RUB'
+        } for p in payments]
+
+        return JsonResponse({'status': 'success', 'payments': data})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
