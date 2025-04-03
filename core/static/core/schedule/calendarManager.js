@@ -1,14 +1,15 @@
 import * as repository from './repository.js';
-import {DAYS_OF_WEEK, formatDate, showNotification} from "./utils.js";
+import {DAYS_OF_WEEK, showNotification} from "./utils.js";
 import {settingsManager} from "../home.js";
+import {WeekManager} from "./weekManager.js";
+import {LessonManager} from "./lessonManager.js";
 
 export class CalendarManager {
 
     constructor() {
-        this.currentWeekOffset = 0;
-        this.lessons = [];
+        this.lessonManager = new LessonManager();
+        this.weekManager = new WeekManager();
         this.openSlots = {};
-        this.displayedLessons = new Set();
         this.startHour = 6;
         this.endHour = 18;
 
@@ -44,73 +45,6 @@ export class CalendarManager {
         });
     }
 
-    getDayOfWeek(date) {
-        return ['sunday', 'monday', 'tuesday', 'wednesday',
-            'thursday', 'friday', 'saturday'][date.getDay()];
-    }
-
-    /**
-     * Получает даты недели относительно текущей с учетом смещения
-     * @param {number} offset - Смещение в неделях (0 - текущая неделя)
-     * @returns {Date[]} Массив дат с понедельника по воскресенье
-     */
-    getWeekDates(offset = 0) {
-        const today = new Date();
-        const currentDay = today.getDay();
-        // Воскресенье (0) становится 6, чтобы правильно вычислить понедельник
-        const diff = currentDay === 0 ? 6 : currentDay - 1;
-
-        const monday = new Date(today);
-        monday.setDate(today.getDate() - diff + (offset * 7));
-
-        return Array.from({length: 7}, (_, i) => {
-            const date = new Date(monday);
-            date.setDate(monday.getDate() + i);
-            return date;
-        });
-    }
-
-    /**
-     * Обновляет даты в заголовках календаря и подсвечивает текущий день
-     */
-    updateHeaderDates() {
-        const dates = this.getWeekDates(this.currentWeekOffset);
-        const dateElements = document.querySelectorAll('.date');
-        const dayHeaders = document.querySelectorAll('.day-header');
-
-        const today = new Date();
-        const currentDate = today.getDate();
-        const currentMonth = today.getMonth();
-        const currentYear = today.getFullYear();
-
-        dateElements.forEach((element, index) => {
-            const displayedDate = dates[index]; // Используем уже вычисленные даты из getWeekDates
-            element.textContent = formatDate(displayedDate);
-
-            // Проверяем, является ли день текущим
-            const isCurrentDay = displayedDate.getDate() === currentDate &&
-                displayedDate.getMonth() === currentMonth &&
-                displayedDate.getFullYear() === currentYear;
-
-            dayHeaders[index].classList.toggle('current-day', isCurrentDay);
-        });
-    }
-
-    /**
-     * Обновляет информацию о диапазоне недели в заголовке календаря
-     */
-    updateWeekInfo() {
-        const dates = this.getWeekDates(this.currentWeekOffset);
-        const [monday, sunday] = [dates[0], dates[6]]; // Первый и последний день недели
-
-        const weekRangeElement = document.getElementById('week-range');
-        weekRangeElement.textContent = `${formatDate(monday)} - ${formatDate(sunday)}`;
-    }
-
-    /**
-     * Очищает расписание, удаляя все пустые ячейки часов
-     * (сохраняет ячейки с уроками)
-     */
     clearSchedule() {
         document.querySelectorAll('.week-day .hour').forEach(hour => {
             if (!hour.querySelector('.lesson')) {
@@ -120,41 +54,6 @@ export class CalendarManager {
         });
     }
 
-    /**
-     * Создает HTML-элемент для отображения урока в календаре
-     * @param {Object} lesson - Данные урока
-     * @param {number} lesson.id - ID урока
-     * @param {string} lesson.lesson_type - Тип урока ('recurring' или 'single')
-     * @param {string} lesson.status - Статус урока ('completed', 'scheduled' и т.д.)
-     * @param {string} lesson.subject - Предмет урока
-     * @param {Object|number} lesson.student - Данные студента или ID студента
-     * @param {string} [lesson.student.name] - Имя студента (если есть)
-     * @returns {string} HTML-строка для вставки в календарь
-     */
-    createLessonHTML(lesson) {
-        const isRecurring = lesson.lesson_type === 'recurring';
-        const isCompleted = lesson.status === 'completed';
-        const isCanceled = lesson.status === 'canceled';
-        const isFuture = lesson.is_future;
-
-        return `
-                    <div class="lesson ${isRecurring ? 'permanent' : 'one-time'} ${isCanceled ? 'cancelled' : ''} ${isCompleted ? 'completed' : ''} ${isFuture ? 'future' : ''}" 
-                         data-lesson-id="${lesson.id}"
-                         data-status="${lesson.status || 'scheduled'}"
-                         onclick="${isFuture ? 'event.preventDefault(); window.showNotification(\'Это запланированный урок\', \'info\')' : `window.openLessonModal(${JSON.stringify(lesson).replace(/"/g, '&quot;')})`}">
-                        <h4>${isRecurring ? '🔄 Постоянный' : '1️⃣ Разовый'} урок</h4>
-                        <p>👩‍🎓 ${lesson.student_name}</p>
-                        <p>📚 ${lesson.course}</p>
-                    </div>
-                `;
-    }
-
-    /**
-     * Генерирует временные слоты для календаря (колонка времени и ячейки для уроков)
-     * Создает:
-     * - Колонку с отметками времени (в .time-column)
-     * - Пустые ячейки для каждого часа в каждом дне недели (в .week-day)
-     */
     generateTimeSlots() {
         const timeColumn = document.querySelector('.time-column');
         const weekDays = document.querySelectorAll('.week-day');
@@ -184,9 +83,6 @@ export class CalendarManager {
             });
     }
 
-    /**
-     * Отображает доступные окна для записи
-     */
     displayOpenSlots() {
         if (!this.openSlots) {
             console.warn("openSlots не загружены");
@@ -220,21 +116,17 @@ export class CalendarManager {
         });
     }
 
-
-    /**
-     * Отображает уроки в календаре для указанных дней и дат
-     */
     displayLessons() {
-        if (!Array.isArray(this.lessons)) {
+        if (!Array.isArray(this.lessonManager.lessons)) {
             console.warn("Некорректные данные уроков");
             return;
         }
 
-        const currentWeekDates = this.getWeekDates(this.currentWeekOffset).map(date =>
+        const currentWeekDates = this.weekManager.getWeekDates(this.weekManager.currentWeekOffset).map(date =>
             date.toISOString().split('T')[0]
         );
 
-        this.lessons.forEach(lesson => {
+        this.lessonManager.lessons.forEach(lesson => {
             try {
                 // Для всех уроков (и разовых, и постоянных) проверяем точное совпадение даты
                 if (!currentWeekDates.includes(lesson.date)) {
@@ -242,7 +134,7 @@ export class CalendarManager {
                 }
 
                 const lessonDate = new Date(lesson.date);
-                const dayOfWeek = this.getDayOfWeek(lessonDate);
+                const dayOfWeek = this.weekManager.getDayOfWeek(lessonDate);
                 const hour = parseInt(lesson.time.split(':')[0]);
 
                 const dayElement = document.getElementById(dayOfWeek);
@@ -250,7 +142,7 @@ export class CalendarManager {
 
                 const hourElement = dayElement.children[hour - this.startHour];
                 if (hourElement) {
-                    hourElement.innerHTML = this.createLessonHTML(lesson);
+                    hourElement.innerHTML = this.lessonManager.createLessonHTML(lesson);
                 }
             } catch (error) {
                 console.error('Ошибка:', error);
@@ -258,96 +150,45 @@ export class CalendarManager {
         });
     }
 
-    /**
-     * Обновляет отображение расписания на основе текущих данных
-     */
     updateScheduleDisplay() {
         this.clearSchedule();
-        this.clearAllLessons();
+        this.lessonManager.clearAllLessons();
         this.displayOpenSlots();
         this.displayLessons();
     }
 
-    /**
-     * Очищает все ячейки с уроками для указанных дней недели
-     */
-    clearAllLessons() {
-        this.displayedLessons.clear();
-        document.querySelectorAll('.week-day .hour').forEach(hourElement => {
-            hourElement.innerHTML = '';
-            hourElement.classList.remove('has-lesson');
-        });
-    }
-
-    /**
-     * Возвращает диапазон дат (понедельник-воскресенье) для недели с указанным смещением
-     * @param {number} offset - Смещение в неделях (0 - текущая неделя)
-     * @returns {{start: Date, end: Date}} Объект с датами начала и конца недели
-     */
-    getWeekRange(offset = 0) {
-        const today = new Date();
-        const currentDay = today.getDay();
-        const diff = currentDay === 0 ? 6 : currentDay - 1; // Коррекция для воскресенья
-
-        const monday = new Date(today);
-        monday.setDate(today.getDate() - diff + (offset * 7));
-
-        const sunday = new Date(monday);
-        sunday.setDate(monday.getDate() + 6);
-
-        return {start: monday, end: sunday};
-    }
-
-    /**
-     * Переключает календарь на следующую неделю
-     */
     nextWeek() {
-        this.currentWeekOffset++;
+        this.weekManager.currentWeekOffset++;
         this.updateCalendar();
         this.updateScheduleDisplay();
     }
 
-    /**
-     * Переключает календарь на предыдущую неделю
-     */
     prevWeek() {
-        this.currentWeekOffset--;
+        this.weekManager.currentWeekOffset--;
         this.updateCalendar();
         this.updateScheduleDisplay();
     }
 
-    /**
-     * Возвращает календарь к текущей неделе
-     */
     goToCurrentWeek() {
-        if (this.currentWeekOffset !== 0) {
-            this.currentWeekOffset = 0;
+        if (this.weekManager.currentWeekOffset !== 0) {
+            this.weekManager.currentWeekOffset = 0;
             this.updateCalendar();
             this.updateScheduleDisplay();
         }
     }
 
-    /**
-     * Обновляет визуальные элементы календаря (заголовки, даты)
-     */
     updateCalendar() {
-        this.updateHeaderDates();
-        this.updateWeekInfo();
+        this.weekManager.updateHeaderDates();
+        this.weekManager.updateWeekInfo();
     }
 
-    /**
-     * Загружает расписание для указанного преподавателя и временного диапазона
-     * @param {number|null} teacherId - ID преподавателя (null - текущий пользователь)
-     * @param {string|null} startDate - Начальная дата (YYYY-MM-DD)
-     * @param {string|null} endDate - Конечная дата (YYYY-MM-DD)
-     */
     async loadSchedule(teacherId = currentUserId, startDate = null, endDate = null) {
         try {
-            const {start: weekStart, end: weekEnd} = this.getWeekRange(this.currentWeekOffset);
+            const {start: weekStart, end: weekEnd} = this.weekManager.getWeekRange(this.weekManager.currentWeekOffset);
             const formatDate = (date) => date.toISOString().split('T')[0];
             const queryStartDate = startDate || formatDate(weekStart);
             const queryEndDate = endDate || formatDate(weekEnd);
-            const effectiveTeacherId = teacherId || this.getMyId();
+            const effectiveTeacherId = teacherId || await this.getMyId();
 
             const response = await repository.getLessons(effectiveTeacherId, queryStartDate, queryEndDate);
             console.log('Server response:', response);
@@ -371,7 +212,7 @@ export class CalendarManager {
 
             lessons.forEach(lesson => {
                 if (lesson.lesson_type === 'recurring' && lesson.schedule && lesson.schedule.length > 0 && lesson.status === 'scheduled') {
-                    const generatedLessons = this.generateFutureLessons(lesson, endDateGeneration);
+                    const generatedLessons = this.lessonManager.generateFutureLessons(lesson, endDateGeneration);
                     fakeLessons.push(...generatedLessons);
 
                     // Фильтруем фейки, которые совпадают с оригиналом по дате/времени
@@ -384,7 +225,7 @@ export class CalendarManager {
             });
 
             // Объединяем реальные и фейковые уроки
-            this.lessons = [...lessons, ...fakeLessons];
+            this.lessonManager.lessons = [...lessons, ...fakeLessons];
 
             this.openSlots = await repository.getOpenSlots(teacherId);
             this.generateTimeSlots();
@@ -398,65 +239,12 @@ export class CalendarManager {
         }
     }
 
-    generateFutureLessons(lesson, endDate) {
-        const weekdayMapping = {
-            'monday': 1, 'tuesday': 2, 'wednesday': 3,
-            'thursday': 4, 'friday': 5, 'saturday': 6, 'sunday': 0
-        };
-
-        const fakeLessons = [];
-        const originalDate = new Date(lesson.date + 'T' + lesson.time);
-        originalDate.setSeconds(0, 0);
-
-        function formatTime(date) {
-            return date.toTimeString().slice(0, 8);
-        }
-
-        lesson.schedule.forEach(scheduleItem => {
-            const targetWeekday = weekdayMapping[scheduleItem.day.toLowerCase()];
-            const [hours, minutes] = scheduleItem.time.split(':').map(Number);
-
-            let currentDate = new Date(originalDate);
-            currentDate.setDate(currentDate.getDate() + 1);
-
-            while (currentDate <= endDate) {
-                if (currentDate.getDay() === targetWeekday) {
-                    const lessonDate = new Date(currentDate);
-                    lessonDate.setHours(hours, minutes, 0, 0);
-
-                    if (lessonDate > originalDate) {
-                        fakeLessons.push({
-                            ...lesson,
-                            id: `fake_${lesson.id}_${lessonDate.getTime()}`,
-                            date: lessonDate.toISOString().split('T')[0],
-                            time: formatTime(lessonDate),
-                            is_future: true,
-                            original_lesson_id: lesson.id
-                        });
-                    }
-                }
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-        });
-
-        return fakeLessons;
-    }
-
-    /**
-     * Возвращает ID текущего пользователя
-     * @returns {number} ID пользователя
-     */
     async getMyId() {
         return currentUserId;
     }
 
-    /**
-     * Обновляет рабочие часы отображения календаря
-     * @param {number} start - Начальный час (6-23)
-     * @param {number} end - Конечный час (6-23)
-     */
     updateWorkingHours(start, end) {
-        if (!this.lessons) {
+        if (!this.lessonManager.lessons) {
             console.warn("Расписание не загружено");
             return;
         }
@@ -467,17 +255,11 @@ export class CalendarManager {
         this.updateScheduleDisplay();
     }
 
-    /**
-     * Полностью обновляет UI календаря (пересоздает слоты и перерисовывает расписание)
-     */
     updateCalendarUi() {
         this.generateTimeSlots();
         this.updateScheduleDisplay();
     }
 
-    /**
-     * Обновляет свободные слоты преподавателя на сервере
-     */
     async updateOpenSlots() {
         try {
             await repository.updateOpenSlots(this.openSlots);
