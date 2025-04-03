@@ -168,19 +168,6 @@
     background: var(--open-window-bg);
 }
 
-#schedule::-webkit-scrollbar {
-    width: 8px;
-}
-
-#schedule::-webkit-scrollbar-track {
-    background: var(--bg);
-}
-
-#schedule::-webkit-scrollbar-thumb {
-    background-color: var(--primary-color);
-    border-radius: 4px;
-}
-
 .icon-button {
     width: 42px;
     height: 42px;

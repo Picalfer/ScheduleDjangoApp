@@ -28,7 +28,7 @@
     --border-color: #3a3b3e;
     --text-primary: #e2e8f0;
     --text-secondary: #a0aec0;
-    --invert-text-primary: #2d3748;
+    --invert-text-primary: #0b0e12;
     --open-window-bg: rgba(47, 47, 48, 0.71);
 }
 
@@ -47,4 +47,18 @@ body {
     display: flex;
     justify-content: center;
     flex-direction: column;
+}
+
+/* Для всех скроллбаров на сайте */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 4px;
 }
