@@ -2,8 +2,6 @@ import json
 import logging
 from datetime import timedelta
 
-from rest_framework.pagination import PageNumberPagination
-
 from .services.payment_service import calculate_weekly_payments
 
 logger = logging.getLogger(__name__)
@@ -159,14 +157,11 @@ def cancel_lesson(request, lesson_id):
         return JsonResponse({'status': 'error', 'message': 'Внутренняя ошибка сервера'}, status=500)
 
 
-class LessonPagination(PageNumberPagination):
-    page_size = 10
-    page_size_query_param = 'page_size'
-    max_page_size = 100
-
-
 class LessonListCreate(generics.ListCreateAPIView):
-    pagination_class = LessonPagination
+    # TODO временно отключена пагинация, доработать
+    # pagination_class = LessonPagination
+    pagination_class = None
+
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
@@ -175,7 +170,6 @@ class LessonListCreate(generics.ListCreateAPIView):
 
     def get_queryset(self):
         queryset = Lesson.objects.select_related('student', 'teacher', 'teacher__user')
-
         # Обрабатываем teacher_id
         teacher_id = self.request.query_params.get('teacher_id')
         if teacher_id:

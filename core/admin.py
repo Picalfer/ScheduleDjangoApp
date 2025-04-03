@@ -1,18 +1,53 @@
+from datetime import timedelta
+
 from django import forms
 from django.contrib import admin
+from django.utils import timezone
 
 from core.forms import LessonAdminForm
-from core.models import Teacher, Student, Lesson, OpenSlots, BalanceOperation, Client, PhoneNumber
+from core.models import Teacher, Student, Lesson, OpenSlots, BalanceOperation, Client, PhoneNumber, TeacherPayment
+
+
+class TeacherPaymentInline(admin.TabularInline):  # или admin.StackedInline
+    model = TeacherPayment
+    extra = 0  # Не показывать пустые формы для добавления
+    readonly_fields = ('week_start_date', 'lessons_count', 'amount', 'is_paid', 'payment_date')
+    can_delete = False
+
+    def has_add_permission(self, request, obj=None):
+        return False  # Запрещаем добавлять выплаты через inline
 
 
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
+    inlines = [TeacherPaymentInline]
     list_display = ('id', 'get_full_name', 'user')
 
     def get_full_name(self, obj):
         return obj.user.get_full_name()
 
     get_full_name.short_description = 'ФИО'
+
+
+@admin.register(TeacherPayment)
+class TeacherPaymentAdmin(admin.ModelAdmin):
+    list_display = ('teacher', 'week_start_date', 'week_end_date', 'lessons_count',
+                    'amount', 'is_paid', 'payment_date')
+    list_filter = ('is_paid', 'teacher', 'week_start_date')
+    search_fields = ('teacher__name',)
+    date_hierarchy = 'week_start_date'
+    actions = ['mark_as_paid']
+
+    def week_end_date(self, obj):
+        return obj.week_start_date + timedelta(days=6)
+
+    week_end_date.short_description = 'Воскресенье'
+
+    def mark_as_paid(self, request, queryset):
+        updated = queryset.update(is_paid=True, payment_date=timezone.now())
+        self.message_user(request, f"Отмечено выплат: {updated}")
+
+    mark_as_paid.short_description = "Отметить как выплаченные"
 
 
 class PhoneNumberInline(admin.TabularInline):

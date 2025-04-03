@@ -82,7 +82,7 @@ export class LessonModal extends Modal {
 
     open(lessonData) {
         this.lessonId = lessonData.id;
-        console.log(this.lessonId)
+        console.log(`Открыт урок под id: ${this.lessonId}`);
 
         // Устанавливаем данные урока
         this.setLessonData(lessonData);
@@ -221,7 +221,6 @@ export class LessonModal extends Modal {
     close() {
         super.close();
         this.form.reset();
-        this.lessonId = null;
         this.topicInput.closest('.form-group').classList.remove('error');
     }
 }

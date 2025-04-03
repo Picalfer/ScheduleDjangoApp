@@ -369,35 +369,36 @@ export class CalendarManager {
             let lessons = [];
             if (response && typeof response === 'object' && Array.isArray(response.results)) {
                 lessons = response.results;
-
-                // Генерируем фейковые уроки для регулярных занятий
-                const fakeLessons = [];
-                const today = new Date();
-                const endDateGeneration = new Date();
-                const futureDays = 30
-                // Генерируем фейковые уроки на n дней вперед
-                endDateGeneration.setDate(today.getDate() + futureDays);
-
-                lessons.forEach(lesson => {
-                    if (lesson.lesson_type === 'recurring' && lesson.schedule && lesson.schedule.length > 0 && lesson.status === 'scheduled') {
-                        const generatedLessons = this.generateFutureLessons(lesson, endDateGeneration);
-                        fakeLessons.push(...generatedLessons);
-
-                        // Фильтруем фейки, которые совпадают с оригиналом по дате/времени
-                        const filteredGenerated = generatedLessons.filter(fake =>
-                            fake.date !== lesson.date || fake.time !== lesson.time
-                        );
-
-                        fakeLessons.push(...filteredGenerated);
-                    }
-                });
-
-                // Объединяем реальные и фейковые уроки
-                this.lessons = [...lessons, ...fakeLessons];
+            } else if (Array.isArray(response)) {
+                lessons = response;
             } else {
                 console.warn('Unexpected response format, initializing empty lessons');
                 this.lessons = [];
             }
+            // Генерируем фейковые уроки для регулярных занятий
+            const fakeLessons = [];
+            const today = new Date();
+            const endDateGeneration = new Date();
+            const futureDays = 30
+            // Генерируем фейковые уроки на n дней вперед
+            endDateGeneration.setDate(today.getDate() + futureDays);
+
+            lessons.forEach(lesson => {
+                if (lesson.lesson_type === 'recurring' && lesson.schedule && lesson.schedule.length > 0 && lesson.status === 'scheduled') {
+                    const generatedLessons = this.generateFutureLessons(lesson, endDateGeneration);
+                    fakeLessons.push(...generatedLessons);
+
+                    // Фильтруем фейки, которые совпадают с оригиналом по дате/времени
+                    const filteredGenerated = generatedLessons.filter(fake =>
+                        fake.date !== lesson.date || fake.time !== lesson.time
+                    );
+
+                    fakeLessons.push(...filteredGenerated);
+                }
+            });
+
+            // Объединяем реальные и фейковые уроки
+            this.lessons = [...lessons, ...fakeLessons];
 
             this.openSlots = await repository.getOpenSlots(teacherId);
             this.generateTimeSlots();

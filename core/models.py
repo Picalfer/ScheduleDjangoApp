@@ -399,3 +399,5 @@ class TeacherPayment(models.Model):
 
     class Meta:
         unique_together = ['teacher', 'week_start_date']
+        verbose_name = 'Выпплата преподавателю'
+        verbose_name_plural = 'Выплаты преподавателям'
