@@ -401,20 +401,59 @@ class WeeklyPaymentsList(generics.ListAPIView):
         ).select_related('teacher')
 
 
+@require_POST
+def generate_weekly_payments(request):
+    try:
+        calculate_weekly_payments()
+        return JsonResponse({'status': 'success', 'message': 'Выплаты сгенерированы'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+
 @require_GET
 def weekly_payments(request):
     try:
         calculate_weekly_payments()
-        payments = TeacherPayment.objects.filter(is_paid=False).select_related('teacher')
+        # payments = TeacherPayment.objects.filter(is_paid=False).select_related('teacher')
+        payments = TeacherPayment.objects.select_related('teacher')
         data = [{
+            'id': p.id,
             'teacher': p.teacher.user.get_full_name(),
             'week_start': p.week_start_date,
             'week_end': p.week_end_date,
             'lessons': p.lessons_count,
             'amount': float(p.amount),
+            'is_paid': p.is_paid,
             'currency': 'RUB'
         } for p in payments]
 
         return JsonResponse({'status': 'success', 'payments': data})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+
+@require_POST
+def mark_payment_as_paid(request, payment_id):
+    try:
+        payment = TeacherPayment.objects.get(id=payment_id)
+        if payment.is_paid:
+            return JsonResponse({
+                'success': False,
+                'message': 'Этот платёж уже был проведён ранее'
+            })
+
+        # Помечаем как оплаченный
+        payment.is_paid = True
+        payment.payment_date = timezone.now()
+        payment.save()
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Платёж успешно подтверждён'
+        })
+
+    except TeacherPayment.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'Платёж не найден'
+        }, status=404)

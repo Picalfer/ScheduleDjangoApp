@@ -490,6 +490,40 @@ input[type="text"]:focus {
     padding: 40px 0;
 }
 
+.payments-init-content {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    padding: 40px 0;
+}
+
+.submit-button {
+    background-color: var(--primary-color);
+    color: white;
+    /* остальные стили как у вашей текущей кнопки */
+}
+
+.generate-payments-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.generate-payments-btn:hover {
+    background-color: #3e8e41;
+}
+
+.generate-payments-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
 .payments-list {
     max-height: 100%;
     overflow-y: auto;
@@ -497,15 +531,16 @@ input[type="text"]:focus {
 }
 
 .payment-item {
-    background-color: #f9f9f9;
+    background-color: var(--bg);
     border-radius: 8px;
     padding: 15px;
     margin-bottom: 15px;
-    border: 1px solid #eee;
+    border: 1px solid var(--border-color);
 }
 
 .payment-row {
     display: flex;
+    align-items: center;
     justify-content: space-between;
     margin-bottom: 8px;
     color: var(--text-primary);
@@ -523,13 +558,81 @@ input[type="text"]:focus {
 }
 
 .payment-status.paid {
-    background-color: #e8f5e9;
+    background-color: #c0fac4;
     color: #2e7d32;
 }
 
 .payment-status.unpaid {
-    background-color: #ffebee;
+    background-color: #ffccd3;
     color: #c62828;
+}
+
+.pay-btn {
+    /* Основные стили */
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    /* Цветовая схема */
+    background-color: var(--primary-color); /* #6366f1 */
+    color: white;
+
+    /* Эффекты при взаимодействии */
+
+    &:hover {
+        background-color: color-mix(in srgb, var(--primary-color) 90%, black);
+        transform: translateY(-1px);
+    }
+
+    &:active {
+        transform: translateY(0);
+        background-color: color-mix(in srgb, var(--primary-color) 80%, black);
+    }
+
+    /* Состояние "Оплачено" */
+
+    &.paid {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        cursor: default;
+
+        &:hover {
+            background-color: #e8f5e9;
+            transform: none;
+        }
+    }
+
+    /* Стиль для disabled состояния */
+
+    &[disabled] {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        cursor: not-allowed;
+        opacity: 0.8;
+    }
+
+    &:not([disabled]):hover {
+        background-color: color-mix(in srgb, var(--primary-color) 90%, black);
+        transform: translateY(-1px);
+    }
+}
+
+.spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 .payment-divider {
