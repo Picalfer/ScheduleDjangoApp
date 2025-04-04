@@ -439,3 +439,23 @@
     background: linear-gradient(45deg, var(--header-bg), var(--open-window-bg));
     border-left: 3px solid var(--primary-color);
 }
+
+/* Яркая подсветка текущего часа в колонке времени */
+.time-column .current-time-slot {
+    color: #ffffff;
+    background-color: rgba(var(--primary-color-rgb), 0.8);
+    position: relative;
+}
+
+/* Линия текущего часа во всех днях */
+.hour.current-hour-line {
+    position: relative;
+}
+
+/*
+!* Подсветка текущего часа *!
+.current-hour {
+    background-color: rgba(var(--primary-color-rgb), 0.2) !important;
+    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.5);
+    position: relative;
+}*/
