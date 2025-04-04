@@ -17,6 +17,7 @@ export class TeachersModal extends Modal {
         try {
             const response = await repository.getTeachers();
             this.teachers = response?.results || [];
+            console.log(this.teachers)
 
             if (this.teachers.length === 0) {
                 this.updateContent('<p class="no-teachers">Нет доступных учителей</p>');

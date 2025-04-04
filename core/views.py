@@ -418,6 +418,7 @@ def weekly_payments(request):
         payments = TeacherPayment.objects.select_related('teacher')
         data = [{
             'id': p.id,
+            'teacher_id': p.teacher.id,
             'teacher': p.teacher.user.get_full_name(),
             'week_start': p.week_start_date,
             'week_end': p.week_end_date,

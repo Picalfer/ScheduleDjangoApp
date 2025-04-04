@@ -535,7 +535,6 @@ input[type="text"]:focus {
     border-radius: 8px;
     padding: 15px;
     margin-bottom: 15px;
-    border: 1px solid var(--border-color);
 }
 
 .payment-row {
@@ -544,6 +543,53 @@ input[type="text"]:focus {
     justify-content: space-between;
     margin-bottom: 8px;
     color: var(--text-primary);
+    padding-bottom: 3px;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.teacher-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--primary);
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+    border: 1px solid rgba(var(--primary-color-rgb), 0.2);
+}
+
+.teacher-link:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.2);
+    color: var(--text-primary);
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.teacher-link:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Добавляем иконку "календаря" для наглядности */
+.teacher-link::after {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' /%3E%3C/svg%3E");
+    background-size: contain;
+    opacity: 0.7;
+}
+
+/* Убрать подчеркивание у последней строки */
+.payment-item .payment-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
 }
 
 .payment-label {
@@ -625,14 +671,16 @@ input[type="text"]:focus {
     display: inline-block;
     width: 12px;
     height: 12px;
-    border: 2px solid rgba(255,255,255,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
     border-top-color: white;
     animation: spin 1s ease-in-out infinite;
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .payment-divider {

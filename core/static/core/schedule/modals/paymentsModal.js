@@ -1,6 +1,7 @@
 import {Modal} from './modal.js';
 import {formatDate} from "../utils.js";
 import {repository} from "../../home.js";
+import {TeachersModal} from "./teachersModal.js";
 
 export class PaymentsModal extends Modal {
     constructor(options = {}) {
@@ -10,37 +11,14 @@ export class PaymentsModal extends Modal {
             ...options
         });
 
-        this.initPaymentsContent();
+        this.loadPaymentsData();
         this.setupPaymentsEvents();
-    }
-
-    initPaymentsContent() {
-        const initialContent = `
-        <div class="payments-init-content">
-            <button class="submit-button" id="load-payments-btn">
-                Посмотреть выплаты
-            </button>
-            <button class="generate-payments-btn" id="generate-payments-btn">
-                Сгенерировать выплаты
-            </button>
-        </div>
-    `;
-
-        this.updateContent(initialContent);
     }
 
     setupPaymentsEvents() {
         this.modalElement.addEventListener('click', async (e) => {
-            if (e.target.id === 'load-payments-btn') {
-                await this.loadPaymentsData();
-            }
-
             if (e.target.id === 'generate-payments-btn') {
                 await this.generatePayments();
-            }
-
-            if (e.target.classList.contains('export-payments-btn')) {
-                this.exportPayments();
             }
         });
     }
@@ -78,13 +56,7 @@ export class PaymentsModal extends Modal {
     }
 
     async loadPaymentsData() {
-        const btn = this.modalElement.querySelector('#load-payments-btn');
-        const generateBtn = this.modalElement.querySelector('#generate-payments-btn');
         try {
-            btn.disabled = true;
-            if (generateBtn) generateBtn.disabled = true;
-            btn.textContent = 'Загрузка...';
-
             const response = await fetch('/payments/');
             const data = await response.json();
 
@@ -102,12 +74,6 @@ export class PaymentsModal extends Modal {
                 </button>
             </div>
         `);
-        } finally {
-            if (btn) {
-                btn.disabled = false;
-                btn.textContent = 'Посмотреть выплаты';
-            }
-            if (generateBtn) generateBtn.disabled = false;
         }
     }
 
@@ -122,16 +88,21 @@ export class PaymentsModal extends Modal {
       <div class="form-group payment-item" data-payment-id="${payment.id}">
         <div class="payment-row">
           <span class="payment-label">Преподаватель:</span>
-          <span class="payment-value">${payment.teacher}</span>
+          <span class="payment-value"><button class="teacher-link" data-teacher-id="${payment.teacher_id}">${payment.teacher}</button></span>
         </div>
         <div class="payment-row">
           <span class="payment-label">Период:</span>
           <span class="payment-value">${formatDate(new Date(payment.week_start))} - ${formatDate(new Date(payment.week_end))}</span>
         </div>
         <div class="payment-row">
-          <span class="payment-label">Уроков:</span>
-          <span class="payment-value">${payment.lessons}</span>
-        </div>
+  <span class="payment-label">Уроков:</span>
+  <span class="payment-value lessons-count">
+    <svg class="lesson-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+    </svg>
+    ${payment.lessons}
+  </span>
+</div>
         <div class="payment-row">
           <span class="payment-label">Сумма:</span>
           <span class="payment-value">${payment.amount} руб.</span>
@@ -151,7 +122,6 @@ export class PaymentsModal extends Modal {
                         ${payment.is_paid ? '✓ Оплачено' : 'Оплатить'}
             </button>
         </div>
-        <hr class="payment-divider">
       </div>
     `).join('');
 
@@ -164,18 +134,38 @@ export class PaymentsModal extends Modal {
         // Обновляем футер
         const footer = this.modalElement.querySelector('.modal-footer');
         footer.innerHTML = `
-      <button class="cancel-button">Закрыть</button>
-      <button class="submit-button export-payments-btn">Экспорт</button>
+            <button class="generate-payments-btn" id="generate-payments-btn">
+                Сгенерировать выплаты
+            </button>
     `;
-        this.setupPaymentButtons();
+        this.setupPaymentElements();
     }
 
-    setupPaymentButtons() {
+    setupPaymentElements() {
         document.querySelectorAll('.pay-btn:not([disabled])').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const paymentId = e.target.dataset.paymentId;
                 await this.processPayment(paymentId);
             });
+        });
+
+        const self = this;
+
+        document.querySelector('.payments-list').addEventListener('click', function (e) {
+            const teacherLink = e.target.closest('.teacher-link');
+            if (teacherLink) {
+                const teacherName = teacherLink.textContent
+                console.log(teacherName)
+                const teacherManager = new TeachersModal()
+                const teacherId = teacherLink.getAttribute('data-teacher-id');
+                self.close();
+                teacherManager.showTeacherSchedule(teacherId);
+                teacherManager.showSchedulePanel(teacherName);
+
+                // Опционально: добавить визуальную обратную связь
+                teacherLink.classList.add('clicked');
+                setTimeout(() => teacherLink.classList.remove('clicked'), 200);
+            }
         });
     }
 
@@ -246,10 +236,5 @@ export class PaymentsModal extends Modal {
             btn.textContent = 'Оплатить';
             showNotification(error.message, 'error');
         }
-    }
-
-    exportPayments() {
-        console.log('Экспорт данных о выплатах...');
-        // Реализация экспорта
     }
 }
