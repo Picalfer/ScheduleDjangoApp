@@ -1,5 +1,5 @@
 import {Modal} from './modal.js';
-import {calendarManager, repository} from '../../home.js';
+import {calendarManager, repository} from '../home.js';
 
 export class TeachersModal extends Modal {
     constructor(options = {}) {

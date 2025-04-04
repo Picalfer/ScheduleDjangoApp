@@ -1,5 +1,5 @@
 import {DAYS_OF_WEEK, showNotification} from "./utils.js";
-import {settingsManager, repository} from "../home.js";
+import {settingsManager, repository} from "./home.js";
 import {WeekManager} from "./weekManager.js";
 import {LessonManager} from "./lessonManager.js";
 

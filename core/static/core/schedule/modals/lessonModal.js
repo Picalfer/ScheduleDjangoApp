@@ -1,5 +1,5 @@
 import {Modal} from './modal.js';
-import {calendarManager, repository} from "../../home.js";
+import {calendarManager, repository} from "../home.js";
 import * as utils from '../utils.js';
 import {showNotification} from '../utils.js';
 

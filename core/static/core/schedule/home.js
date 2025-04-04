@@ -1,10 +1,10 @@
-import {CalendarManager} from "./schedule/calendarManager.js";
-import {SettingsManager} from "./schedule/settingsManager.js";
-import {TeachersModal} from "./schedule/modals/teachersModal.js";
-import {PaymentsModal} from "./schedule/modals/paymentsModal.js";
-import {showNotification} from "./schedule/utils.js";
-import {LessonModal} from "./schedule/modals/lessonModal.js";
-import {Repository} from "./schedule/repository.js";
+import {CalendarManager} from "./calendarManager.js";
+import {SettingsManager} from "./settingsManager.js";
+import {TeachersModal} from "./modals/teachersModal.js";
+import {PaymentsModal} from "./modals/paymentsModal.js";
+import {showNotification} from "./utils.js";
+import {LessonModal} from "./modals/lessonModal.js";
+import {Repository} from "./repository.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     if (userData.isAdmin) {
