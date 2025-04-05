@@ -175,10 +175,10 @@ FORMAT_MODULE_PATH = [
 
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Для collectstatic
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # Для collectstatic
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'core/static'),
+    BASE_DIR / 'core' / 'static',  # путь к статике приложения core
 ]
 
 # Универсальная настройка STORAGES (работает и в DEBUG, и в production)
@@ -187,6 +187,12 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+)
 
 
 # Default primary key field type
