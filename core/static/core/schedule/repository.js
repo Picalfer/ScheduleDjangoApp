@@ -1,7 +1,10 @@
 export class Repository {
     constructor() {
         this.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
-        this.currentUserId = window.currentUserId;
+        this.currentUserId = currentUserId;
+        if (typeof currentUserId === 'undefined') {
+            throw new Error('currentUserId is not defined! Check script loading order');
+        }
     }
 
     getCookie(name) {
@@ -72,10 +75,7 @@ export class Repository {
 
     async updateOpenSlots(openSlots, teacherId = this.currentUserId) {
         try {
-            console.log(teacherId)
-            console.log(this.currentUserId)
-            console.log(window.currentUserId)
-            const response = await fetch(`/api/open-slots/${window.currentUserId}/update/`, {
+            const response = await fetch(`/api/open-slots/${teacherId}/update/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
