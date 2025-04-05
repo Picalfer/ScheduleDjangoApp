@@ -7,21 +7,18 @@ import {LessonModal} from "./modals/lessonModal.js";
 import {Repository} from "./repository.js";
 
 export function initApp() {
+    if (userData.isAdmin) {
+        setAdminTools()
+    }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        if (userData.isAdmin) {
-            setAdminTools()
+    window.openLessonModal = (lessonData) => {
+        if (settingsManager.isOpenWindowsMode) {
+            showNotification("Недоступно в режиме выбора открытых окон", "error");
+        } else {
+            const lessonModal = new LessonModal();
+            lessonModal.open(lessonData);
         }
-
-        window.openLessonModal = (lessonData) => {
-            if (settingsManager.isOpenWindowsMode) {
-                showNotification("Недоступно в режиме выбора открытых окон", "error");
-            } else {
-                const lessonModal = new LessonModal();
-                lessonModal.open(lessonData);
-            }
-        }
-    });
+    }
 
     function setAdminTools() {
         const teachersBtn = document.getElementById('teachers-button')
@@ -35,7 +32,6 @@ export function initApp() {
         })
     }
 }
-
 
 export const repository = new Repository();
 export const calendarManager = new CalendarManager();
