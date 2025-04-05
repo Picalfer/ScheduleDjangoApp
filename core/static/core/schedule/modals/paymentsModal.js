@@ -1,6 +1,6 @@
 import {Modal} from './modal.js';
 import {formatDate} from "../utils.js";
-import {repository} from "../home.js";
+import {repository} from "../app.js";
 import {TeachersModal} from "./teachersModal.js";
 
 export class PaymentsModal extends Modal {

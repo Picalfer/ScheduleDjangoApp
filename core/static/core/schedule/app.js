@@ -23,10 +23,6 @@ export function initApp() {
         }
     });
 
-    export const repository = new Repository();
-    export const calendarManager = new CalendarManager();
-    export const settingsManager = new SettingsManager(calendarManager);
-
     function setAdminTools() {
         const teachersBtn = document.getElementById('teachers-button')
         teachersBtn.addEventListener('click', () => {
@@ -39,3 +35,8 @@ export function initApp() {
         })
     }
 }
+
+
+export const repository = new Repository();
+export const calendarManager = new CalendarManager();
+export const settingsManager = new SettingsManager(calendarManager);
