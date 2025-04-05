@@ -1,4 +1,4 @@
-import {initApp} from './schedule/app.js';
+import {initApp} from './app.js';
 
 document.addEventListener("DOMContentLoaded", function () {
     initApp();
