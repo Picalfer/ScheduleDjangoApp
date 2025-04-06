@@ -371,7 +371,18 @@ def user_logout(request):
 
 @login_required
 def home(request):
-    return render(request, 'core/home.html', context={"current_user_id": request.user.id})
+    context = {
+        "user_id": request.user.id,
+        "teacher_id": None
+    }
+
+    try:
+        teacher = Teacher.objects.get(user=request.user)
+        context["teacher_id"] = teacher.id
+    except Teacher.DoesNotExist:
+        pass  # Оставляем teacher_id=None если пользователь не преподаватель
+
+    return render(request, 'core/home.html', context=context)
 
 
 @login_required

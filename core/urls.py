@@ -24,5 +24,5 @@ urlpatterns = [
     path('api/cancel-lesson/<int:lesson_id>/', views.cancel_lesson, name='cancel-lesson'),
     path('generate-payments/', generate_weekly_payments, name='generate-payments'),
     path('payments/', weekly_payments, name='payments'),
-path('api/payments/<int:payment_id>/pay/', mark_payment_as_paid, name='mark_payment_paid'),
+    path('api/payments/<int:payment_id>/pay/', mark_payment_as_paid, name='mark_payment_paid'),
 ]

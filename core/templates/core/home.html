@@ -237,8 +237,10 @@
 {% block scripts %}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        let currentUserId = {{ current_user_id }};
+        let currentUserId = {{ user_id }};
+        let currentTeacherId = {{ teacher_id }}
         console.log(`UserId: ${currentUserId}`)
+        console.log(`TeacherId: ${currentTeacherId}`)
         const userData = {
             isAdmin: {% if request.user.is_staff %}true{% else %}false{% endif %},
             username: "{{ request.user.username|escapejs }}"

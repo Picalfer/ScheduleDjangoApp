@@ -2,6 +2,7 @@ export class Repository {
     constructor() {
         this.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
         this.currentUserId = currentUserId;
+        this.currentTeacherId = currentTeacherId
         if (typeof currentUserId === 'undefined') {
             throw new Error('currentUserId is not defined! Check script loading order');
         }
@@ -58,7 +59,7 @@ export class Repository {
         }
     }
 
-    async getOpenSlots(teacherId = this.currentUserId) {
+    async getOpenSlots(teacherId = this.currentTeacherId) {
         try {
             const response = await fetch(`/api/open-slots/${teacherId}/`);
             if (!response.ok) {
@@ -73,7 +74,7 @@ export class Repository {
         }
     }
 
-    async updateOpenSlots(openSlots, teacherId = this.currentUserId) {
+    async updateOpenSlots(openSlots, teacherId = this.currentTeacherId) {
         try {
             const response = await fetch(`/api/open-slots/${teacherId}/update/`, {
                 method: 'PUT',
