@@ -3,6 +3,7 @@ import logging
 from datetime import timedelta
 
 from django.db import transaction
+from django.db.models import F
 
 from .services.payment_service import calculate_weekly_payments
 
@@ -46,6 +47,8 @@ def complete_lesson(request, lesson_id):
         if not request.user.is_authenticated:
             return JsonResponse({'status': 'error', 'message': 'Требуется авторизация'}, status=401)
 
+        # Чтобы админ мог проводить уроки других преподавателей
+        # if request.user != lesson.teacher.user and not request.user.is_staff:
         if request.user != lesson.teacher.user:
             return JsonResponse({'status': 'error', 'message': 'Можно отмечать только свои уроки'}, status=403)
 
@@ -54,13 +57,14 @@ def complete_lesson(request, lesson_id):
 
         try:
             if not lesson.student.spend_lesson():
-                logger.warning("Недостаточно средств на балансе")
+                logger.warning(f"Недостаточно средств у студента {lesson.student.id}")
                 return JsonResponse({
                     'status': 'error',
                     'message': f'У клиента {lesson.student.client.name} текущий баланс уроков: {lesson.student.client.balance}',
                     'current_balance': lesson.student.client.balance
                 }, status=402)
         except ValueError as e:
+            logger.error(f"Ошибка списания урока: {str(e)}")
             return JsonResponse({
                 'status': 'error',
                 'message': str(e)
@@ -73,7 +77,6 @@ def complete_lesson(request, lesson_id):
         lesson.completed_at = now()
         lesson.save()
 
-        from django.db.models import F
         client = lesson.student.client
         client.refresh_from_db()
 
@@ -93,13 +96,16 @@ def complete_lesson(request, lesson_id):
 
         # Создаем следующий урок для повторяющихся занятий
         if lesson.lesson_type == 'recurring':
-            next_lesson = lesson.create_next_lesson()
-            if next_lesson:
-                response_data['next_lesson'] = {
-                    'id': next_lesson.id,
-                    'date': next_lesson.date.strftime('%Y-%m-%d'),
-                    'time': next_lesson.time.strftime('%H:%M')
-                }
+            try:
+                next_lesson = lesson.create_next_lesson()
+                if next_lesson:
+                    response_data['next_lesson'] = {
+                        'id': next_lesson.id,
+                        'date': next_lesson.date.strftime('%Y-%m-%d'),
+                        'time': next_lesson.time.strftime('%H:%M')
+                    }
+            except Exception as e:
+                logger.error(f'Ошибка создания следующего урока: {str(e)}', exc_info=True)
 
         return JsonResponse(response_data)
 
