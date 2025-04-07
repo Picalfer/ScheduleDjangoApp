@@ -226,7 +226,7 @@ export class CalendarManager {
         this.updateScheduleDisplay();
     }
 
-    async loadSchedule(teacherId = currentTeacherId, startDate = null, endDate = null) {
+    async loadSchedule(teacherId = currentUserId, startDate = null, endDate = null) {
         try {
             const {start: weekStart, end: weekEnd} = this.weekManager.getWeekRange(this.weekManager.currentWeekOffset);
             const formatDate = (date) => date.toISOString().split('T')[0];
@@ -235,7 +235,7 @@ export class CalendarManager {
             const effectiveTeacherId = teacherId || await this.getMyId();
 
             const response = await repository.getLessons(effectiveTeacherId, queryStartDate, queryEndDate);
-            console.log('Lessons: ', response);
+            console.log(`Lessons for user ${teacherId} (search by user id): : `, response);
 
             let lessons = [];
             if (response && typeof response === 'object' && Array.isArray(response.results)) {

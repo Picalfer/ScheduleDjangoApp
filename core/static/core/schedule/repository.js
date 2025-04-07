@@ -66,7 +66,7 @@ export class Repository {
                 throw new Error(`Ошибка: ${response.status} ${response.statusText}`);
             }
             const data = await response.json();
-            console.log('Open slots: ', data.weekly_open_slots);
+            console.log(`Open slots for user ${teacherId} (search by user id): `, data.weekly_open_slots);
             return data.weekly_open_slots;
         } catch (error) {
             console.error("Ошибка при получении свободных слотов:", error);

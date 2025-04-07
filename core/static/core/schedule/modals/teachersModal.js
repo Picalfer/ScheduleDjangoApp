@@ -50,7 +50,7 @@ export class TeachersModal extends Modal {
             ${teacher.education ? `<div class="teacher-education">${teacher.education}</div>` : ''}
           </div>
           <button class="submit-button teacher-schedule-btn" 
-                  data-teacher-id="${teacher.id}"
+                  data-teacher-id="${teacher.user}"
                   data-teacher-name="${displayInfo}">
             Расписание
           </button>
@@ -84,7 +84,7 @@ export class TeachersModal extends Modal {
     }
 
     showTeacherSchedule(teacherId) {
-        console.log(`Просмотр расписания для учителя с ID: ${teacherId}`);
+        console.log(`Просмотр расписания для User с ID: ${teacherId}`);
         calendarManager.loadSchedule(teacherId);
     }
 
