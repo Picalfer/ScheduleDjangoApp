@@ -2,6 +2,8 @@ import json
 import logging
 from datetime import timedelta
 
+from django.db import transaction
+
 from .services.payment_service import calculate_weekly_payments
 
 logger = logging.getLogger(__name__)
@@ -110,6 +112,7 @@ def complete_lesson(request, lesson_id):
 
 
 @require_POST
+@transaction.atomic
 def cancel_lesson(request, lesson_id):
     try:
         lesson = Lesson.objects.select_related('student', 'teacher__user').select_for_update().get(id=lesson_id)
@@ -118,6 +121,8 @@ def cancel_lesson(request, lesson_id):
         if not request.user.is_authenticated:
             return JsonResponse({'status': 'error', 'message': 'Требуется авторизация'}, status=401)
 
+        # Чтобы админ мог отменять уроки других преподавателей
+        # if request.user != lesson.teacher.user and not request.user.is_staff:
         if request.user != lesson.teacher.user:
             return JsonResponse({'status': 'error', 'message': 'Можно отменять только свои уроки'}, status=403)
 
