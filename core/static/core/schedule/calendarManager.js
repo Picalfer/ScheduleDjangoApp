@@ -226,16 +226,18 @@ export class CalendarManager {
         this.updateScheduleDisplay();
     }
 
-    async loadSchedule(teacherId = currentUserId, startDate = null, endDate = null) {
+    async loadSchedule(teacherId = currentTeacherId, userId = currentUserId, startDate = null, endDate = null) {
         try {
             const {start: weekStart, end: weekEnd} = this.weekManager.getWeekRange(this.weekManager.currentWeekOffset);
             const formatDate = (date) => date.toISOString().split('T')[0];
             const queryStartDate = startDate || formatDate(weekStart);
             const queryEndDate = endDate || formatDate(weekEnd);
-            const effectiveTeacherId = teacherId || await this.getMyId();
+
+            const effectiveTeacherId = teacherId || await this.getMyTeacherId();
+            const effectiveUserId = userId || await this.getMyId();
 
             const response = await repository.getLessons(effectiveTeacherId, queryStartDate, queryEndDate);
-            console.log(`Lessons for user ${teacherId} (search by user id): : `, response);
+            console.log(`Lessons for teacher ${teacherId} (search by teacher id): `, response);
 
             let lessons = [];
             if (response && typeof response === 'object' && Array.isArray(response.results)) {
@@ -271,7 +273,7 @@ export class CalendarManager {
             // Объединяем реальные и фейковые уроки
             this.lessonManager.lessons = [...lessons, ...fakeLessons];
 
-            this.openSlots = await repository.getOpenSlots(teacherId);
+            this.openSlots = await repository.getOpenSlots(effectiveUserId);
             this.generateTimeSlots();
             this.updateCalendar();
             this.updateScheduleDisplay();

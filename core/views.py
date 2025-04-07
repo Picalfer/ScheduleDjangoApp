@@ -445,6 +445,7 @@ def weekly_payments(request):
         data = [{
             'id': p.id,
             'teacher_id': p.teacher.id,
+            'user_id': p.teacher.user.id,
             'teacher': p.teacher.user.get_full_name(),
             'week_start': p.week_start_date,
             'week_end': p.week_end_date,

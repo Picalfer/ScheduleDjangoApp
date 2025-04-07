@@ -59,14 +59,14 @@ export class Repository {
         }
     }
 
-    async getOpenSlots(teacherId = this.currentUserId) {
+    async getOpenSlots(userId = this.currentUserId) {
         try {
-            const response = await fetch(`/api/open-slots/${teacherId}/`);
+            const response = await fetch(`/api/open-slots/${userId}/`);
             if (!response.ok) {
                 throw new Error(`Ошибка: ${response.status} ${response.statusText}`);
             }
             const data = await response.json();
-            console.log(`Open slots for user ${teacherId} (search by user id): `, data.weekly_open_slots);
+            console.log(`Open slots for user ${userId} (search by user id): `, data.weekly_open_slots);
             return data.weekly_open_slots;
         } catch (error) {
             console.error("Ошибка при получении свободных слотов:", error);
@@ -74,9 +74,9 @@ export class Repository {
         }
     }
 
-    async updateOpenSlots(openSlots, teacherId = this.currentUserId) {
+    async updateOpenSlots(openSlots, userId = this.currentUserId) {
         try {
-            const response = await fetch(`/api/open-slots/${teacherId}/update/`, {
+            const response = await fetch(`/api/open-slots/${userId}/update/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

@@ -88,7 +88,7 @@ export class PaymentsModal extends Modal {
       <div class="form-group payment-item" data-payment-id="${payment.id}">
         <div class="payment-row">
           <span class="payment-label">Преподаватель:</span>
-          <span class="payment-value"><button class="teacher-link" data-teacher-id="${payment.teacher_id}">${payment.teacher}</button></span>
+          <span class="payment-value"><button class="teacher-link" data-teacher-id="${payment.teacher_id}" data-user-id="${payment.user_id}">${payment.teacher}</button></span>
         </div>
         <div class="payment-row">
           <span class="payment-label">Период:</span>
@@ -158,8 +158,9 @@ export class PaymentsModal extends Modal {
                 console.log(teacherName)
                 const teacherManager = new TeachersModal()
                 const teacherId = teacherLink.getAttribute('data-teacher-id');
+                const userId = teacherLink.getAttribute('data-user-id');
                 self.close();
-                teacherManager.showTeacherSchedule(teacherId);
+                teacherManager.showTeacherSchedule(teacherId, userId);
                 teacherManager.showSchedulePanel(teacherName);
 
                 // Опционально: добавить визуальную обратную связь

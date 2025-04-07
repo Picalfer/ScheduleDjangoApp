@@ -4,9 +4,23 @@ from datetime import date as date_type, datetime, timedelta, time
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
-from django.db.models import F
 
 logger = logging.getLogger(__name__)
+
+
+class Teacher(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    @property
+    def name(self):
+        return f"{self.user.first_name} {self.user.last_name}".strip()
+
+    def __str__(self):
+        return self.user.get_full_name() or self.user.username
+
+    class Meta:
+        verbose_name = 'Преподаватель'
+        verbose_name_plural = 'Преподаватели'
 
 
 class PhoneNumber(models.Model):
@@ -37,21 +51,6 @@ class PhoneNumber(models.Model):
 
     def __str__(self):
         return f"{self.number} ({self.note})" if self.note else self.number
-
-
-class Teacher(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-    @property
-    def name(self):
-        return f"{self.user.first_name} {self.user.last_name}".strip()
-
-    def __str__(self):
-        return self.user.get_full_name() or self.user.username
-
-    class Meta:
-        verbose_name = 'Преподаватель'
-        verbose_name_plural = 'Преподаватели'
 
 
 class Client(models.Model):
