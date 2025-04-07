@@ -50,7 +50,8 @@ export class TeachersModal extends Modal {
             ${teacher.education ? `<div class="teacher-education">${teacher.education}</div>` : ''}
           </div>
           <button class="submit-button teacher-schedule-btn" 
-                  data-teacher-id="${teacher.user}"
+                  data-teacher-id="${teacher.id}"
+                  data-user-id="${teacher.user}"
                   data-teacher-name="${displayInfo}">
             Расписание
           </button>
@@ -70,9 +71,10 @@ export class TeachersModal extends Modal {
             // Обработка кнопки "Расписание"
             if (e.target.classList.contains('teacher-schedule-btn')) {
                 const teacherId = e.target.dataset.teacherId;
+                const userId = e.target.dataset.userId;
                 const teacherName = e.target.dataset.teacherName;
                 this.close();
-                this.showTeacherSchedule(teacherId);
+                this.showTeacherSchedule(teacherId, userId);
                 this.showSchedulePanel(teacherName);
             }
 
@@ -83,9 +85,9 @@ export class TeachersModal extends Modal {
         });
     }
 
-    showTeacherSchedule(teacherId) {
-        console.log(`Просмотр расписания для User с ID: ${teacherId}`);
-        calendarManager.loadSchedule(teacherId);
+    showTeacherSchedule(teacherId, userId) {
+        console.log(`Просмотр расписания для User с ID: ${userId}, TeacherID: ${teacherId}`);
+        calendarManager.loadSchedule(teacherId, userId);
     }
 
     showSchedulePanel(teacherName) {
