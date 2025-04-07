@@ -286,12 +286,12 @@ def create_lesson(request):
 
 
 @require_http_methods(["GET"])
-def get_open_slots(request, user_id):
+def get_open_slots(request, teacher_id):
     try:
-        user = get_object_or_404(User, id=user_id)
-        open_slots = get_object_or_404(OpenSlots, teacher=user)
+        teacher = get_object_or_404(User, id=teacher_id)
+        open_slots = get_object_or_404(OpenSlots, teacher=teacher)
         return JsonResponse({
-            "user": user.id,
+            "teacher": teacher.id,
             "weekly_open_slots": open_slots.weekly_open_slots
         })
     except User.DoesNotExist as e:
@@ -301,16 +301,16 @@ def get_open_slots(request, user_id):
 
 
 @require_http_methods(["PUT"])
-def update_open_slots(request, user_id):
+def update_open_slots(request, teacher_id):
     try:
-        user = get_object_or_404(User, id=user_id)
-        open_slots = get_object_or_404(OpenSlots, teacher=user)
+        teacher = get_object_or_404(User, id=teacher_id)
+        open_slots = get_object_or_404(OpenSlots, teacher=teacher)
         data = json.loads(request.body)
         open_slots.weekly_open_slots = data.get("weekly_open_slots", {})
         open_slots.full_clean()  # Валидация данных
         open_slots.save()
         return JsonResponse({
-            "user": user.id,
+            "teacher": teacher.id,
             "weekly_open_slots": open_slots.weekly_open_slots
         })
     except ValidationError as e:
