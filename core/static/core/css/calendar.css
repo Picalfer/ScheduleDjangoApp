@@ -1,13 +1,9 @@
 
 #schedule-container {
-    width: 100%;
-    margin: 0 auto;
     border: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     height: 100%;
-    min-height: 600px;
-    overflow: hidden;
     background: linear-gradient(180deg, var(--bg) 0%, var(--header-bg) 30%, var(--header-bg) 100%);
 }
 
@@ -38,7 +34,7 @@
     display: flex;
     background-color: var(--header-bg);
     border-bottom: 1px solid var(--border-color);
-    padding-right: 8px;
+    padding-right: var(--scrollbar-width);
     color: var(--text-primary);
 }
 
@@ -71,11 +67,7 @@
     display: flex;
     scrollbar-gutter: stable;
     overflow-y: auto;
-    flex: 0 1 auto;
-    height: 83vh;
-    position: relative;
-    min-height: 0;
-    background-color: white;
+    flex: 1;
 }
 
 .time-column {
@@ -252,7 +244,6 @@
         transform: translateY(0);
     }
 }
-
 
 
 #week-info-left {
