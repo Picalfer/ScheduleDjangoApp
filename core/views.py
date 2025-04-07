@@ -33,6 +33,7 @@ from .serializers import LessonSerializer, TeacherSerializer, StudentSerializer,
 
 
 @require_POST
+@transaction.atomic
 def complete_lesson(request, lesson_id):
     try:
         lesson = Lesson.objects.select_related(
