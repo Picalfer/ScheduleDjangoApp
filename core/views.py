@@ -37,11 +37,13 @@ from .serializers import LessonSerializer, TeacherSerializer, StudentSerializer,
 @transaction.atomic
 def complete_lesson(request, lesson_id):
     try:
-        lesson = Lesson.objects.select_related(
-            'student',
-            'student__client',
-            'teacher__user'
-        ).select_for_update().get(id=lesson_id)
+        # Основной запрос без select_related для nullable полей
+        lesson = Lesson.objects.select_for_update().get(id=lesson_id)
+
+        # Отдельно подгружаем связанные объекты
+        lesson.student = Student.objects.get(id=lesson.student_id)
+        lesson.teacher = Teacher.objects.get(id=lesson.teacher_id)
+
         data = json.loads(request.body)
 
         if not request.user.is_authenticated:

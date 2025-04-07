@@ -4,6 +4,7 @@ from datetime import date as date_type, datetime, timedelta, time
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
+from django.db.models import F
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +85,7 @@ class Client(models.Model):
             notes=note or f"Пополнение баланса на {amount} уроков"
         )
 
+    @transaction.atomic
     def spend_lesson(self, student, note=''):
         """Атомарное списание урока с баланса"""
         with transaction.atomic():
