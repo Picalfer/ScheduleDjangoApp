@@ -36,7 +36,8 @@ SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-&2ce*-1i(v#76_*64
 
 ALLOWED_HOSTS = [
     'schedule-app.dokka2.duckdns.org',  # Основной домен
-    '.dokka2.duckdns.org',  # Все поддомены (*.dokka2.duckdns.org)
+    '.dokka2.duckdns.org',  # Все поддомены (*.dokka2.duckdns.org)\
+    '45.88.90.91',
     'localhost',  # Для локального тестирования (если нужно)
     '127.0.0.1',  # Для дебага
 ]
