@@ -19,20 +19,21 @@ export function initApp() {
             lessonModal.open(lessonData);
         }
     }
-
-    function setAdminTools() {
-        const teachersBtn = document.getElementById('teachers-button')
-        teachersBtn.addEventListener('click', () => {
-            const teachersModal = new TeachersModal().open();
-        })
-
-        const paymentsBtn = document.getElementById("payments-button");
-        paymentsBtn.addEventListener('click', async function () {
-            const paymentsModal = new PaymentsModal().open();
-        })
-    }
 }
 
+function setAdminTools() {
+    const teachersBtn = document.getElementById('teachers-button')
+    teachersBtn.addEventListener('click', () => {
+        const teachersModal = new TeachersModal().open();
+    })
+
+    const paymentsBtn = document.getElementById("payments-button");
+    paymentsBtn.addEventListener('click', async function () {
+        const paymentsModal = new PaymentsModal().open();
+    })
+}
+
+// Важен порядок инициализации
 export const repository = new Repository();
 export const calendarManager = new CalendarManager();
-export const settingsManager = new SettingsManager(calendarManager);
+export const settingsManager = new SettingsManager();
