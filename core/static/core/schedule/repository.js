@@ -59,9 +59,9 @@ export class Repository {
         }
     }
 
-    async getOpenSlots(teacherId = this.currentTeacherId) {
+    async getOpenSlots(userId = this.currentUserId) {
         try {
-            const response = await fetch(`/api/open-slots/${teacherId}/`);
+            const response = await fetch(`/api/open-slots/${userId}/`);
             if (!response.ok) {
                 throw new Error(`Ошибка: ${response.status} ${response.statusText}`);
             }
@@ -74,9 +74,9 @@ export class Repository {
         }
     }
 
-    async updateOpenSlots(openSlots, teacherId = this.currentTeacherId) {
+    async updateOpenSlots(openSlots, userId = this.currentUserId) {
         try {
-            const response = await fetch(`/api/open-slots/${teacherId}/update/`, {
+            const response = await fetch(`/api/open-slots/${userId}/update/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

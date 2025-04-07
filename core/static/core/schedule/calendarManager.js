@@ -232,7 +232,7 @@ export class CalendarManager {
             const formatDate = (date) => date.toISOString().split('T')[0];
             const queryStartDate = startDate || formatDate(weekStart);
             const queryEndDate = endDate || formatDate(weekEnd);
-            const effectiveTeacherId = teacherId || await this.getMyTeacherId();
+            const effectiveTeacherId = teacherId || await this.getMyId();
 
             const response = await repository.getLessons(effectiveTeacherId, queryStartDate, queryEndDate);
             console.log('Lessons: ', response);

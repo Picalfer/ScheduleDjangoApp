@@ -3,7 +3,6 @@ import logging
 from datetime import timedelta
 
 from django.db import transaction
-from django.db.models import F
 
 from .services.payment_service import calculate_weekly_payments
 
@@ -287,29 +286,31 @@ def create_lesson(request):
 
 
 @require_http_methods(["GET"])
-def get_open_slots(request, teacher_id):
+def get_open_slots(request, user_id):
     try:
-        teacher = get_object_or_404(User, id=teacher_id)
-        open_slots = get_object_or_404(OpenSlots, teacher=teacher)
+        user = get_object_or_404(User, id=user_id)
+        open_slots = get_object_or_404(OpenSlots, teacher=user)
         return JsonResponse({
-            "teacher": teacher.id,
+            "user": user.id,
             "weekly_open_slots": open_slots.weekly_open_slots
         })
+    except User.DoesNotExist as e:
+        return JsonResponse({'error': str(e), 'message': 'Преподаватель не найден'}, status=404)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
 
 
 @require_http_methods(["PUT"])
-def update_open_slots(request, teacher_id):
+def update_open_slots(request, user_id):
     try:
-        teacher = get_object_or_404(User, id=teacher_id)
-        open_slots = get_object_or_404(OpenSlots, teacher=teacher)
+        user = get_object_or_404(User, id=user_id)
+        open_slots = get_object_or_404(OpenSlots, teacher=user)
         data = json.loads(request.body)
         open_slots.weekly_open_slots = data.get("weekly_open_slots", {})
         open_slots.full_clean()  # Валидация данных
         open_slots.save()
         return JsonResponse({
-            "teacher": teacher.id,
+            "user": user.id,
             "weekly_open_slots": open_slots.weekly_open_slots
         })
     except ValidationError as e:
