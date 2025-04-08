@@ -39,3 +39,7 @@ nav {
 .time-header {
     padding: 5px 8px;
 }
+
+.modal-content {
+    width: 90%;
+}
