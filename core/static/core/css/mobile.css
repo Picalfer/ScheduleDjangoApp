@@ -1,0 +1,41 @@
+header {
+    height: 5vh;
+    padding: 0 10px;
+}
+
+nav {
+    text-align: right;
+}
+
+.week-navigation {
+    width: 90%;
+}
+
+/* Контейнер для основного контента */
+#schedule-container {
+    flex: 1;
+    overflow: auto;
+    width: 100%;
+}
+
+/* Широкие внутренние контейнеры */
+#headers, #schedule {
+    width: 190%; /* Или ваша нужная ширина */
+    min-width: 1200px; /* Минимальная ширина */
+    display: flex;
+}
+
+/* Стили для заголовков дней */
+.day-header {
+    flex: 1;
+}
+
+/* Стили для колонок с временем */
+.time-column, .time-header {
+    flex: 0;
+    width: 15vw;
+}
+
+.time-header {
+    padding: 5px 8px;
+}

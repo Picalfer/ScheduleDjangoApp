@@ -1,3 +1,9 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 :root {
     --app-header: linear-gradient(135deg, #8848ca, #ba4040);
 }
@@ -91,6 +97,14 @@ h1 {
 
 p {
     font-size: 1.2rem;
+}
+
+ul, ol {
+    text-align: left;
+}
+
+li {
+    margin-bottom: 5px;
 }
 
 .admin-btn {
