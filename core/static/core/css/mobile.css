@@ -1,6 +1,26 @@
 header {
-    height: 5vh;
-    padding: 0 10px;
+    height: 7vh;
+    padding: 3px 10px;
+}
+
+.admin-btn {
+    padding: 2px 4px;
+    text-align: center;
+}
+
+#teacher-name {
+    font-size: 1rem;
+    width: fit-content;
+    display: block;
+}
+
+#admin-label {
+    display: none;
+}
+
+#week-info-left {
+    flex-shrink: 0;
+    flex-direction: column;
 }
 
 nav {
@@ -9,6 +29,14 @@ nav {
 
 .week-navigation {
     width: 90%;
+    align-items: start;
+}
+
+#week-nav-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    gap: 7px;
 }
 
 /* Контейнер для основного контента */
