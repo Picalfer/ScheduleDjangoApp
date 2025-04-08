@@ -1,3 +1,9 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 :root {
     --app-header: linear-gradient(135deg, #8848ca, #ba4040);
 }
@@ -18,13 +24,21 @@ body {
 }
 
 #admin-label {
-    color: #666;
+    color: var(--invert-text-primary);
     font-size: 1em;
     display: block;
 }
 
+[data-theme="dark"] #admin-label {
+    color: var(--text-secondary);
+}
+
 header {
     padding: 10px 20px;
+    width: 100%;
+    height: 5vh;
+    display: flex;
+    justify-content: space-between;
 }
 
 [data-theme="dark"] header {
@@ -36,6 +50,7 @@ header {
     justify-content: space-between;
     align-items: center;
     margin: 0 auto;
+    width: 100%;
 }
 
 .user-info {
@@ -67,6 +82,7 @@ main {
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
 }
 
 #content-main {
@@ -81,6 +97,14 @@ h1 {
 
 p {
     font-size: 1.2rem;
+}
+
+ul, ol {
+    text-align: left;
+}
+
+li {
+    margin-bottom: 5px;
 }
 
 .admin-btn {

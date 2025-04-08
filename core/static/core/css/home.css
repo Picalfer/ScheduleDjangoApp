@@ -21,6 +21,7 @@
     --one-time-lesson-bg: #dcfce7;
     --one-time-lesson-primary: rgb(16, 185, 129);
     --permanent-lesson-primary: #6366f1;
+    --scrollbar-width: 8px;
 }
 
 [data-theme="dark"] {
@@ -31,12 +32,6 @@
     --text-secondary: #a0aec0;
     --invert-text-primary: #0b0e12;
     --open-window-bg: rgba(47, 47, 48, 0.71);
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
 }
 
 body {
@@ -52,7 +47,7 @@ body {
 
 /* Для всех скроллбаров на сайте */
 ::-webkit-scrollbar {
-    width: 8px;
+    width: var(--scrollbar-width);
 }
 
 ::-webkit-scrollbar-track {

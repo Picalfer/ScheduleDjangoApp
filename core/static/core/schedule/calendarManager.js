@@ -313,9 +313,13 @@ export class CalendarManager {
     async updateOpenSlots() {
         try {
             await repository.updateOpenSlots(this.openSlots);
+            showNotification(`Открытые окна обновлены`, "success");
         } catch (error) {
             console.error("Ошибка при обновлении свободных слотов:", error);
-            showNotification("Ошибка при обновлении слотов", "error");
+            showNotification(
+                error.message || "Ошибка при обновлении окон",
+                "error"
+            );
         }
     }
 }
