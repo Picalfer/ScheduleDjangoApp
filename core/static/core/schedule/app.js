@@ -33,6 +33,8 @@ function setAdminTools() {
     })
 }
 
+export const scheduleState = { isAnother: false };
+
 // Важен порядок инициализации
 export const repository = new Repository();
 export const calendarManager = new CalendarManager();

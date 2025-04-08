@@ -74,9 +74,9 @@ export class Repository {
         }
     }
 
-    async updateOpenSlots(openSlots, userId = this.currentUserId) {
+    async updateOpenSlots(openSlots) {
         try {
-            const response = await fetch(`/api/open-slots/${userId}/update/`, {
+            const response = await fetch(`/api/open-slots/${this.currentUserId}/update/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,5 +1,5 @@
 import {Modal} from './modal.js';
-import {calendarManager, repository} from '../app.js';
+import {calendarManager, repository, scheduleState} from '../app.js';
 
 export class TeachersModal extends Modal {
     constructor(options = {}) {
@@ -86,6 +86,7 @@ export class TeachersModal extends Modal {
     }
 
     showTeacherSchedule(teacherId, userId) {
+        scheduleState.isAnother = true;
         console.log(`Просмотр расписания для User с ID: ${userId}, TeacherId: ${teacherId}`);
         calendarManager.loadSchedule(teacherId, userId);
     }

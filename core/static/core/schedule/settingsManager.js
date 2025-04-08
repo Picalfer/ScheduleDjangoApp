@@ -1,6 +1,6 @@
 import * as utils from "./utils.js";
 import {showNotification} from "./utils.js";
-import {calendarManager} from "./app.js";
+import {calendarManager, scheduleState} from "./app.js";
 
 export class SettingsManager {
     constructor() {
@@ -278,6 +278,11 @@ export class SettingsManager {
     }
 
     toggleOpenWindows() {
+        if (scheduleState.isAnother) {
+            showNotification("Можно изменять только свои открытые окна", "error")
+            return
+        }
+
         console.log("Режим настройки окон переключен");
         this.isOpenWindowsMode = !this.isOpenWindowsMode;
 

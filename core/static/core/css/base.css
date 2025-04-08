@@ -18,9 +18,13 @@ body {
 }
 
 #admin-label {
-    color: #666;
+    color: var(--invert-text-primary);
     font-size: 1em;
     display: block;
+}
+
+[data-theme="dark"] #admin-label {
+    color: var(--text-secondary);
 }
 
 header {
