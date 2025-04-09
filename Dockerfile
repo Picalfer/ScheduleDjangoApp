@@ -46,4 +46,5 @@ RUN chown -R django:django /app
 USER django
 
 # Команда запуска (исправлен формат для надежности)
+# !!! На сервере вместо команды CMD запускается Procfile
 CMD ["gunicorn", "schedule_app.wsgi:application", "--bind", "0.0.0.0:$PORT"]
