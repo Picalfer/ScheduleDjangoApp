@@ -177,11 +177,8 @@ FORMAT_MODULE_PATH = [
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # Отдельная папка для собранной статики
-
-STATICFILES_DIRS = [
-    BASE_DIR / 'core/static',  # Путь к статике приложения core
-]
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
