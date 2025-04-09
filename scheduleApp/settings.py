@@ -181,8 +181,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Для collectstatic
 
 if DEBUG:
     STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'core/static'),  # Путь к вашей статике в приложении core
-        os.path.join(BASE_DIR, 'admin/static'),  # Путь к вашей статике в приложении core
+        os.path.join(BASE_DIR, 'core/static'),
     ]
 else:
     # Новая система STORAGES для Django 4.2+
