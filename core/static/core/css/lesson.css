@@ -87,7 +87,7 @@
 }
 
 .hour .lesson.permanent {
-    background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
+    background: linear-gradient(135deg, #a0cff1 0%, #677ee4 100%);
     border-left: 3px solid var(--primary-color);
 }
 
@@ -96,7 +96,7 @@
 }
 
 .hour .lesson.one-time {
-    background: linear-gradient(135deg, #f0f7f0 0%, #ffffff 100%);
+    background: linear-gradient(135deg, #cff4cf 0%, #c7ec8a 100%);
     border-left: 3px solid #4caf50;
 }
 
@@ -150,4 +150,17 @@
     color: #e65100;
     border: 1px solid #ffe082;
     content: "⏳ Запланирован";
+}
+
+[data-theme="dark"] .hour .lesson.demo {
+    background: linear-gradient(135deg, rgba(177, 99, 241, 0.2), rgba(184, 99, 241, 0.1));
+}
+
+.hour .lesson.demo {
+    background: linear-gradient(135deg, rgba(177, 99, 241, 0.7), rgba(184, 99, 241, 0.5));
+    border-left: 3px solid #7915cd;
+}
+
+.lesson.demo:hover {
+    border-color: var(--demo-lesson-primary);
 }

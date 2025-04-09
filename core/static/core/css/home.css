@@ -20,6 +20,8 @@
     --permanent-lesson-bg: #e0e7ff;
     --one-time-lesson-bg: #dcfce7;
     --one-time-lesson-primary: rgb(16, 185, 129);
+    --demo-lesson-bg: #f3dcfc;
+    --demo-lesson-primary: rgb(172, 91, 255);
     --permanent-lesson-primary: #6366f1;
     --scrollbar-width: 8px;
 }

@@ -226,7 +226,8 @@ class BalanceOperation(models.Model):
 class Lesson(models.Model):
     LESSON_TYPE_CHOICES = [
         ('single', 'Разовый'),
-        ('recurring', 'Регулярный')
+        ('recurring', 'Регулярный'),
+        ('demo', 'Вводный')
     ]
 
     STATUS_CHOICES = [
@@ -370,8 +371,8 @@ class Lesson(models.Model):
             return None
 
     def save(self, *args, **kwargs):
-        if self.lesson_type == 'single':
-            self.schedule = []  # Очищаем расписание для разовых уроков
+        if self.lesson_type == 'single' or self.lesson_type == 'single':
+            self.schedule = []  # Очищаем расписание для разовых и вводных уроков
         super().save(*args, **kwargs)
 
     class Meta:
@@ -380,7 +381,7 @@ class Lesson(models.Model):
         ordering = ['date', 'time']
 
     def __str__(self):
-        if self.lesson_type == 'single':
+        if self.lesson_type == 'single' or self.lesson_type == 'single':
             return f"{self.date} {self.time} - {self.course} ({self.get_status_display()})"
         return f"Регулярный: {self.course} ({self.get_status_display()})"
 
