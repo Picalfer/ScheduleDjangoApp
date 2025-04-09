@@ -20,9 +20,9 @@
     <div class="header-content">
         <div class="user-info">
             {% if user.is_authenticated %}
-                <p>{{ user.first_name }} {{ user.last_name }}</p>
+                <p id="teacher-name">{{ user.first_name }} {{ user.last_name }}</p>
                 {% if user.is_staff %}
-                    <p id="admin-label" style="display: inline;">(админ)</p>
+                    <p id="admin-label">(админ)</p>
                     <a href="{% url 'admin:index' %}" class="admin-btn" title="Админка">
                         ⚙️ Админ-панель
                     </a>

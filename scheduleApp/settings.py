@@ -35,7 +35,9 @@ else:
 SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-&2ce*-1i(v#76_*648-%9b19td3%mu3d#i2_y5#n!^*e@!u-z5')
 
 ALLOWED_HOSTS = [
-    'schedule-app.dokka2.duckdns.org',  # Основной домен
+    'kodamaclass.com', # Основной домен
+    'schedule.kodamaclass.com', # домен для расписания
+    'schedule-app.dokka2.duckdns.org',
     '.dokka2.duckdns.org',  # Все поддомены (*.dokka2.duckdns.org)\
     '45.88.90.91',
     'localhost',  # Для локального тестирования (если нужно)
