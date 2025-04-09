@@ -44,6 +44,7 @@ export class LessonModal extends Modal {
         });
 
         this.lessonId = null;
+        this.lessonData = null;
         this.form = this.modalElement.querySelector('#lesson-form');
         this.topicInput = this.modalElement.querySelector('#lesson-topic');
         this.cancelButton = this.modalElement.querySelector('.cancel-button');
@@ -81,6 +82,7 @@ export class LessonModal extends Modal {
 
     open(lessonData) {
         this.lessonId = lessonData.id;
+        this.lessonData = lessonData;
         console.log(`Открыт урок под id: ${this.lessonId}`);
 
         // Устанавливаем данные урока
@@ -105,10 +107,16 @@ export class LessonModal extends Modal {
         // Курс
         this.modalElement.querySelector('#lesson-course').value = lessonData.course;
 
+        const types = {
+            recurring: ['🔄', 'Постоянный урок'],
+            demo: ['🎯', 'Демо-урок'],
+            single: ['1️⃣', 'Разовый урок']
+        };
+
         // Тип урока
-        const emoji = lessonData.lesson_type === 'recurring' ? '🔄' : '1️⃣';
-        const statusText = lessonData.lesson_type === 'recurring' ? 'Постоянный урок' : 'Разовый урок';
-        this.lessonTypeElement.innerHTML = `${emoji} ${statusText}`;
+        const [emoji, text] = types[lessonData.lesson_type] || ['📅', 'Урок'];
+
+        this.lessonTypeElement.innerHTML = `${emoji} ${text}`;
 
         // Ученик
         this.lessonStudentElement.textContent = `Ученик: ${lessonData.student_name || lessonData.student}`;
@@ -154,8 +162,8 @@ export class LessonModal extends Modal {
         const confirmationMessage = `Вы уверены, что хотите отметить урок как проведенный?\n\n` +
             `Тема: ${lessonData.topic || 'не указана'}\n` +
             `Комментарий: ${lessonData.notes || 'нет'}\n` +
-            `ДЗ: ${lessonData.homework || 'не задано'}\n\n` +
-            `Баланс студента уменьшится на 1.`;
+            `ДЗ: ${lessonData.homework || 'не задано'}` +
+            (this.lessonData.lesson_type !== 'demo' ? `\n\nБаланс студента уменьшится на 1.` : '');
 
         if (!confirm(confirmationMessage)) {
             return;
@@ -163,10 +171,18 @@ export class LessonModal extends Modal {
 
         try {
             const response = await repository.completeLesson(this.lessonId, lessonData);
-            showNotification(
-                `Урок проведен! Осталось уроков: ${response.remaining_balance}`,
-                "success"
-            );
+            if (this.lessonData.lesson_type !== 'demo') {
+                showNotification(
+                    `Урок проведен! Осталось уроков: ${response.remaining_balance}`,
+                    "success"
+                );
+            } else {
+                showNotification(
+                    `Демо урок проведен!`,
+                    "success"
+                );
+            }
+
             calendarManager.loadSchedule();
             this.close();
         } catch (error) {

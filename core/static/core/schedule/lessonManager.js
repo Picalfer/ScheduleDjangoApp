@@ -49,21 +49,45 @@ export class LessonManager {
     }
 
     createLessonHTML(lesson) {
-        const isRecurring = lesson.lesson_type === 'recurring';
-        const isCompleted = lesson.status === 'completed';
-        const isCanceled = lesson.status === 'canceled';
+        const lessonTypeClass = {
+            'recurring': 'permanent',
+            'demo': 'demo',
+            'single': 'one-time'
+        }[lesson.lesson_type];
+
+        const statusClass = {
+            'completed': 'completed',
+            'canceled': 'cancelled',
+            'scheduled': ''
+        }[lesson.status];
+
+        const lessonIcon = {
+            'recurring': '🔄',
+            'demo': '🎯',
+            'single': '1️⃣'
+        }[lesson.lesson_type];
+
+        const typeLabel = {
+            'recurring': 'Постоянный',
+            'demo': 'Вводный',
+            'single': 'Разовый'
+        }[lesson.lesson_type];
+
         const isFuture = lesson.is_future;
+        const clickHandler = isFuture
+            ? 'event.preventDefault(); window.showNotification(\'Это запланированный урок\', \'info\')'
+            : `window.openLessonModal(${JSON.stringify(lesson).replace(/"/g, '&quot;')})`;
 
         return `
-                    <div class="lesson ${isRecurring ? 'permanent' : 'one-time'} ${isCanceled ? 'cancelled' : ''} ${isCompleted ? 'completed' : ''} ${isFuture ? 'future' : ''}" 
-                         data-lesson-id="${lesson.id}"
-                         data-status="${lesson.status || 'scheduled'}"
-                         onclick="${isFuture ? 'event.preventDefault(); window.showNotification(\'Это запланированный урок\', \'info\')' : `window.openLessonModal(${JSON.stringify(lesson).replace(/"/g, '&quot;')})`}">
-                        <h4>${isRecurring ? '🔄 Постоянный' : '1️⃣ Разовый'} урок</h4>
-                        <p>👩‍🎓 ${lesson.student_name}</p>
-                        <p>📚 ${lesson.course}</p>
-                    </div>
-                `;
+                  <div class="lesson ${lessonTypeClass} ${statusClass} ${isFuture ? 'future' : ''}" 
+                       data-lesson-id="${lesson.id}"
+                       data-status="${lesson.status || 'scheduled'}"
+                       onclick="${clickHandler}">
+                    <h4>${lessonIcon} ${typeLabel} урок</h4>
+                    <p>👩‍🎓 ${lesson.student_name}</p>
+                    <p>📚 ${lesson.course}</p>
+                  </div>
+               `;
     }
 
     clearAllLessons() {

@@ -56,24 +56,26 @@ def complete_lesson(request, lesson_id):
         if lesson.status == 'completed':
             return JsonResponse({'status': 'error', 'message': 'Урок уже проведен'}, status=400)
 
-        try:
-            if not lesson.student.spend_lesson():
-                logger.warning(f"Недостаточно средств у студента {lesson.student.id}")
+        if lesson.lesson_type != 'demo':
+            try:
+                if not lesson.student.spend_lesson():
+                    logger.warning(f"Недостаточно средств у студента {lesson.student.id}")
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': f'У клиента {lesson.student.client.name} текущий баланс уроков: {lesson.student.client.balance}',
+                        'current_balance': lesson.student.client.balance
+                    }, status=402)
+            except ValueError as e:
+                logger.error(f"Ошибка списания урока: {str(e)}")
                 return JsonResponse({
                     'status': 'error',
-                    'message': f'У клиента {lesson.student.client.name} текущий баланс уроков: {lesson.student.client.balance}',
-                    'current_balance': lesson.student.client.balance
-                }, status=402)
-        except ValueError as e:
-            logger.error(f"Ошибка списания урока: {str(e)}")
-            return JsonResponse({
-                'status': 'error',
-                'message': str(e)
-            }, status=400)
+                    'message': str(e)
+                }, status=400)
 
         lesson.lesson_topic = data.get('lesson_topic') or None
         lesson.lesson_notes = data.get('lesson_notes') or None
         lesson.homework = data.get('homework') or None
+
         lesson.status = 'completed'
         lesson.completed_at = now()
         lesson.save()
