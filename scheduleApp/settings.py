@@ -35,8 +35,8 @@ else:
 SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-&2ce*-1i(v#76_*648-%9b19td3%mu3d#i2_y5#n!^*e@!u-z5')
 
 ALLOWED_HOSTS = [
-    'kodamaclass.com', # Основной домен
-    'schedule.kodamaclass.com', # домен для расписания
+    'kodamaclass.com',  # Основной домен
+    'schedule.kodamaclass.com',  # домен для расписания
     'schedule-app.dokka2.duckdns.org',
     '.dokka2.duckdns.org',  # Все поддомены (*.dokka2.duckdns.org)\
     '45.88.90.91',
@@ -176,20 +176,21 @@ FORMAT_MODULE_PATH = [
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Для всех режимов (не только DEBUG)
 STATICFILES_DIRS = [
-    BASE_DIR / 'core' / 'static',
+    os.path.join(BASE_DIR, "static"),
+    os.path.join(BASE_DIR, "core/static"),
+    os.path.join(BASE_DIR, "scheduleApp/static"),
 ]
 
-# Упростите настройку хранилища
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
