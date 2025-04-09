@@ -177,9 +177,7 @@ FORMAT_MODULE_PATH = [
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-    os.path.join(BASE_DIR, "core/static"),
-    os.path.join(BASE_DIR, "scheduleApp/static"),
+    os.path.join(BASE_DIR, "core/static"),  # Основная статика из приложения core
 ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
