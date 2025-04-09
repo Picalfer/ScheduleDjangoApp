@@ -181,7 +181,6 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'  # Отдельная папка для �
 
 STATICFILES_DIRS = [
     BASE_DIR / 'core/static',  # Путь к статике приложения core
-    BASE_DIR / 'static',  # Глобальная статика (если нужно)
 ]
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
