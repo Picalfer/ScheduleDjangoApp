@@ -32,6 +32,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Копирование проекта (исключая ненужные файлы через .dockerignore)
 COPY . .
 
+# Сборка статики (добавлена проверка)
+RUN if [ -f "manage.py" ]; then \
+        python manage.py collectstatic --noinput --clear; \
+    else \
+        echo "Warning: manage.py not found, skipping collectstatic"; \
+    fi
+
 # Права на файлы
 RUN chown -R django:django /app
 
