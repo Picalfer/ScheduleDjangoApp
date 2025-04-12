@@ -5,6 +5,7 @@ import {PaymentsModal} from "./modals/paymentsModal.js";
 import {showNotification} from "./utils.js";
 import {LessonModal} from "./modals/lessonModal.js";
 import {Repository} from "./repository.js";
+import {BalanceAlertModal} from "./modals/balanceAlertModal.js";
 
 export function initApp() {
     if (userData.isAdmin) {
@@ -30,6 +31,11 @@ function setAdminTools() {
     const paymentsBtn = document.getElementById("payments-button");
     paymentsBtn.addEventListener('click', async function () {
         const paymentsModal = new PaymentsModal().open();
+    })
+
+    const balanceAlertBtn = document.getElementById("balance-alert-button");
+    balanceAlertBtn.addEventListener('click', async function () {
+        const balanceAlertModal = new BalanceAlertModal().open()
     })
 }
 

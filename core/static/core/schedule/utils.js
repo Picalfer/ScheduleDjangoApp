@@ -145,5 +145,5 @@ export function updateCounter(
     }
 }
 
-updateCounter('attention-counter', 2);
+updateCounter('balance-alert-counter', 2);
 updateCounter('payments-counter', 12);
