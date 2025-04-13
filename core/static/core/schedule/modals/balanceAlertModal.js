@@ -39,29 +39,42 @@ export class BalanceAlertModal extends Modal {
 
     displayClients(clients) {
         // Группируем клиентов по балансу
+        const negativeBalance = clients.filter(c => c.balance < 0);
         const zeroBalance = clients.filter(c => c.balance === 0);
         const lowBalance = clients.filter(c => c.balance === 1);
         const warningBalance = clients.filter(c => c.balance === 2);
 
+
         const sections = [
+            {
+                title: '🟣 Отрицательный баланс',
+                className: 'negative-balance',
+                clients: negativeBalance,
+                show: negativeBalance.length > 0
+            },
             {
                 title: '🔴 Нулевой баланс',
                 clients: zeroBalance,
-                className: 'zero-balance'
+                className: 'zero-balance',
+                show: zeroBalance.length > 0
             },
             {
                 title: '🟠 Остался 1 урок',
                 clients: lowBalance,
-                className: 'low-balance'
+                className: 'low-balance',
+                show: lowBalance.length > 0
             },
             {
                 title: '🟡 Осталось 2 урока',
                 clients: warningBalance,
-                className: 'warning-balance'
+                className: 'warning-balance',
+                show: warningBalance.length > 0
             }
         ];
 
-        const sectionsHTML = sections.map(section => `
+        const visibleSections = sections.filter(section => section.show);
+
+        const sectionsHTML = visibleSections.map(section => `
             <div class="balance-section ${section.className}">
                 <h3>${section.title} (${section.clients.length})</h3>
                 ${section.clients.length > 0
@@ -85,6 +98,7 @@ export class BalanceAlertModal extends Modal {
                     <h4>${client.name}</h4>
                     <div class="client-details">
                         <p>Телефон: ${client.parent_phone}</p>
+                        ${client.balance < 0 ? `<p>Баланс: ${client.balance}</p>` : ''}
                         <p>Последняя оплата: ${client.last_payment_date ? formatDate(new Date(client.last_payment_date)) : 'нет данных'}</p>
                         <p>Следующий урок: ${client.next_lesson_date ? formatDate(new Date(client.next_lesson_date)) : 'не запланирован'}</p>
                     </div>

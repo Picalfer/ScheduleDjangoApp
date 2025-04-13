@@ -2,7 +2,6 @@ import json
 import logging
 from datetime import timedelta
 
-from django.core.cache import cache
 from django.db import transaction
 
 from .services.payment_service import calculate_weekly_payments
@@ -511,16 +510,10 @@ def low_balance_clients(request):
 
 
 def low_balance_clients_count(request):
-    count = cache.get('low_balance_count')
-    if count is None:
-        count = Client.objects.filter(balance__lte=2).count()
-        cache.set('low_balance_count', count, 60 * 30)  # Кэш на 30 минут
+    count = Client.objects.filter(balance__lte=2).count()
     return JsonResponse({'count': count})
 
 
 def payments_count(request):
-    count = cache.get('payments_count')
-    if count is None:
-        count = TeacherPayment.objects.count()
-        cache.set('payments_count', count, 60 * 600)  # Кэш на 600 минут
+    count = TeacherPayment.objects.count()
     return JsonResponse({'count': count})

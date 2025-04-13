@@ -83,6 +83,11 @@
     width: 70%;
 }
 
+.negative-balance {
+    background-color: var(--balance-negative);
+    border: 1px solid var(--balance-negative-border);
+}
+
 .zero-balance {
     background-color: var(--balance-danger);
     border: 1px solid var(--balance-danger-border);

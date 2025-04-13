@@ -27,9 +27,12 @@
     --permanent-lesson-primary: #6366f1;
     --scrollbar-width: 8px;
 
+    --balance-negative: #ecccff;
     --balance-danger: #ffccd4;
     --balance-warning: #ffe6ce;
     --balance-info: #fffdd6;
+
+    --balance-negative-border: #aa00ff;
     --balance-danger-border: #ff2f4d;
     --balance-warning-border: #d17306;
     --balance-info-border: #ffde40;
@@ -44,6 +47,8 @@
     --invert-text-primary: #0b0e12;
     --open-window-bg: rgba(47, 47, 48, 0.71);
 
+
+    --balance-negative: #2d0440;
     --balance-danger: #270c10;
     --balance-warning: #25190b;
     --balance-info: #221d0a;
