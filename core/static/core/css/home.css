@@ -6,6 +6,7 @@
 
 :root {
     --bg: #e0f2fe;
+    --bg-invert: #000000;
     --header-bg: #f0f7ff;
     --border-color: #d4d6ff;
     --primary-color: #6366f1;
@@ -40,6 +41,7 @@
 
 [data-theme="dark"] {
     --bg: #1a1b1e;
+    --bg-invert: #ffffff;
     --header-bg: #1a1b1e;
     --border-color: #3a3b3e;
     --text-primary: #e2e8f0;

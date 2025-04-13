@@ -1,5 +1,4 @@
 import {Modal} from './modal.js';
-import {formatDate} from "../utils.js";
 import {repository} from "../app.js";
 
 export class BalanceAlertModal extends Modal {
@@ -97,10 +96,7 @@ export class BalanceAlertModal extends Modal {
                 <div class="client-info">
                     <h4>${client.name}</h4>
                     <div class="client-details">
-                        <p>Телефон: ${client.parent_phone}</p>
                         ${client.balance < 0 ? `<p>Баланс: ${client.balance}</p>` : ''}
-                        <p>Последняя оплата: ${client.last_payment_date ? formatDate(new Date(client.last_payment_date)) : 'нет данных'}</p>
-                        <p>Следующий урок: ${client.next_lesson_date ? formatDate(new Date(client.next_lesson_date)) : 'не запланирован'}</p>
                     </div>
                 </div>
                 <div class="client-actions">
@@ -110,6 +106,15 @@ export class BalanceAlertModal extends Modal {
                 </div>
             </div>
         `).join('');
+
+        /*<div className="client-details">
+            <p>Телефон: ${client.parent_phone}</p>
+            ${client.balance < 0 ? `<p>Баланс: ${client.balance}</p>` : ''}
+            <p>Последняя оплата:
+                ${client.last_payment_date ? formatDate(new Date(client.last_payment_date)) : 'нет данных'}</p>
+            <p>Следующий урок:
+                ${client.next_lesson_date ? formatDate(new Date(client.next_lesson_date)) : 'не запланирован'}</p>
+        </div>*/
     }
 
     handleContactClient(clientId) {

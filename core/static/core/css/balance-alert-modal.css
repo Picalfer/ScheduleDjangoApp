@@ -1,7 +1,9 @@
 .balance-alert-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: space-evenly;
     gap: 20px;
+    height: 100%;
 }
 
 .balance-section {
@@ -81,6 +83,11 @@
 
 .balance-alert-modal-content {
     width: 70%;
+    height: 70vh;
+}
+
+.balance-alert-modal-content .modal-body {
+    height: 100%;
 }
 
 .negative-balance {
