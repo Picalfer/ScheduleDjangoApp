@@ -2,7 +2,7 @@ import {CalendarManager} from "./calendarManager.js";
 import {SettingsManager} from "./settingsManager.js";
 import {TeachersModal} from "./modals/teachersModal.js";
 import {PaymentsModal} from "./modals/paymentsModal.js";
-import {showNotification} from "./utils.js";
+import {showNotification, updateCounter} from "./utils.js";
 import {LessonModal} from "./modals/lessonModal.js";
 import {Repository} from "./repository.js";
 import {BalanceAlertModal} from "./modals/balanceAlertModal.js";
@@ -22,7 +22,7 @@ export function initApp() {
     }
 }
 
-function setAdminTools() {
+async function setAdminTools() {
     const teachersBtn = document.getElementById('teachers-button')
     teachersBtn.addEventListener('click', () => {
         const teachersModal = new TeachersModal().open();
@@ -37,6 +37,12 @@ function setAdminTools() {
     balanceAlertBtn.addEventListener('click', async function () {
         const balanceAlertModal = new BalanceAlertModal().open()
     })
+
+    const lowBalanceClientsCount = await repository.loadLowBalanceClientsCount()
+    const paymentsCount = await repository.loadPaymentsCount()
+
+    updateCounter('balance-alert-counter', lowBalanceClientsCount);
+    updateCounter('payments-counter', paymentsCount);
 }
 
 export const scheduleState = {isAnother: false};

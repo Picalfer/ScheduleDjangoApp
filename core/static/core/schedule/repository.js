@@ -209,4 +209,35 @@ export class Repository {
             throw error;
         }
     }
+
+    async loadLowBalanceClients() {
+        try {
+            const response = await fetch('/api/clients/low-balance/');
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            console.log('Received clients data:', data);
+
+            return data;
+        } catch (error) {
+            console.error('Error fetching low balance clients:', error);
+            return {status: 'error', clients: []};
+        }
+    }
+
+    async loadLowBalanceClientsCount() {
+        const response = await fetch('/api/clients/low-balance-count/');
+        const data = await response.json();
+        return data.count
+    }
+
+    async loadPaymentsCount() {
+        const response = await fetch('/api/payments-count/');
+        const data = await response.json();
+        return data.count
+    }
 }

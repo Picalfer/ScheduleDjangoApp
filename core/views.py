@@ -2,6 +2,7 @@ import json
 import logging
 from datetime import timedelta
 
+from django.core.cache import cache
 from django.db import transaction
 
 from .services.payment_service import calculate_weekly_payments
@@ -27,7 +28,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from .forms import ProfileForm
 from .forms import RegisterForm, LoginForm
-from .models import Lesson, Teacher, Student, TeacherPayment
+from .models import Lesson, Teacher, Student, TeacherPayment, Client
 from .models import OpenSlots, UserSettings
 from .serializers import LessonSerializer, TeacherSerializer, StudentSerializer, TeacherPaymentSerializer
 
@@ -487,3 +488,39 @@ def mark_payment_as_paid(request, payment_id):
             'success': False,
             'message': 'Платёж не найден'
         }, status=404)
+
+
+def low_balance_clients(request):
+    clients = Client.objects.filter(balance__lte=2)
+
+    clients_data = []
+    for client in clients:
+        clients_data.append({
+            'id': client.id,
+            'name': client.name,
+            'balance': client.balance,
+            # 'last_payment_date': client.last_payment_date.strftime('%Y-%m-%d') if client.last_payment_date else None,
+            # 'next_lesson_date': client.next_lesson_date.strftime('%Y-%m-%d') if client.next_lesson_date else None,
+            # 'parent_phone': client.primary_phone.phone_number if client.primary_phone else 'Не указан'
+        })
+
+    return JsonResponse({
+        'status': 'success',
+        'clients': clients_data
+    })
+
+
+def low_balance_clients_count(request):
+    count = cache.get('low_balance_count')
+    if count is None:
+        count = Client.objects.filter(balance__lte=2).count()
+        cache.set('low_balance_count', count, 60 * 30)  # Кэш на 30 минут
+    return JsonResponse({'count': count})
+
+
+def payments_count(request):
+    count = cache.get('payments_count')
+    if count is None:
+        count = TeacherPayment.objects.count()
+        cache.set('payments_count', count, 60 * 600)  # Кэш на 600 минут
+    return JsonResponse({'count': count})

@@ -1,5 +1,6 @@
 import {Modal} from './modal.js';
 import {formatDate} from "../utils.js";
+import {repository} from "../app.js";
 
 export class BalanceAlertModal extends Modal {
     constructor(options = {}) {
@@ -23,62 +24,17 @@ export class BalanceAlertModal extends Modal {
     }
 
     async loadClientsData() {
-        // Фейковые данные для демонстрации
-        const fakeData = {
-            status: 'success',
-            clients: [
-                {
-                    id: 1,
-                    name: 'Иванов Иван',
-                    balance: 0,
-                    last_payment_date: '2023-10-15',
-                    next_lesson_date: '2023-11-20',
-                    parent_phone: '+7 (123) 456-78-90'
-                },
-                {
-                    id: 2,
-                    name: 'Петрова Анна',
-                    balance: 1,
-                    last_payment_date: '2023-11-01',
-                    next_lesson_date: '2023-11-22',
-                    parent_phone: '+7 (234) 567-89-01'
-                },
-                {
-                    id: 3,
-                    name: 'Сидоров Алексей',
-                    balance: 2,
-                    last_payment_date: '2023-11-10',
-                    next_lesson_date: '2023-11-25',
-                    parent_phone: '+7 (345) 678-90-12'
-                },
-                {
-                    id: 4,
-                    name: 'Кузнецова Мария',
-                    balance: 0,
-                    last_payment_date: '2023-09-30',
-                    next_lesson_date: null,
-                    parent_phone: '+7 (456) 789-01-23'
-                },
-                {
-                    id: 5,
-                    name: 'Кузнецова Мария',
-                    balance: 2,
-                    last_payment_date: '2023-09-30',
-                    next_lesson_date: null,
-                    parent_phone: '+7 (456) 789-01-23'
-                },
-                {
-                    id: 6,
-                    name: 'Кузнецова Мария',
-                    balance: 2,
-                    last_payment_date: '2023-09-30',
-                    next_lesson_date: null,
-                    parent_phone: '+7 (456) 789-01-23'
-                }
-            ]
-        };
+        try {
+            const data = await repository.loadLowBalanceClients();
 
-        this.displayClients(fakeData.clients);
+            if (data && data.clients) {
+                this.displayClients(data.clients);
+            } else {
+                console.error('Не удалось загрузить данные клиентов');
+            }
+        } catch (error) {
+            console.error('Ошибка при загрузке клиентов:', error);
+        }
     }
 
     displayClients(clients) {

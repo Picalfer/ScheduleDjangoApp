@@ -144,6 +144,3 @@ export function updateCounter(
         counter.style.display = 'none';
     }
 }
-
-updateCounter('balance-alert-counter', 2);
-updateCounter('payments-counter', 12);

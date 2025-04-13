@@ -137,6 +137,9 @@ class Client(models.Model):
     class Meta:
         verbose_name = 'Клиент'
         verbose_name_plural = 'Клиенты'
+        indexes = [
+            models.Index(fields=['balance']),
+        ]
 
 
 class Student(models.Model):
