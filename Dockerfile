@@ -33,11 +33,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Сборка статики (добавлена проверка)
-RUN if [ -f "manage.py" ]; then \
-        python manage.py collectstatic --noinput --clear; \
-    else \
-        echo "Warning: manage.py not found, skipping collectstatic"; \
-    fi
+RUN python manage.py collectstatic --noinput --clear;
 
 # Права на файлы
 RUN chown -R django:django /app
