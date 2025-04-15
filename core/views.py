@@ -48,9 +48,7 @@ def complete_lesson(request, lesson_id):
         if not request.user.is_authenticated:
             return JsonResponse({'status': 'error', 'message': 'Требуется авторизация'}, status=401)
 
-        # Чтобы админ мог проводить уроки других преподавателей
-        # if request.user != lesson.teacher.user and not request.user.is_staff:
-        if request.user != lesson.teacher.user:
+        if request.user != lesson.teacher.user and not request.user.is_staff:
             return JsonResponse({'status': 'error', 'message': 'Можно отмечать только свои уроки'}, status=403)
 
         if lesson.status == 'completed':
@@ -131,9 +129,7 @@ def cancel_lesson(request, lesson_id):
         if not request.user.is_authenticated:
             return JsonResponse({'status': 'error', 'message': 'Требуется авторизация'}, status=401)
 
-        # Чтобы админ мог отменять уроки других преподавателей
-        # if request.user != lesson.teacher.user and not request.user.is_staff:
-        if request.user != lesson.teacher.user:
+        if request.user != lesson.teacher.user and not request.user.is_staff:
             return JsonResponse({'status': 'error', 'message': 'Можно отменять только свои уроки'}, status=403)
 
         if lesson.status != 'scheduled':
