@@ -304,6 +304,16 @@ class Lesson(models.Model):
         help_text='Поле для постоянного расписания'
     )
 
+    @property
+    def is_reliable(self):
+        if self.status == 'cancelled':
+            return False
+
+        if not hasattr(self.student, 'client'):
+            return False
+
+        return self.student.client.balance > 0
+
     # Информация об уроке
     lesson_topic = models.CharField(
         max_length=255,

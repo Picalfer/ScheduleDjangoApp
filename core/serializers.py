@@ -9,6 +9,28 @@ from .models import OpenSlots
 class LessonSerializer(serializers.ModelSerializer):
     student_name = serializers.CharField(source='student.name', read_only=True)
     start_date = serializers.DateField(source='date', read_only=True)
+    balance = serializers.SerializerMethodField(read_only=True)
+    is_reliable = serializers.SerializerMethodField()
+
+    def get_is_reliable(self, obj):
+        return obj.is_reliable
+
+    def get_balance(self, obj):
+        # Проверяем, является ли пользователь админом (из контекста)
+        if not self.context.get('is_admin', False):
+            return None
+
+        # Оптимизированный доступ к балансу через prefetch_related
+        if hasattr(obj.student, 'client'):
+            return obj.student.client.balance
+        return None
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Удаляем поле balance, если пользователь не админ
+        if not self.context.get('is_admin', False):
+            data.pop('balance', None)
+        return data
 
     class Meta:
         model = Lesson

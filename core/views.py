@@ -189,8 +189,11 @@ class LessonListCreate(generics.ListCreateAPIView):
     search_fields = ['teacher__user__username']
 
     def get_queryset(self):
-        queryset = Lesson.objects.select_related('student', 'teacher', 'teacher__user')
-        # Обрабатываем teacher_id
+        queryset = Lesson.objects.select_related(
+            'student', 'student__client',
+            'teacher', 'teacher__user'
+        )
+        # Обрабатываем teacher_id если он есть
         teacher_id = self.request.query_params.get('teacher_id')
         if teacher_id:
             try:
@@ -221,6 +224,12 @@ class LessonListCreate(generics.ListCreateAPIView):
             )
 
         return queryset.order_by('date', 'time')
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        # Добавляем информацию о пользователе в контекст
+        context['is_admin'] = self.request.user.is_staff
+        return context
 
 
 class TeacherListCreate(generics.ListCreateAPIView):
