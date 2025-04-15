@@ -3,7 +3,6 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/home.css' %}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 {% endblock %}
 
 {% block content %}
@@ -11,19 +10,37 @@
         {% csrf_token %}
         <div id="week-info">
             <div id="week-info-left">
-                <button id="settings-button" title="Настройки"
-                        class="icon-button icon-button-rotate"><span>⚙️</span></button>
+                <div class="button-wrapper">
+                    <button id="settings-button" title="Настройки" class="icon-button icon-rotate">
+                        <span>⚙️</span>
+                    </button>
+                </div>
                 {% if user.is_staff %}
-                    <div id="admin-panel" style="display: inline-block">
-                        <button id="teachers-button" title="Преподаватели" class="icon-button icon-button-float"
-                                style="display: inline-block;"><span>‍👨‍🏫</span></button>
-                        <button id="payments-button" title="Выплаты" class="icon-button icon-button-float"
-                                style="display: inline-block;"><span>‍💰</span></button>
-                        {% comment %}
+                    <div class="button-wrapper">
+                        <button id="teachers-button" title="Преподаватели" class="icon-button icon-float">
+                            <span>‍👨‍🏫</span>
+                        </button>
+                    </div>
+
+                    <div class="button-wrapper">
+                        <button id="payments-button" title="Выплаты преподавателям"
+                                class="icon-button icon-float">
+                            <span>‍💰</span>
+                        </button>
+                        <span id="payments-counter" class="notification-badge">0</span>
+                    </div>
+
+                    <div class="button-wrapper">
+                        <button id="balance-alert-button" title="Требует оплаты уроков"
+                                class="icon-button icon-float">
+                            <span>🔔</span>
+                        </button>
+                        <span id="balance-alert-counter" class="notification-badge">0</span>
+                    </div>
+                    {% comment %}
                         <button id="add-student-button" title="Добавить расписание ученика"
                                 class="icon-button icon-button-float"
                                 style="display: inline-block;"><span>➕</span></button>{% endcomment %}
-                    </div>
                 {% endif %}
                 <div id="open-windows-controls" style="display: none;">
                     <span>Отметьте открытые окна</span>
@@ -235,7 +252,6 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         let currentUserId = {{ user_id }};
         let currentTeacherId = {{ teacher_id }}

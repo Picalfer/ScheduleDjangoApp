@@ -8,8 +8,11 @@ from .models import OpenSlots, Teacher, Lesson
 
 @receiver(pre_save, sender=Lesson)
 def check_lesson_balance(sender, instance, **kwargs):
-    if instance.status == 'completed' and instance.student.lesson_balance <= 0:
-        raise ValidationError('Нельзя провести урок с нулевым балансом')
+    if instance.status == 'completed':
+        client = instance.student.client
+        if client.balance <= 0 and not client.allow_negative_once:
+            raise ValidationError('Нельзя провести урок с нулевым балансом')
+
 
 @receiver(post_save, sender=User)
 def init_teacher_and_open_slots(sender, instance, created, **kwargs):

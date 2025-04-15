@@ -119,3 +119,28 @@ export function closeConfirmationModal() {
         confirmationModal.style.display = 'none';
     }
 }
+
+export function updateCounter(
+    elementId,
+    count,
+    {
+        colorNormal = '#4285f4',
+        colorAlert = '#cc0000',
+        alertThreshold = 3,
+        maxDisplay = 9
+    } = {}
+) {
+    const counter = document.getElementById(elementId);
+    if (!counter) return;
+
+    if (count > 0) {
+        // Форматирование числа (9+ если больше maxDisplay)
+        counter.textContent = count > maxDisplay ? `${maxDisplay}+` : count;
+        counter.style.display = 'flex';
+
+        // Установка цвета в зависимости от порога
+        counter.style.backgroundColor = count >= alertThreshold ? colorAlert : colorNormal;
+    } else {
+        counter.style.display = 'none';
+    }
+}
