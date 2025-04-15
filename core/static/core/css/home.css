@@ -1,9 +1,12 @@
+@import "subheader.css";
 @import "calendar.css";
 @import "lesson.css";
 @import "modal.css";
+@import "balance-alert-modal.css";
 
 :root {
     --bg: #e0f2fe;
+    --bg-invert: #000000;
     --header-bg: #f0f7ff;
     --border-color: #d4d6ff;
     --primary-color: #6366f1;
@@ -24,16 +27,33 @@
     --demo-lesson-primary: rgb(172, 91, 255);
     --permanent-lesson-primary: #6366f1;
     --scrollbar-width: 8px;
+
+    --balance-negative: #ecccff;
+    --balance-danger: #ffccd4;
+    --balance-warning: #ffe6ce;
+    --balance-info: #fffdd6;
+
+    --balance-negative-border: #aa00ff;
+    --balance-danger-border: #ff2f4d;
+    --balance-warning-border: #d17306;
+    --balance-info-border: #ffde40;
 }
 
 [data-theme="dark"] {
     --bg: #1a1b1e;
+    --bg-invert: #ffffff;
     --header-bg: #1a1b1e;
     --border-color: #3a3b3e;
     --text-primary: #e2e8f0;
     --text-secondary: #a0aec0;
     --invert-text-primary: #0b0e12;
     --open-window-bg: rgba(47, 47, 48, 0.71);
+
+
+    --balance-negative: #2d0440;
+    --balance-danger: #270c10;
+    --balance-warning: #25190b;
+    --balance-info: #221d0a;
 }
 
 body {

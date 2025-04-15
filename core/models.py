@@ -2,7 +2,7 @@ import logging
 from datetime import date as date_type, datetime, timedelta, time
 
 from django.contrib.auth.models import User
-from django.core.validators import MinValueValidator
+from django.core.exceptions import ValidationError
 from django.db import models, transaction
 
 logger = logging.getLogger(__name__)
@@ -57,16 +57,20 @@ class Client(models.Model):
     name = models.CharField(max_length=100, verbose_name='Имя родителя')
     email = models.EmailField(blank=True, verbose_name='Email')
 
+    balance = models.IntegerField(
+        default=0,
+        verbose_name='Баланс уроков'
+    )
+
+    allow_negative_once = models.BooleanField(
+        default=False,
+        verbose_name='Разрешить одно списание в минус'
+    )
+
     @property
     def primary_phone(self):
         """Возвращает основной номер телефона"""
         return self.phone_numbers.filter(is_primary=True).first() or self.phone_numbers.first()
-
-    balance = models.PositiveIntegerField(
-        default=0,
-        verbose_name='Баланс уроков',
-        validators=[MinValueValidator(0)]
-    )
 
     def add_lessons(self, amount, student, note=''):
         """Пополнение баланса с логированием"""
@@ -91,18 +95,41 @@ class Client(models.Model):
             # Блокируем запись клиента для изменения
             client = Client.objects.select_for_update().get(pk=self.pk)
 
-            if client.balance <= 0:
+            if client.balance > 0:
+                # Обычное списание при положительном балансе
+                BalanceOperation.objects.create(
+                    client=client,
+                    student=student,
+                    operation_type='spend',
+                    amount=1,
+                    notes=note or f"Занятие с {student.name}"
+                )
+                return True
+            elif client.allow_negative_once:
+                # Списание в минус (однократное)
+                BalanceOperation.objects.create(
+                    client=client,
+                    student=student,
+                    operation_type='spend',
+                    amount=1,
+                    notes=note or f"Занятие с {student.name} (списание в минус)"
+                )
+                client.refresh_from_db()
+                # Сбрасываем флаг и сохраняем
+                client.allow_negative_once = False
+                client.save()
+                return True
+            else:
+                # Нельзя списать - баланс 0 и нет разрешения на минус
                 return False
 
-            # Создаем операцию (которая в save() обновит баланс)
-            BalanceOperation.objects.create(
-                client=client,
-                student=student,
-                operation_type='spend',
-                amount=1,
-                notes=note or f"Занятие с {student.name}"
+    def clean(self):
+        super().clean()
+        # Проверяем, что баланс либо положительный, либо (отрицательный И разрешено одно списание)
+        if self.balance < 0 and not self.allow_negative_once:
+            raise ValidationError(
+                {'balance': 'Баланс не может быть отрицательным без специального разрешения'}
             )
-            return True
 
     def __str__(self):
         return f"{self.name} (Баланс: {self.balance})"
@@ -110,6 +137,9 @@ class Client(models.Model):
     class Meta:
         verbose_name = 'Клиент'
         verbose_name_plural = 'Клиенты'
+        indexes = [
+            models.Index(fields=['balance']),
+        ]
 
 
 class Student(models.Model):
@@ -197,14 +227,18 @@ class BalanceOperation(models.Model):
             if not self.pk:  # Только для новых операций
                 self.balance_before = client.balance
 
-                if self.operation_type == 'spend' and client.balance < self.amount:
-                    raise ValueError("Недостаточно средств на балансе")
+                if self.operation_type == 'spend':
+                    if client.balance < self.amount and not client.allow_negative_once:
+                        raise ValueError("Недостаточно средств на балансе")
 
                 # Обновляем баланс
                 if self.operation_type == 'add':
                     client.balance += self.amount
                 elif self.operation_type == 'spend':
                     client.balance -= self.amount
+                    # Если ушли в минус - сбрасываем флаг
+                    if client.balance < 0:
+                        client.allow_negative_once = False
                 elif self.operation_type == 'correction':
                     client.balance = self.amount
 
@@ -269,6 +303,16 @@ class Lesson(models.Model):
         verbose_name='Регулярное расписание',
         help_text='Поле для постоянного расписания'
     )
+
+    @property
+    def is_reliable(self):
+        if self.status == 'cancelled':
+            return False
+
+        if not hasattr(self.student, 'client'):
+            return False
+
+        return self.student.client.balance > 0
 
     # Информация об уроке
     lesson_topic = models.CharField(

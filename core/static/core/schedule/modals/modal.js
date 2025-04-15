@@ -7,6 +7,7 @@ export class Modal {
             footer: '',
             closeOnOutsideClick: true,
             modalClass: '',
+            modalContentClass: '',
             ...options
         };
 
@@ -21,7 +22,7 @@ export class Modal {
         modal.className = `modal ${this.options.modalClass}`;
 
         const modalContent = document.createElement('div');
-        modalContent.className = 'modal-content';
+        modalContent.className = `modal-content ${this.options.modalContentClass}`;
 
         // Header
         const header = this.#createHeader();
@@ -105,8 +106,7 @@ export class Modal {
     }
 
     close() {
-        this.modalElement.style.display = 'none';
-        document.body.style.overflow = '';
+        this.destroy()
         return this;
     }
 

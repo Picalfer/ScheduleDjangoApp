@@ -2,7 +2,8 @@ from django.contrib.auth import views as auth_views
 from django.urls import path
 
 from . import views
-from .views import get_open_slots, update_open_slots, weekly_payments, generate_weekly_payments, mark_payment_as_paid
+from .views import get_open_slots, update_open_slots, weekly_payments, generate_weekly_payments, mark_payment_as_paid, \
+    low_balance_clients, low_balance_clients_count, payments_count
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -25,4 +26,7 @@ urlpatterns = [
     path('generate-payments/', generate_weekly_payments, name='generate-payments'),
     path('payments/', weekly_payments, name='payments'),
     path('api/payments/<int:payment_id>/pay/', mark_payment_as_paid, name='mark_payment_paid'),
+    path('api/clients/low-balance/', low_balance_clients, name='low_balance_clients'),
+    path('api/clients/low-balance-count/', low_balance_clients_count, name='low_balance_clients_count'),
+    path('api/payments-count/', payments_count, name='payments_count'),
 ]

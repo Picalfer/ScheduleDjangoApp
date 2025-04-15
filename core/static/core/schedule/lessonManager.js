@@ -58,7 +58,7 @@ export class LessonManager {
         const statusClass = {
             'completed': 'completed',
             'canceled': 'cancelled',
-            'scheduled': ''
+            'scheduled': 'scheduled'
         }[lesson.status];
 
         const lessonIcon = {
@@ -78,16 +78,28 @@ export class LessonManager {
             ? 'event.preventDefault(); window.showNotification(\'Это запланированный урок\', \'info\')'
             : `window.openLessonModal(${JSON.stringify(lesson).replace(/"/g, '&quot;')})`;
 
+        const isUnreliable = !lesson.is_reliable && !isFuture && statusClass === 'scheduled';
+
         return `
-                  <div class="lesson ${lessonTypeClass} ${statusClass} ${isFuture ? 'future' : ''}" 
-                       data-lesson-id="${lesson.id}"
-                       data-status="${lesson.status || 'scheduled'}"
-                       onclick="${clickHandler}">
-                    <h4>${lessonIcon} ${typeLabel} урок</h4>
-                    <p>👩‍🎓 ${lesson.student_name}</p>
-                    <p>📚 ${lesson.course}</p>
-                  </div>
-               `;
+                    <div class="lesson ${lessonTypeClass} ${statusClass} ${isFuture ? 'future' : ''} ${isUnreliable ? 'unreliable' : ''}" 
+                         data-lesson-id="${lesson.id}"
+                         data-status="${lesson.status || 'scheduled'}"
+                         onclick="${clickHandler}">
+                        ${lesson.balance !== undefined ? `
+                            <div class="balance-badge" 
+                                 data-balance="${lesson.balance < 0 ? '-' : lesson.balance}"
+                                 title="${lesson.balance < 0 ? 'Отрицательный баланс' : 'Остаток уроков'}">
+                                ${lesson.balance}
+                            </div>
+                        ` : ''}
+                        
+                        ${isUnreliable ? '<div class="unreliable-badge" title="Ненадёжный урок \nУрок может быть отменен">⚠️</div>' : ''}
+                        
+                        <h4>${lessonIcon} ${typeLabel} урок</h4>
+                        <p>👩‍🎓 ${lesson.student_name}</p>
+                        <p>📚 ${lesson.course}</p>
+                    </div>
+                `;
     }
 
     clearAllLessons() {

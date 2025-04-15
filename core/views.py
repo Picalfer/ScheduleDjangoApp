@@ -27,7 +27,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from .forms import ProfileForm
 from .forms import RegisterForm, LoginForm
-from .models import Lesson, Teacher, Student, TeacherPayment
+from .models import Lesson, Teacher, Student, TeacherPayment, Client
 from .models import OpenSlots, UserSettings
 from .serializers import LessonSerializer, TeacherSerializer, StudentSerializer, TeacherPaymentSerializer
 
@@ -189,8 +189,11 @@ class LessonListCreate(generics.ListCreateAPIView):
     search_fields = ['teacher__user__username']
 
     def get_queryset(self):
-        queryset = Lesson.objects.select_related('student', 'teacher', 'teacher__user')
-        # Обрабатываем teacher_id
+        queryset = Lesson.objects.select_related(
+            'student', 'student__client',
+            'teacher', 'teacher__user'
+        )
+        # Обрабатываем teacher_id если он есть
         teacher_id = self.request.query_params.get('teacher_id')
         if teacher_id:
             try:
@@ -221,6 +224,12 @@ class LessonListCreate(generics.ListCreateAPIView):
             )
 
         return queryset.order_by('date', 'time')
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        # Добавляем информацию о пользователе в контекст
+        context['is_admin'] = self.request.user.is_staff
+        return context
 
 
 class TeacherListCreate(generics.ListCreateAPIView):
@@ -487,3 +496,33 @@ def mark_payment_as_paid(request, payment_id):
             'success': False,
             'message': 'Платёж не найден'
         }, status=404)
+
+
+def low_balance_clients(request):
+    clients = Client.objects.filter(balance__lte=2)
+
+    clients_data = []
+    for client in clients:
+        clients_data.append({
+            'id': client.id,
+            'name': client.name,
+            'balance': client.balance,
+            # 'last_payment_date': client.last_payment_date.strftime('%Y-%m-%d') if client.last_payment_date else None,
+            # 'next_lesson_date': client.next_lesson_date.strftime('%Y-%m-%d') if client.next_lesson_date else None,
+            # 'parent_phone': client.primary_phone.phone_number if client.primary_phone else 'Не указан'
+        })
+
+    return JsonResponse({
+        'status': 'success',
+        'clients': clients_data
+    })
+
+
+def low_balance_clients_count(request):
+    count = Client.objects.filter(balance__lte=2).count()
+    return JsonResponse({'count': count})
+
+
+def payments_count(request):
+    count = TeacherPayment.objects.count()
+    return JsonResponse({'count': count})
