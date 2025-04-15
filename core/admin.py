@@ -112,7 +112,7 @@ class OpenSlotsAdmin(admin.ModelAdmin):
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
     form = LessonAdminForm
-    list_display = ('date', 'status', 'lesson_type', 'teacher', 'time', 'student', 'course', 'is_reliable')
+    list_display = ('date', 'status', 'lesson_type', 'teacher', 'time', 'student', 'course')
     list_filter = ('lesson_type', 'status', 'date')
     search_fields = ['student__name']
 
@@ -121,7 +121,7 @@ class LessonAdmin(admin.ModelAdmin):
         if obj is None:
             return [
                 'student', 'teacher', 'course',
-                'lesson_type', 'date', 'time', 'schedule', 'is_reliable',
+                'lesson_type', 'date', 'time', 'schedule',
             ]
         # Для редактирования существующего урока
         return super().get_fields(request, obj)
