@@ -5,43 +5,52 @@ import {showNotification} from '../utils.js';
 
 export class LessonModal extends Modal {
     constructor() {
+        const adminButton = document.createElement('a');
+        adminButton.className = 'admin-link';
+        adminButton.innerHTML = '⚙️';
+        adminButton.title = 'Открыть в админке';
+        adminButton.target = '_blank';
+
         super({
             modalId: 'lesson-modal',
             title: 'Информация об уроке',
             content: `
-        <div class="lesson-info">
-          <p class="lesson-type"></p>
-          <p class="lesson-student"></p>
-        </div>
-        <form id="lesson-form">
-          <div class="form-group">
-            <label for="lesson-date">Дата</label>
-            <input type="text" id="lesson-date" readonly>
-          </div>
-          <div class="form-group">
-            <label for="lesson-course">Курс</label>
-            <input type="text" id="lesson-course" readonly>
-          </div>
-          <div class="form-group">
-            <label for="lesson-topic">Тема урока <span class="required">*</span></label>
-            <input type="text" id="lesson-topic" required>
-            <div class="error-message">Это поле обязательно для заполнения</div>
-          </div>
-          <div class="form-group">
-            <label for="lesson-homework">Домашнее задание</label>
-            <textarea id="lesson-homework" rows="3"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="lesson-comment">Комментарий</label>
-            <textarea id="lesson-comment" rows="3"></textarea>
-          </div>
-        </form>
-      `,
+                        <div class="lesson-info">
+                          <p class="lesson-type"></p>
+                          <p class="lesson-student"></p>
+                        </div>
+                        <form id="lesson-form">
+                          <div class="form-group">
+                            <label for="lesson-date">Дата</label>
+                            <input type="text" id="lesson-date" readonly>
+                          </div>
+                          <div class="form-group">
+                            <label for="lesson-course">Курс</label>
+                            <input type="text" id="lesson-course" readonly>
+                          </div>
+                          <div class="form-group">
+                            <label for="lesson-topic">Тема урока <span class="required">*</span></label>
+                            <input type="text" id="lesson-topic" required>
+                            <div class="error-message">Это поле обязательно для заполнения</div>
+                          </div>
+                          <div class="form-group">
+                            <label for="lesson-homework">Домашнее задание</label>
+                            <textarea id="lesson-homework" rows="3"></textarea>
+                          </div>
+                          <div class="form-group">
+                            <label for="lesson-comment">Комментарий</label>
+                            <textarea id="lesson-comment" rows="3"></textarea>
+                          </div>
+                        </form>
+                      `,
             footer: `
-        <button class="cancel-button cancel-lesson-btn">Отменить урок</button>
-        <button class="submit-button admit-lesson-btn">Отметить проведённым</button>
-      `
+                        <button class="cancel-button cancel-lesson-btn">Отменить урок</button>
+                        <button class="submit-button admit-lesson-btn">Отметить проведённым</button>
+                      `,
+            headerElements: [adminButton],
         });
+
+        this.adminButton = adminButton;
 
         this.lessonId = null;
         this.lessonData = null;
@@ -96,6 +105,13 @@ export class LessonModal extends Modal {
     }
 
     setLessonData(lessonData) {
+        if (userData.isAdmin) {
+            this.adminButton.href = `/admin/core/lesson/${lessonData.id}/change/`;
+            this.adminButton.style.display = 'inline-block';
+        } else {
+            this.adminButton.style.display = 'none';
+        }
+
         // Дата урока
         const dateElement = this.modalElement.querySelector('#lesson-date');
         dateElement.value = new Date(lessonData.date).toLocaleDateString('ru-RU', {

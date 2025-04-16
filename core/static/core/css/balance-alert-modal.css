@@ -19,7 +19,7 @@
 .client-card {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: start;
     padding: 12px;
     margin-bottom: 10px;
     border: 1px solid black;
@@ -108,4 +108,10 @@
 .warning-balance {
     background-color: var(--balance-info);
     border: 1px solid var(--balance-info-border);
+}
+
+.client-actions {
+    display: flex;
+    align-items: center;
+    gap: 3px;
 }
