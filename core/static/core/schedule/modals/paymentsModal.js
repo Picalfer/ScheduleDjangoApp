@@ -81,28 +81,54 @@ export class PaymentsModal extends Modal {
         console.log(payments)
         if (!payments || payments.length === 0) {
             this.updateContent('<p class="no-payments">Нет данных о выплатах</p>');
+            // Обновляем футер
+            const footer = this.modalElement.querySelector('.modal-footer');
+            footer.innerHTML = `
+                <button class="generate-payments-btn" id="generate-payments-btn">
+                    Сгенерировать выплаты
+                </button>
+            `;
+            this.setupPaymentElements();
             return;
         }
 
         const paymentsHTML = payments.map(payment => `
-      <div class="form-group payment-item" data-payment-id="${payment.id}">
-        <div class="payment-row">
-          <span class="payment-label">Преподаватель:</span>
-          <span class="payment-value"><button class="teacher-link" data-teacher-id="${payment.teacher_id}" data-user-id="${payment.user_id}">${payment.teacher}</button></span>
-        </div>
-        <div class="payment-row">
-          <span class="payment-label">Период:</span>
-          <span class="payment-value">${formatDate(new Date(payment.week_start))} - ${formatDate(new Date(payment.week_end))}</span>
-        </div>
-        <div class="payment-row">
-  <span class="payment-label">Уроков:</span>
-  <span class="payment-value lessons-count">
-    <svg class="lesson-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-    </svg>
-    ${payment.lessons}
-  </span>
-</div>
+                  <div class="form-group payment-item" data-payment-id="${payment.id}">
+                      <div class="payment-row created-at-row">
+                                <span class="payment-label">Сгенерировано:</span>
+                                <span class="payment-value">${new Date(payment.created_at).toLocaleDateString('ru-RU', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })}</span>
+                      </div>
+                      <div class="payment-row created-at-row">
+                                <span class="payment-label">Оплатить до:</span>
+                                <span class="payment-value">${new Date(payment.due_date).toLocaleDateString('ru-RU', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+        })}</span>
+                      </div>
+                    <div class="payment-row">
+                      <span class="payment-label">Преподаватель:</span>
+                      <span class="payment-value"><button class="teacher-link" data-teacher-id="${payment.teacher_id}" data-user-id="${payment.user_id}">${payment.teacher}</button></span>
+                    </div>
+                    <div class="payment-row">
+                      <span class="payment-label">Период:</span>
+                      <span class="payment-value">${formatDate(new Date(payment.week_start))} - ${formatDate(new Date(payment.week_end))}</span>
+                    </div>
+                    <div class="payment-row">
+              <span class="payment-label">Уроков:</span>
+              <span class="payment-value lessons-count">
+                <svg class="lesson-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+                ${payment.lessons}
+              </span>
+            </div>
         <div class="payment-row">
           <span class="payment-label">Сумма:</span>
           <span class="payment-value">${payment.amount} руб.</span>
@@ -151,7 +177,7 @@ export class PaymentsModal extends Modal {
 
         const self = this;
 
-        document.querySelector('.payments-list').addEventListener('click', function (e) {
+        document.querySelector('.payments-list')?.addEventListener('click', function (e) {
             const teacherLink = e.target.closest('.teacher-link');
             if (teacherLink) {
                 const teacherName = teacherLink.textContent

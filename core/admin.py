@@ -31,11 +31,12 @@ class TeacherAdmin(admin.ModelAdmin):
 
 @admin.register(TeacherPayment)
 class TeacherPaymentAdmin(admin.ModelAdmin):
-    list_display = ('teacher', 'week_start_date', 'week_end_date', 'lessons_count',
+    list_display = ('teacher', 'local_created_at', 'due_date', 'week_start_date', 'week_end_date', 'lessons_count',
                     'amount', 'is_paid', 'payment_date')
     list_filter = ('is_paid', 'teacher', 'week_start_date')
     search_fields = ('teacher__name',)
-    date_hierarchy = 'week_start_date'
+    readonly_fields = ('due_date', 'local_created_at',)
+    date_hierarchy = 'due_date'
     actions = ['mark_as_paid']
 
     def week_end_date(self, obj):

@@ -4,6 +4,7 @@ from datetime import date as date_type, datetime, timedelta, time
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -459,8 +460,18 @@ class TeacherPayment(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     is_paid = models.BooleanField(default=False)
     payment_date = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now, verbose_name='Дата создания')
+    due_date = models.DateField(default=timezone.now, verbose_name='Дата оплаты до')
+
+    @property
+    def local_created_at(self):
+        return timezone.localtime(self.created_at)
 
     class Meta:
         unique_together = ['teacher', 'week_start_date']
-        verbose_name = 'Выпплата преподавателю'
+        verbose_name = 'Выплата преподавателю'
         verbose_name_plural = 'Выплаты преподавателям'
+        ordering = ['-created_at']  # Сортировка по дате создания (новые сначала)
+
+    def __str__(self):
+        return f"{self.teacher} - {self.week_start_date} ({self.amount} руб.)"
