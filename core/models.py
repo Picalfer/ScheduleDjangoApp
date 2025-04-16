@@ -70,7 +70,10 @@ class Client(models.Model):
 
     @property
     def primary_phone(self):
-        return self.phone_numbers.filter(is_primary=True).first() or self.phone_numbers.first()
+        try:
+            return self.phone_numbers.filter(is_primary=True).first() or self.phone_numbers.first()
+        except Exception:
+            return None
 
     def add_lessons(self, amount, student, note=''):
         """Пополнение баланса с логированием"""

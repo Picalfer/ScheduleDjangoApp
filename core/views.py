@@ -12,7 +12,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
@@ -497,31 +497,42 @@ def mark_payment_as_paid(request, payment_id):
 
 
 def low_balance_clients(request):
-    clients = Client.objects.filter(balance__lte=2)
+    try:
+        clients = Client.objects.filter(balance__lte=2) \
+            .prefetch_related(
+            'phone_numbers',
+            Prefetch('students', queryset=Student.objects.select_related('teacher'))
+        )
 
-    clients_data = []
-    for client in clients:
-        clients_data.append({
-            'id': client.id,
-            'name': client.name,
-            'balance': client.balance,
-            'phone': client.primary_phone.number,
-            'phone_note': client.primary_phone.note,
-            'children': [
-                {
-                    'id': student.id,
-                    'name': student.name,
-                    'teacher': student.teacher.name if student.teacher else None,
-                    'notes': student.notes
-                }
-                for student in client.students.all()
-            ]
+        clients_data = []
+        for client in clients:
+            if not hasattr(client, 'phone_numbers'):
+                logger.warning(f"Client {client.id} has no phone numbers relation")
+            primary_phone = client.primary_phone
+            clients_data.append({
+                'id': client.id,
+                'name': client.name,
+                'balance': client.balance,
+                'phone': primary_phone.number if primary_phone else None,
+                'phone_note': primary_phone.note if primary_phone else None,
+                'children': [
+                    {
+                        'id': student.id,
+                        'name': student.name,
+                        'teacher': student.teacher.name if student.teacher else None,
+                        'notes': student.notes
+                    }
+                    for student in client.students.all()
+                ]
+            })
+
+        return JsonResponse({
+            'status': 'success',
+            'clients': clients_data
         })
-
-    return JsonResponse({
-        'status': 'success',
-        'clients': clients_data
-    })
+    except Exception as e:
+        logger.error(f"Error in low_balance_clients: {str(e)}", exc_info=True)
+        return JsonResponse({'status': 'error', 'message': 'Internal server error'}, status=500)
 
 
 def low_balance_clients_count(request):
