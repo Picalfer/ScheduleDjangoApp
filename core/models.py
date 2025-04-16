@@ -69,7 +69,6 @@ class Client(models.Model):
 
     @property
     def primary_phone(self):
-        """Возвращает основной номер телефона"""
         return self.phone_numbers.filter(is_primary=True).first() or self.phone_numbers.first()
 
     def add_lessons(self, amount, student, note=''):

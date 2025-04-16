@@ -784,3 +784,19 @@ input[type="text"]:focus {
     transform: scale(1.1);
     color: #036;
 }
+
+.child-link {
+    color: #53b9ec;
+    text-decoration: none;
+    transition: color 0.2s;
+    cursor: pointer;
+}
+
+.child-link:hover {
+    color: #429ffb;
+    text-decoration: underline;
+}
+
+.client-info a {
+    color: #447e9b;
+}

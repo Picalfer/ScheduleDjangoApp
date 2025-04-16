@@ -503,9 +503,17 @@ def low_balance_clients(request):
             'id': client.id,
             'name': client.name,
             'balance': client.balance,
-            # 'last_payment_date': client.last_payment_date.strftime('%Y-%m-%d') if client.last_payment_date else None,
-            # 'next_lesson_date': client.next_lesson_date.strftime('%Y-%m-%d') if client.next_lesson_date else None,
-            # 'parent_phone': client.primary_phone.phone_number if client.primary_phone else 'Не указан'
+            'phone': client.primary_phone.number,
+            'phone_note': client.primary_phone.note,
+            'children': [
+                {
+                    'id': student.id,
+                    'name': student.name,
+                    'teacher': student.teacher.name if student.teacher else None,
+                    'notes': student.notes
+                }
+                for student in client.students.all()
+            ]
         })
 
     return JsonResponse({

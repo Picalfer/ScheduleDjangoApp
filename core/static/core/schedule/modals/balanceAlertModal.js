@@ -94,15 +94,29 @@ export class BalanceAlertModal extends Modal {
         return clients.map(client => `
             <div class="client-card" data-client-id="${client.id}">
                 <div class="client-info">
-                    <h4>${client.name}</h4>
+                    <h4>${client.name}${client.children && client.children.length > 0 ?
+            ` (${client.children.map(child =>
+                `<a href="/admin/core/student/${child.id}/change/" 
+                               target="_blank" 
+                               class="child-link"
+                               title="Редактировать в админке">
+                               ${child.name}
+                            </a>`
+            ).join(', ')})` :
+            ''}</h4>
                     <div class="client-details">
                         ${client.balance < 0 ? `<p>Баланс: ${client.balance}</p>` : ''}
+                        ${client.phone_note ? `<p>${client.phone_note}</p>` : ''}
+                        ${client.phone ? `<p>${client.phone}</p>` : ''}
                     </div>
                 </div>
                 <div class="client-actions">
                     <button class="contact-btn" data-client-id="${client.id}">
                         Связаться
                     </button>
+                    <a class="admin-link" data-target="_blank" title="Открыть в админке" href="/admin/core/client/${client.id}/change/">
+                        ⚙️
+                    </a>
                 </div>
             </div>
         `).join('');
