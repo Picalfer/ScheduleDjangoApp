@@ -20,6 +20,8 @@ export function initApp() {
             lessonModal.open(lessonData);
         }
     }
+
+    setupContextMenu();
 }
 
 async function setAdminTools() {
@@ -43,6 +45,45 @@ async function setAdminTools() {
 
     updateCounter('balance-alert-counter', lowBalanceClientsCount);
     updateCounter('payments-counter', paymentsCount);
+}
+
+function setupContextMenu() {
+    const customContextMenu = document.createElement('div');
+    customContextMenu.id = 'custom-context-menu';
+    customContextMenu.style.display = 'none';
+    document.body.appendChild(customContextMenu);
+
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        customContextMenu.innerHTML = `
+            <div class="menu-item" data-action="refresh">🔄 Обновить</div>
+        `;
+        customContextMenu.style.display = 'block';
+        customContextMenu.style.left = `${e.pageX}px`;
+        customContextMenu.style.top = `${e.pageY}px`;
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') customContextMenu.style.display = 'none';
+    });
+
+    document.addEventListener('click', (e) => {
+        if (e.button !== 2) {
+            customContextMenu.style.display = 'none';
+        }
+    });
+
+    customContextMenu.addEventListener('click', (e) => {
+        const menuItem = e.target.closest('.menu-item');
+        if (!menuItem) return;
+
+        const action = menuItem.dataset.action;
+        if (action === 'refresh') {
+            location.reload();
+        }
+
+        customContextMenu.style.display = 'none';
+    });
 }
 
 export const scheduleState = {isAnother: false};

@@ -48,9 +48,7 @@ def complete_lesson(request, lesson_id):
         if not request.user.is_authenticated:
             return JsonResponse({'status': 'error', 'message': 'Требуется авторизация'}, status=401)
 
-        # Чтобы админ мог проводить уроки других преподавателей
-        # if request.user != lesson.teacher.user and not request.user.is_staff:
-        if request.user != lesson.teacher.user:
+        if request.user != lesson.teacher.user and not request.user.is_staff:
             return JsonResponse({'status': 'error', 'message': 'Можно отмечать только свои уроки'}, status=403)
 
         if lesson.status == 'completed':
@@ -131,9 +129,7 @@ def cancel_lesson(request, lesson_id):
         if not request.user.is_authenticated:
             return JsonResponse({'status': 'error', 'message': 'Требуется авторизация'}, status=401)
 
-        # Чтобы админ мог отменять уроки других преподавателей
-        # if request.user != lesson.teacher.user and not request.user.is_staff:
-        if request.user != lesson.teacher.user:
+        if request.user != lesson.teacher.user and not request.user.is_staff:
             return JsonResponse({'status': 'error', 'message': 'Можно отменять только свои уроки'}, status=403)
 
         if lesson.status != 'scheduled':
@@ -450,11 +446,13 @@ def generate_weekly_payments(request):
 @require_GET
 def weekly_payments(request):
     try:
-        calculate_weekly_payments()
+        # calculate_weekly_payments()
         # payments = TeacherPayment.objects.filter(is_paid=False).select_related('teacher')
         payments = TeacherPayment.objects.select_related('teacher')
         data = [{
             'id': p.id,
+            'created_at': p.local_created_at,
+            'due_date': p.due_date,
             'teacher_id': p.teacher.id,
             'user_id': p.teacher.user.id,
             'teacher': p.teacher.user.get_full_name(),
@@ -507,9 +505,17 @@ def low_balance_clients(request):
             'id': client.id,
             'name': client.name,
             'balance': client.balance,
-            # 'last_payment_date': client.last_payment_date.strftime('%Y-%m-%d') if client.last_payment_date else None,
-            # 'next_lesson_date': client.next_lesson_date.strftime('%Y-%m-%d') if client.next_lesson_date else None,
-            # 'parent_phone': client.primary_phone.phone_number if client.primary_phone else 'Не указан'
+            'phone': client.primary_phone.number,
+            'phone_note': client.primary_phone.note,
+            'children': [
+                {
+                    'id': student.id,
+                    'name': student.name,
+                    'teacher': student.teacher.name if student.teacher else None,
+                    'notes': student.notes
+                }
+                for student in client.students.all()
+            ]
         })
 
     return JsonResponse({
