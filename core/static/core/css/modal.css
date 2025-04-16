@@ -139,11 +139,14 @@
     border-radius: 16px 16px 0 0;
     border-bottom: 1px solid var(--border-color);
     padding: 20px 24px;
+    display: flex;
+    align-items: center;
 }
 
 .modal-header h3 {
     color: var(--text-primary);
     font-size: 1.4em;
+    display: inline-block;
     margin-bottom: 15px;
 }
 
@@ -758,4 +761,26 @@ input[type="text"]:focus {
 .teachers-error p {
     color: #d32f2f;
     margin-bottom: 15px;
+}
+
+/* Стили для контейнера элементов в header */
+.modal-header .header-elements {
+    display: flex;
+    gap: 10px;
+    margin-left: auto; /* Выравниваем элементы справа */
+}
+
+/* Стили для кнопки админки */
+.admin-link {
+    color: #447e9b;
+    text-decoration: none;
+    font-size: 1.2em;
+    transition: transform 0.2s;
+    display: inline-flex;
+    align-items: center;
+}
+
+.admin-link:hover {
+    transform: scale(1.1);
+    color: #036;
 }

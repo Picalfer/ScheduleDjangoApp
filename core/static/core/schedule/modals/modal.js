@@ -8,6 +8,7 @@ export class Modal {
             closeOnOutsideClick: true,
             modalClass: '',
             modalContentClass: '',
+            headerElements: [],
             ...options
         };
 
@@ -49,7 +50,14 @@ export class Modal {
         closeBtn.className = 'close';
         closeBtn.innerHTML = '&times;';
 
-        header.append(title, closeBtn);
+        // Добавляем кастомные элементы из options.headerElements
+        const elementsContainer = document.createElement('div');
+        elementsContainer.className = 'header-elements';
+        this.options.headerElements.forEach(element => {
+            elementsContainer.appendChild(element);
+        });
+
+        header.append(title, elementsContainer, closeBtn);
         return header;
     }
 
