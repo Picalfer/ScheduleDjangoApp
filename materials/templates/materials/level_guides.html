@@ -16,14 +16,12 @@
 
         <div class="guides-list">
             {% for guide in guides %}
-                <div class="guide-card">
-                    <div class="guide-content">
-                        <h2 class="guide-title">{{ guide.title }}</h2>
-                        <a href="{{ guide.file.url }}" class="download-btn" download>
-                            <i class="fas fa-download"></i> Скачать
-                        </a>
-                    </div>
-                </div>
+                <a href="{% url 'view_guide' guide.id %}" class="guide-card" target="_blank">
+                    <h3 class="guide-title">{{ guide.title }}</h3>
+                    <span class="guide-action">
+        <i class="fas fa-eye"></i>
+    </span>
+                </a>
             {% empty %}
                 <div class="empty-message">
                     <i class="fas fa-file-alt"></i>

@@ -26,9 +26,15 @@ class Level(models.Model):
 
 class Guide(models.Model):
     level = models.ForeignKey(Level, on_delete=models.CASCADE, related_name='guides')
-    title = models.CharField("Название методички", max_length=200)
-    file = models.FileField("Файл", upload_to="guides/")
+    title = models.CharField("Название", max_length=200)
+    html_file = models.FileField("HTML файл", upload_to="guides/html/", null=True, blank=True)
+    assets = models.FileField("Ресурсы (zip)", upload_to="guides/assets/", null=True, blank=True)
     order = models.PositiveIntegerField("Порядок", default=0)
+
+    def assets_url(self):
+        if self.assets:
+            return self.assets.url.replace('.zip', '')
+        return ''
 
     class Meta:
         ordering = ['order']

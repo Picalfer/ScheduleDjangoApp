@@ -6,7 +6,7 @@ from .models import Course, Level, Guide
 class GuideInline(admin.TabularInline):
     model = Guide
     extra = 1
-    fields = ('title', 'file', 'order')
+    fields = ('title', 'html_file', 'assets', 'order')
 
 
 class LevelInline(admin.TabularInline):
