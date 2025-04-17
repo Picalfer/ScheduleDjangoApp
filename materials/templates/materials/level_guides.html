@@ -1,0 +1,35 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}{{ level.title }} | {{ course.title }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'materials/css/guides.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="guides-container">
+        <div class="breadcrumbs">
+            <a href="{% url 'course_levels' course.id %}">← {{ course.title }}</a>
+            <h1>{{ level.title }}</h1>
+        </div>
+
+        <div class="guides-list">
+            {% for guide in guides %}
+                <div class="guide-card">
+                    <div class="guide-content">
+                        <h2 class="guide-title">{{ guide.title }}</h2>
+                        <a href="{{ guide.file.url }}" class="download-btn" download>
+                            <i class="fas fa-download"></i> Скачать
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="empty-message">
+                    <i class="fas fa-file-alt"></i>
+                    <p>Методички пока не добавлены</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
