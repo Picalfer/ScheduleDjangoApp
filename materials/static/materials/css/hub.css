@@ -3,6 +3,11 @@ main {
     padding: 0;
     display: block;
     color: black;
+    background-color: rgba(0, 0, 0, 0.52);
+}
+
+.header-text {
+    color: white;
 }
 
 #content-main {
@@ -35,10 +40,6 @@ main {
     font-size: 2rem;
     font-weight: bold;
     margin-bottom: 0.5rem;
-}
-
-.header-text p {
-    color: black;
 }
 
 /* Кнопка добавления курса */
@@ -167,7 +168,7 @@ main {
 }
 
 .lesson-count {
-    background: #f8f9fa;
+    background: #d6d6d6;
     padding: 3px 8px;
     border-radius: 3px;
     font-size: 0.8rem;
