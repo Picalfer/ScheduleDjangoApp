@@ -1,0 +1,198 @@
+
+main {
+    padding: 0;
+    display: block;
+    color: black;
+}
+
+#content-main {
+    width: 100%;
+    height: 100%;
+}
+
+/* Основные стили контейнера */
+.courses-container {
+    padding: 2rem;
+    margin: 0 auto;
+}
+
+/* Шапка с заголовком и кнопкой */
+.courses-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+    .courses-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+.header-text h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.header-text p {
+    color: black;
+}
+
+/* Кнопка добавления курса */
+.add-course-btn {
+    background: #0d6efd;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.add-course-btn:hover {
+    background: #0b5ed7;
+}
+
+/* Сетка курсов */
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+/* Стили для пустого состояния */
+.empty-courses {
+    grid-column: 1 / -1;
+}
+
+.empty-card {
+    background: white;
+    border-radius: 0.25rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    padding: 2rem;
+    text-align: center;
+}
+
+.empty-card i {
+    font-size: 3rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.empty-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-card p {
+    color: #6c757d;
+}
+
+/*  стили для карточек */
+.course-card {
+    width: 300px; /* Фиксированная ширина */
+    height: 400px; /* Фиксированная высота */
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    display: inline-block;
+    margin: 15px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.course-cover {
+    position: relative;
+    height: 150px;
+    overflow: hidden;
+}
+
+.course-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.course-cover .badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #007bff;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.course-cover-placeholder {
+    height: 150px;
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.course-cover-placeholder i {
+    font-size: 3rem;
+}
+
+.course-body {
+    padding: 15px;
+    height: 150px;
+    overflow: hidden;
+}
+
+.course-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.course-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.lesson-count {
+    background: #f8f9fa;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 0.8rem;
+}
+
+.course-body p {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.course-footer {
+    padding: 0 15px 15px;
+}
+
+.course-link {
+    display: block;
+    background: #007bff;
+    color: white;
+    text-align: center;
+    padding: 8px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background 0.3s;
+}
+
+.course-link:hover {
+    background: #0069d9;
+    color: white;
+}
