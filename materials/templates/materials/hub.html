@@ -1,0 +1,32 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+    <div class="courses-container">
+        <div class="courses-header">
+            <div class="header-text">
+                <h1>Все курсы</h1>
+                <p>Выберите курс для изучения материалов</p>
+            </div>
+
+            {% if user.is_staff %}
+                <a href="{% url 'admin:materials_course_add' %}" class="add-course-btn">
+                    <i class="fas fa-plus"></i> Добавить курс
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="courses-grid">
+            {% for course in courses %}
+                {% include "materials/includes/course_card.html" %}
+            {% empty %}
+                <div class="empty-courses">
+                    <div class="empty-card">
+                        <i class="fas fa-book-open"></i>
+                        <h3>Курсы пока не добавлены</h3>
+                        <p>Здесь будут отображаться все учебные материалы</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

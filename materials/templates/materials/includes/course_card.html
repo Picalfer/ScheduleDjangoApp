@@ -1,0 +1,26 @@
+<div class="course-card">
+    {% if course.cover %}
+        <div class="course-cover">
+            <img src="{{ course.cover.url }}" alt="{{ course.title }}">
+            <span class="badge">Новый</span>
+        </div>
+    {% else %}
+        <div class="course-cover-placeholder">
+            <i class="fas fa-book-open"></i>
+        </div>
+    {% endif %}
+
+    <div class="course-body">
+        <div class="course-header">
+            <h3>{{ course.title }}</h3>
+            <span class="lesson-count">🔥 24 урока</span>
+        </div>
+        <p>{{ course.short_description }}</p>
+    </div>
+
+    <div class="course-footer">
+        <a href="#" class="course-link">
+            Смотреть программу
+        </a>
+    </div>
+</div>
