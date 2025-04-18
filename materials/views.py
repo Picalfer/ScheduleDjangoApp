@@ -36,20 +36,26 @@ def level_guides(request, level_id):
 def view_guide(request, guide_id):
     guide = get_object_or_404(Guide, id=guide_id)
 
-    # Распаковываем архив при первом обращении
+    # Базовый URL для ресурсов
+    assets_url = f"{settings.MEDIA_URL}guides/assets/{guide.id}/"
+
     if guide.assets and not os.path.exists(os.path.join(settings.MEDIA_ROOT, 'guides/assets', str(guide.id))):
         with zipfile.ZipFile(guide.assets.path, 'r') as zip_ref:
             zip_ref.extractall(os.path.join(settings.MEDIA_ROOT, 'guides/assets', str(guide.id)))
 
-    # Читаем HTML и заменяем пути
-    with guide.html_file.open('r') as f:
-        html_content = f.read()
+    try:
+        with open(guide.html_file.path, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+    except UnicodeDecodeError:
+        with open(guide.html_file.path, 'r', encoding='cp1251') as f:
+            html_content = f.read()
 
-    # Заменяем пути к ресурсам
-    html_content = html_content.replace('images/', f'/media/guides/assets/{guide.id}/images/') \
-        .replace('style.css', f'/static/materials/css/guide_styles.css')
+    # Универсальная замена путей
+    html_content = html_content.replace('src="images/', f'src="{assets_url}images/') \
+        .replace('href="style.css', f'href="{assets_url}style.css')
 
     return render(request, 'materials/guide_wrapper.html', {
         'content': html_content,
-        'guide': guide
+        'guide': guide,
+        'assets_url': assets_url
     })
