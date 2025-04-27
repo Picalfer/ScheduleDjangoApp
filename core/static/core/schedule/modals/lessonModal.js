@@ -5,11 +5,25 @@ import {showNotification} from '../utils.js';
 
 export class LessonModal extends Modal {
     constructor() {
-        const adminButton = document.createElement('a');
-        adminButton.className = 'admin-link';
-        adminButton.innerHTML = '⚙️';
-        adminButton.title = 'Открыть в админке';
-        adminButton.target = '_blank';
+        const adminLessonBtn = document.createElement('a');
+        adminLessonBtn.className = 'admin-link';
+        adminLessonBtn.innerHTML = '✏️';
+        adminLessonBtn.title = 'Открыть урок в админке';
+        adminLessonBtn.target = '_blank';
+
+        const adminStudentBtn = document.createElement('a');
+        adminStudentBtn.className = 'admin-link';
+        adminStudentBtn.innerHTML = '🎓';
+        adminStudentBtn.title = 'Открыть студента в админке';
+        adminStudentBtn.target = '_blank';
+        adminStudentBtn.style.display = 'none';
+
+        const adminClientBtn = document.createElement('a');
+        adminClientBtn.className = 'admin-link';
+        adminClientBtn.innerHTML = '💼';
+        adminClientBtn.title = 'Открыть клиента в админке';
+        adminClientBtn.target = '_blank';
+        adminClientBtn.style.display = 'none';
 
         super({
             modalId: 'lesson-modal',
@@ -47,10 +61,12 @@ export class LessonModal extends Modal {
                         <button class="cancel-button cancel-lesson-btn">Отменить урок</button>
                         <button class="submit-button admit-lesson-btn">Отметить проведённым</button>
                       `,
-            headerElements: [adminButton],
+            headerElements: [adminLessonBtn, adminStudentBtn, adminClientBtn],
         });
 
-        this.adminButton = adminButton;
+        this.adminButton = adminLessonBtn;
+        this.adminStudentButton = adminStudentBtn;
+        this.adminClientButton = adminClientBtn;
 
         this.lessonId = null;
         this.lessonData = null;
@@ -93,6 +109,7 @@ export class LessonModal extends Modal {
         this.lessonId = lessonData.id;
         this.lessonData = lessonData;
         console.log(`Открыт урок под id: ${this.lessonId}`);
+        console.log(lessonData);
 
         // Устанавливаем данные урока
         this.setLessonData(lessonData);
@@ -106,10 +123,30 @@ export class LessonModal extends Modal {
 
     setLessonData(lessonData) {
         if (userData.isAdmin) {
+            // Кнопка урока
             this.adminButton.href = `/admin/core/lesson/${lessonData.id}/change/`;
             this.adminButton.style.display = 'inline-block';
+
+            // Кнопка студента (если есть student_id в lessonData)
+            if (lessonData.student) {
+                this.adminStudentButton.href = `/admin/core/student/${lessonData.student}/change/`;
+                this.adminStudentButton.style.display = 'inline-block';
+            } else {
+                this.adminStudentButton.style.display = 'none';
+            }
+
+            // Кнопка клиента (если есть client_id в lessonData)
+            if (lessonData.client) {
+                this.adminClientButton.href = `/admin/core/client/${lessonData.client}/change/`;
+                this.adminClientButton.style.display = 'inline-block';
+            } else {
+                this.adminClientButton.style.display = 'none';
+            }
         } else {
+            // Скрываем все кнопки для не-админов
             this.adminButton.style.display = 'none';
+            this.adminStudentButton.style.display = 'none';
+            this.adminClientButton.style.display = 'none';
         }
 
         // Дата урока

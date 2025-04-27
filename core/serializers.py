@@ -8,6 +8,7 @@ from .models import OpenSlots
 
 class LessonSerializer(serializers.ModelSerializer):
     student_name = serializers.CharField(source='student.name', read_only=True)
+    client = serializers.CharField(source='student.client.id', read_only=True)
     start_date = serializers.DateField(source='date', read_only=True)
     balance = serializers.SerializerMethodField(read_only=True)
     is_reliable = serializers.SerializerMethodField()
@@ -23,6 +24,11 @@ class LessonSerializer(serializers.ModelSerializer):
         # Оптимизированный доступ к балансу через prefetch_related
         if hasattr(obj.student, 'client'):
             return obj.student.client.balance
+        return None
+
+    def get_client(self, obj):
+        if hasattr(obj.student, 'client'):
+            return obj.student.client.id
         return None
 
     def to_representation(self, instance):
