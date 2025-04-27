@@ -13,13 +13,10 @@
         <div class="courses-header">
             <div class="header-text">
                 <h1>Все курсы</h1>
-                <p>Выберите курс для изучения материалов</p>
             </div>
 
             {% if user.is_staff %}
-                <a href="{% url 'admin:materials_course_add' %}" class="add-course-btn">
-                    <i class="fas fa-plus"></i> Добавить курс
-                </a>
+                <a href="{% url 'admin:materials_course_add' %}" class="add-course-btn">Добавить курс</a>
             {% endif %}
         </div>
 

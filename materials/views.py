@@ -51,8 +51,10 @@ def view_guide(request, guide_id):
             html_content = f.read()
 
     # Универсальная замена путей
-    html_content = html_content.replace('src="images/', f'src="{assets_url}images/') \
-        .replace('href="style.css', f'href="{assets_url}style.css')
+    # html_content = html_content.replace('src="images/', f'src="{assets_url}images/') \
+    #    .replace('href="style.css', f'href="{assets_url}style.css')
+
+    html_content = html_content.replace('src="images/', f'src="{assets_url}images/')
 
     return render(request, 'materials/guide_wrapper.html', {
         'content': html_content,
