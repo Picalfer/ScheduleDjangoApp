@@ -9,6 +9,16 @@ from django.utils import timezone
 logger = logging.getLogger(__name__)
 
 
+class UserSettings(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='settings')
+    working_hours_start = models.IntegerField(default=9)  # Начало рабочего дня
+    working_hours_end = models.IntegerField(default=18)  # Конец рабочего дня
+    theme = models.CharField(max_length=10, default='light')  # Тема (light/dark)
+
+    def __str__(self):
+        return f"Настройки пользователя {self.user.username}"
+
+
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
@@ -24,34 +34,16 @@ class Teacher(models.Model):
         verbose_name_plural = 'Преподаватели'
 
 
-class PhoneNumber(models.Model):
-    client = models.ForeignKey(
-        'Client',
-        on_delete=models.CASCADE,
-        related_name='phone_numbers',
-        verbose_name='Клиент'
-    )
-    number = models.CharField(
-        max_length=20,
-        verbose_name='Номер телефона'
-    )
-    note = models.CharField(
-        max_length=100,
-        blank=True,
-        verbose_name='Заметка (например, "Бабушка Алла")'
-    )
-    is_primary = models.BooleanField(
-        default=False,
-        verbose_name='Основной номер'
-    )
+class OpenSlots(models.Model):
+    teacher = models.OneToOneField(User, on_delete=models.CASCADE, related_name='open_slots')
+    weekly_open_slots = models.JSONField(default=dict)
 
     class Meta:
-        verbose_name = 'Номер телефона'
-        verbose_name_plural = 'Номера телефонов'
-        ordering = ['-is_primary', 'id']
+        verbose_name = 'Открытые часы'
+        verbose_name_plural = 'Открытые часы'
 
     def __str__(self):
-        return f"{self.number} ({self.note})" if self.note else self.number
+        return f"Open slots for {self.teacher.username}"
 
 
 class Client(models.Model):
@@ -94,45 +86,17 @@ class Client(models.Model):
     @transaction.atomic
     def spend_lesson(self, student, note=''):
         """Атомарное списание урока с баланса"""
-        with transaction.atomic():
-            # Блокируем запись клиента для изменения
-            client = Client.objects.select_for_update().get(pk=self.pk)
-
-            if client.balance > 0:
-                # Обычное списание при положительном балансе
-                BalanceOperation.objects.create(
-                    client=client,
-                    student=student,
-                    operation_type='spend',
-                    amount=1,
-                    notes=note or f"Занятие с {student.name}"
-                )
-                return True
-            elif client.allow_negative_once:
-                # Списание в минус (однократное)
-                BalanceOperation.objects.create(
-                    client=client,
-                    student=student,
-                    operation_type='spend',
-                    amount=1,
-                    notes=note or f"Занятие с {student.name} (списание в минус)"
-                )
-                client.refresh_from_db()
-                # Сбрасываем флаг и сохраняем
-                client.allow_negative_once = False
-                client.save()
-                return True
-            else:
-                # Нельзя списать - баланс 0 и нет разрешения на минус
-                return False
-
-    def clean(self):
-        super().clean()
-        # Проверяем, что баланс либо положительный, либо (отрицательный И разрешено одно списание)
-        if self.balance < 0 and not self.allow_negative_once:
-            raise ValidationError(
-                {'balance': 'Баланс не может быть отрицательным без специального разрешения'}
+        try:
+            BalanceOperation.objects.create(
+                client=self,
+                student=student,
+                operation_type='spend',
+                amount=1,
+                notes=note or f"Занятие с {student.name}"
             )
+            return True
+        except ValueError:
+            return False
 
     def __str__(self):
         return f"{self.name} (Баланс: {self.balance})"
@@ -143,6 +107,36 @@ class Client(models.Model):
         indexes = [
             models.Index(fields=['balance']),
         ]
+
+
+class PhoneNumber(models.Model):
+    client = models.ForeignKey(
+        'Client',
+        on_delete=models.CASCADE,
+        related_name='phone_numbers',
+        verbose_name='Клиент'
+    )
+    number = models.CharField(
+        max_length=20,
+        verbose_name='Номер телефона'
+    )
+    note = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name='Заметка (например, "Бабушка Алла")'
+    )
+    is_primary = models.BooleanField(
+        default=False,
+        verbose_name='Основной номер'
+    )
+
+    class Meta:
+        verbose_name = 'Номер телефона'
+        verbose_name_plural = 'Номера телефонов'
+        ordering = ['-is_primary', 'id']
+
+    def __str__(self):
+        return f"{self.number} ({self.note})" if self.note else self.number
 
 
 class Student(models.Model):
@@ -216,13 +210,23 @@ class BalanceOperation(models.Model):
         choices=OPERATION_TYPES,
         verbose_name='Тип операции'
     )
-    amount = models.PositiveIntegerField(verbose_name='Количество уроков')
+    amount = models.IntegerField(verbose_name='Количество уроков')
     balance_before = models.IntegerField(verbose_name='Баланс до операции')
     balance_after = models.IntegerField(verbose_name='Баланс после операции')
     date = models.DateTimeField(auto_now_add=True, verbose_name='Дата операции')
     notes = models.CharField(max_length=100, blank=True, verbose_name='Комментарий')
 
+    def clean(self):
+        super().clean()
+        if self.operation_type in ('add', 'spend') and self.amount <= 0:
+            raise ValidationError(
+                {'amount': 'Количество уроков должно быть положительным для операций пополнения/списания'})
+
+        if self.operation_type == 'correction' and not isinstance(self.amount, int):
+            raise ValidationError({'amount': 'Количество уроков должно быть целым числом'})
+
     def save(self, *args, **kwargs):
+        self.clean()
         with transaction.atomic():
             # Блокируем клиента для изменения
             client = Client.objects.select_for_update().get(pk=self.client.pk)
@@ -231,19 +235,23 @@ class BalanceOperation(models.Model):
                 self.balance_before = client.balance
 
                 if self.operation_type == 'spend':
-                    if client.balance < self.amount and not client.allow_negative_once:
-                        raise ValueError("Недостаточно средств на балансе")
+                    if client.balance < self.amount:
+                        if not client.allow_negative_once:
+                            raise ValueError("Недостаточно средств на балансе")
+                        # Если разрешено однократное списание в минус
+                        client.allow_negative_once = False
 
                 # Обновляем баланс
                 if self.operation_type == 'add':
                     client.balance += self.amount
                 elif self.operation_type == 'spend':
                     client.balance -= self.amount
-                    # Если ушли в минус - сбрасываем флаг
+                elif self.operation_type == 'correction':
+                    if self.amount < 0 and not client.allow_negative_once:
+                        raise ValueError("Корректировка в минус запрещена")
+                    client.balance = self.amount
                     if client.balance < 0:
                         client.allow_negative_once = False
-                elif self.operation_type == 'correction':
-                    client.balance = self.amount
 
                 self.balance_after = client.balance
                 client.save()
@@ -431,28 +439,6 @@ class Lesson(models.Model):
         if self.lesson_type == 'single' or self.lesson_type == 'single':
             return f"{self.date} {self.time} - {self.course} ({self.get_status_display()})"
         return f"Регулярный: {self.course} ({self.get_status_display()})"
-
-
-class UserSettings(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='settings')
-    working_hours_start = models.IntegerField(default=9)  # Начало рабочего дня
-    working_hours_end = models.IntegerField(default=18)  # Конец рабочего дня
-    theme = models.CharField(max_length=10, default='light')  # Тема (light/dark)
-
-    def __str__(self):
-        return f"Настройки пользователя {self.user.username}"
-
-
-class OpenSlots(models.Model):
-    teacher = models.OneToOneField(User, on_delete=models.CASCADE, related_name='open_slots')
-    weekly_open_slots = models.JSONField(default=dict)
-
-    class Meta:
-        verbose_name = 'Открытые часы'
-        verbose_name_plural = 'Открытые часы'
-
-    def __str__(self):
-        return f"Open slots for {self.teacher.username}"
 
 
 class TeacherPayment(models.Model):
