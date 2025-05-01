@@ -22,6 +22,9 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
-                  path("materials/", include("materials.urls")),
-                  # TODO СДЕЛАТЬ ЧТОБЫ ЗДЕСЬ ПОДКЛЮЧАЛОСЬ ПРИЛОЖЕНИЕ CORE, А В КОРЕ УЖЕ КОРОВЫКЕ ССЫЛКИ ТОЛЬКО, И НОРМАЛЬНОЕ ИМЕНОВАНИЕ В ОДНОМ СТИЛЕ
-              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path("materials/", include("materials.urls")),
+    # TODO СДЕЛАТЬ ЧТОБЫ ЗДЕСЬ ПОДКЛЮЧАЛОСЬ ПРИЛОЖЕНИЕ CORE, А В КОРЕ УЖЕ КОРОВЫКЕ ССЫЛКИ ТОЛЬКО, И НОРМАЛЬНОЕ ИМЕНОВАНИЕ В ОДНОМ СТИЛЕ
+]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
