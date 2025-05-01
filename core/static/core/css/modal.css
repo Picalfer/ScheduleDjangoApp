@@ -766,23 +766,27 @@ input[type="text"]:focus {
 /* Стили для контейнера элементов в header */
 .modal-header .header-elements {
     display: flex;
-    gap: 10px;
-    margin-left: auto; /* Выравниваем элементы справа */
+    flex-wrap: wrap;
+    justify-content: right;
+    align-items: center;
+    gap: 5px;
 }
 
 /* Стили для кнопки админки */
 .admin-link {
-    color: #447e9b;
+    display: inline-block;
+    padding: 5px 10px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
     text-decoration: none;
-    font-size: 1.2em;
-    transition: transform 0.2s;
-    display: inline-flex;
-    align-items: center;
+    color: #333;
+    font-size: 14px;
+    transition: background-color 0.3s;
 }
 
 .admin-link:hover {
-    transform: scale(1.1);
-    color: #036;
+    background-color: #b5e2ec;
+    text-decoration: none;
 }
 
 .child-link {
