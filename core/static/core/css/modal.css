@@ -777,7 +777,7 @@ input[type="text"]:focus {
 .admin-link {
     display: inline-block;
     padding: 5px 10px;
-    background-color: #f0f0f0;
+    background-color: var(--bg-invert);
     border-radius: 4px;
     text-decoration: none;
     color: #333;
