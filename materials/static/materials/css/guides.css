@@ -1,0 +1,146 @@
+main {
+    padding: 2rem;
+    display: block;
+    color: black;
+    background-color: rgba(0, 0, 0, 0.52);
+}
+
+.guides-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.breadcrumbs {
+    margin-bottom: 2rem;
+}
+
+.breadcrumbs a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 1rem;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+}
+
+.breadcrumbs a:hover {
+    color: white;
+}
+
+.breadcrumbs h1 {
+    color: white;
+    font-size: 2rem;
+    margin: 0;
+}
+
+.guides-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.guide-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.guide-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.guide-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.guide-title {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.download-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.download-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.empty-message {
+    text-align: center;
+    padding: 3rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.empty-message i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.6;
+}
+
+.empty-message p {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.guide-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.25s ease;
+    text-decoration: none;
+    color: white;
+}
+
+.guide-card:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.guide-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 0;
+    flex-grow: 1;
+}
+
+.guide-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transition: all 0.25s ease;
+}
+
+.guide-card:hover .guide-action {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.guide-action i {
+    font-size: 0.9rem;
+}

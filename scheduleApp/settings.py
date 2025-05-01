@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core.apps.CoreConfig',
+    'materials.apps.MaterialsConfig',
 ]
 
 MIDDLEWARE = [
@@ -181,7 +182,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Для collectstatic
 
 if DEBUG:
     STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'core/static'),  # Путь к вашей статике в приложении core
+        os.path.join(BASE_DIR, 'core/static'),
+        os.path.join(BASE_DIR, 'materials/static'),
     ]
 else:
     # Новая система STORAGES для Django 4.2+
@@ -204,3 +206,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
 }
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

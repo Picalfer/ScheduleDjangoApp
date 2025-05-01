@@ -1,6 +1,8 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
+{% block title %}Профиль{% endblock %}
+
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/profile.css' %}">
 {% endblock %}
@@ -15,6 +17,7 @@
             <br>
             <br>
             <a href="{% url 'password_change' %}">Сменить пароль</a>
+            <a href="{% url 'logout' %}">Выйти</a>
         </form>
     </div>
 {% endblock %}
