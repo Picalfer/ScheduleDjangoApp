@@ -5,7 +5,7 @@
   "repository": "",
   "scripts": {
     "dokku": {
-      "postdeploy": ""
+      "postdeploy": "python manage.py collectstatic --noinput"
     }
   },
   "keywords": [
