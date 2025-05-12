@@ -177,14 +177,12 @@ FORMAT_MODULE_PATH = [
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/static/'  # e.g. localhost:80/static/styles.css
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Для collectstatic
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'core/static'),
     os.path.join(BASE_DIR, 'materials/static'),
-    os.path.join(BASE_DIR, 'materials-test-storage'),
-    os.path.join(BASE_DIR, 'test-storage'),
 ]
 
 # Новая система STORAGES для Django 4.2+
@@ -209,5 +207,5 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10
 }
 
-MEDIA_URL = '/media/'
+MEDIA_URL = '/media/'  # e.g. localhost:80/media/image.jpg
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

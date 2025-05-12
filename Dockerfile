@@ -32,6 +32,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Копирование проекта (исключая ненужные файлы через .dockerignore)
 COPY . .
 
+# Сборка статики (добавлена проверка)
+RUN python manage.py collectstatic --noinput --clear --verbosity=2;
+
 # Права на файлы
 RUN chown -R django:django /app
 
