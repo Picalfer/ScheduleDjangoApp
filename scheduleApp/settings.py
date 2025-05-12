@@ -184,6 +184,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'core/static'),
     os.path.join(BASE_DIR, 'materials/static'),
     os.path.join(BASE_DIR, 'materials-test-storage'),
+    os.path.join(BASE_DIR, 'test-storage'),
 ]
 
 # Новая система STORAGES для Django 4.2+
