@@ -46,6 +46,14 @@ export class LessonModal extends Modal {
                             <label for="lesson-topic">Тема урока <span class="required">*</span></label>
                             <input type="text" id="lesson-topic" required>
                             <div class="error-message">Это поле обязательно для заполнения</div>
+                            
+                            <div style="display: flex; align-items: center; margin-top: 5px">
+                                <label for="last-lesson-topic">Прошлая тема урока</label>
+                                <input type="text" id="last-lesson-topic" readonly style="flex-grow: 1; margin-right: 5px">
+                                <button id="copy-last-topic-btn" type="button" style="padding: 5px 10px; background: #eee; border: 1px solid #ddd; cursor: pointer">
+                                  Копировать
+                                </button>
+                            </div>
                           </div>
                           <div class="form-group">
                             <label for="lesson-homework">Домашнее задание</label>
@@ -159,6 +167,9 @@ export class LessonModal extends Modal {
 
         // Курс
         this.modalElement.querySelector('#lesson-course').value = lessonData.course;
+
+        // Прошлая тема
+        this.modalElement.querySelector('#last-lesson-topic').value = "Дистанционный пульт";
 
         const types = {
             recurring: ['🔄', 'Постоянный урок'],
