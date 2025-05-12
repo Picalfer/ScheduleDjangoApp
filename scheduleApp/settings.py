@@ -183,7 +183,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Для collectstatic
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'core/static'),
     os.path.join(BASE_DIR, 'materials/static'),
-    os.path.join(BASE_DIR, 'matetials-static-test'),
+    os.path.join(BASE_DIR, 'materials-test-storage'),
 ]
 
 # Новая система STORAGES для Django 4.2+
