@@ -34,9 +34,8 @@ main {
 .levels-flex-container {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center; /* Центрируем элементы */
+    justify-content: space-between; /* Центрируем элементы */
     gap: 1.5rem;
-    padding: 0 1rem;
 }
 
 .level-card {
@@ -47,8 +46,8 @@ main {
     text-decoration: none;
     border: 1px solid rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
-    width: 280px; /* Фиксированная ширина карточек */
-    height: 120px;
+    width: 300px;
+    height: 140px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -67,7 +66,7 @@ main {
 
 .level-title {
     color: white;
-    font-size: 1.5rem;
+    font-size: 1.7rem;
     font-weight: 500;
     margin: 0;
 }

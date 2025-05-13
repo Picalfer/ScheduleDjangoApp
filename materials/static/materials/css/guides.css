@@ -11,28 +11,6 @@ main {
     padding: 2rem 1rem;
 }
 
-.breadcrumbs {
-    margin-bottom: 2rem;
-}
-
-.breadcrumbs a {
-    color: rgba(255, 255, 255, 0.7);
-    text-decoration: none;
-    font-size: 1rem;
-    display: inline-block;
-    margin-bottom: 0.5rem;
-}
-
-.breadcrumbs a:hover {
-    color: white;
-}
-
-.breadcrumbs h1 {
-    color: white;
-    font-size: 2rem;
-    margin: 0;
-}
-
 .guides-list {
     display: flex;
     flex-direction: column;

@@ -5,11 +5,20 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'materials/css/levels.css' %}">
+    <link rel="stylesheet" href="{% static 'materials/css/breadcrumbs.css' %}">
 {% endblock %}
 
 {% block content %}
     <div class="course-container">
         <div class="course-header">
+            <div style="display: flex; justify-content: left">
+                <div class="breadcrumbs">
+                    <a href="{% url 'materials_hub' %}">← все курсы</a>
+                    <h1>{{ level.title }}</h1>
+                </div>
+            </div>
+
+
             <h1 class="course-title">{{ course.title }}</h1>
             {% if course.description %}
                 <p class="course-description">{{ course.description }}</p>

@@ -1,3 +1,5 @@
+import re
+
 from django.db import models
 
 
@@ -30,6 +32,25 @@ class Guide(models.Model):
     html_file = models.FileField("HTML файл", upload_to="guides/html/", null=True, blank=True)
     assets = models.FileField("Ресурсы (zip)", upload_to="guides/assets/", null=True, blank=True)
     order = models.PositiveIntegerField("Порядок", default=0)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.html_file:  # Если загружен HTML-файл
+            self.clean_google_redirects()
+
+    def clean_google_redirects(self):
+        """Удаляет google-редиректы из ссылок в HTML."""
+        with open(self.html_file.path, 'r+', encoding='utf-8') as f:
+            content = f.read()
+            # Регулярка для поиска google-редиректов
+            cleaned_content = re.sub(
+                r'https?://www\.google\.com/url\?q=([^&]+)&[^"]+',
+                lambda m: m.group(1),  # Оставляем только оригинальный URL
+                content
+            )
+            f.seek(0)
+            f.write(cleaned_content)
+            f.truncate()
 
     def assets_url(self):
         if self.assets:

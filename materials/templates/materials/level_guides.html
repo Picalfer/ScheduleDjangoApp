@@ -5,6 +5,7 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'materials/css/guides.css' %}">
+    <link rel="stylesheet" href="{% static 'materials/css/breadcrumbs.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -19,12 +20,10 @@
                 <a href="{% url 'view_guide' guide.id %}" class="guide-card" target="_blank">
                     <h3 class="guide-title">{{ guide.title }}</h3>
                     <span class="guide-action">
-        <i class="fas fa-eye"></i>
-    </span>
+                </span>
                 </a>
             {% empty %}
                 <div class="empty-message">
-                    <i class="fas fa-file-alt"></i>
                     <p>Методички пока не добавлены</p>
                 </div>
             {% endfor %}
