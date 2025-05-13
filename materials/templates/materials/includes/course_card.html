@@ -1,0 +1,14 @@
+<div class="course-card">
+    <a href="{% url 'course_levels' course.id %}" class="card-link">
+        {% if course.cover %}
+            <div class="course-image">
+                <img src="{{ course.cover.url }}" alt="{{ course.title }}">
+            </div>
+        {% else %}
+            <div class="course-image placeholder">
+                <i class="fas fa-book-open"></i>
+            </div>
+        {% endif %}
+        <h3 class="course-title">{{ course.title }}</h3>
+    </a>
+</div>

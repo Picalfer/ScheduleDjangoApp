@@ -1,0 +1,32 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}{{ level.title }} | {{ course.title }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'materials/css/guides.css' %}">
+    <link rel="stylesheet" href="{% static 'materials/css/breadcrumbs.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="guides-container">
+        <div class="breadcrumbs">
+            <a href="{% url 'course_levels' course.id %}">← {{ course.title }}</a>
+            <h1>{{ level.title }}</h1>
+        </div>
+
+        <div class="guides-list">
+            {% for guide in guides %}
+                <a href="{% url 'view_guide' guide.id %}" class="guide-card" target="_blank">
+                    <h3 class="guide-title">{{ guide.title }}</h3>
+                    <span class="guide-action">
+                </span>
+                </a>
+            {% empty %}
+                <div class="empty-message">
+                    <p>Методички пока не добавлены</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

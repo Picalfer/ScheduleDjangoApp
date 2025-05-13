@@ -4,6 +4,25 @@
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
+/* Стили для кнопки "Назад" */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    margin-bottom: 1rem;
+    transition: color 0.3s ease;
+}
+
+.back-link:hover {
+    color: white;
+}
+
 :root {
     --app-header: linear-gradient(135deg, #8848ca, #ba4040);
 }

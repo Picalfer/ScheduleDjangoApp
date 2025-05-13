@@ -1,0 +1,100 @@
+main {
+    background-color: rgba(0, 0, 0, 0.52);
+    display: block;
+    padding: 2rem;
+}
+
+.course-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.course-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.course-title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+.course-description {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* Flexbox контейнер вместо Grid */
+.levels-flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between; /* Центрируем элементы */
+    gap: 1.5rem;
+}
+
+.level-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    width: 300px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.level-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.level-content {
+    text-align: center;
+}
+
+.level-title {
+    color: white;
+    font-size: 1.7rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.empty-message {
+    width: 100%;
+    text-align: center;
+    padding: 3rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.empty-message i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.6;
+}
+
+.empty-message p {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .course-title {
+        font-size: 2rem;
+    }
+
+    .level-card {
+        width: 100%; /* На мобильных - полная ширина */
+    }
+}

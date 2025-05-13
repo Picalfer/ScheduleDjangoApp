@@ -1,0 +1,43 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}{{ course.title }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'materials/css/levels.css' %}">
+    <link rel="stylesheet" href="{% static 'materials/css/breadcrumbs.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="course-container">
+        <div class="course-header">
+            <div style="display: flex; justify-content: left">
+                <div class="breadcrumbs">
+                    <a href="{% url 'materials_hub' %}">← все курсы</a>
+                    <h1>{{ level.title }}</h1>
+                </div>
+            </div>
+
+
+            <h1 class="course-title">{{ course.title }}</h1>
+            {% if course.description %}
+                <p class="course-description">{{ course.description }}</p>
+            {% endif %}
+        </div>
+
+        <div class="levels-flex-container">
+            {% for level in levels %}
+                <a href="{% url 'level_guides' level.id %}" class="level-card">
+                    <div class="level-content">
+                        <h2 class="level-title">{{ level.title }}</h2>
+                    </div>
+                </a>
+            {% empty %}
+                <div class="empty-message">
+                    <i class="fas fa-layer-group"></i>
+                    <p>Уровни пока не добавлены</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core.apps.CoreConfig',
+    'materials.apps.MaterialsConfig',
 ]
 
 MIDDLEWARE = [
@@ -176,22 +177,23 @@ FORMAT_MODULE_PATH = [
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/static/'  # e.g. localhost:80/static/styles.css
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Для collectstatic
 
-if DEBUG:
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'core/static'),  # Путь к вашей статике в приложении core
-    ]
-else:
-    # Новая система STORAGES для Django 4.2+
-    STORAGES = {
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        },
-    }
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'core/static'),
+    os.path.join(BASE_DIR, 'materials/static'),
+]
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# Новая система STORAGES для Django 4.2+
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -204,3 +206,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
 }
+
+MEDIA_URL = '/media/'  # e.g. localhost:80/media/image.jpg
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

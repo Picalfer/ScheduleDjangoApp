@@ -1,0 +1,15 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <title>{{ guide.title }}</title>
+    <link rel="stylesheet" href="{% static 'materials/css/guide_styles.css' %}">
+    <base href="{{ guide.assets_url }}" target="_blank">
+</head>
+<body>
+{% autoescape off %}
+    {{ content }}
+{% endautoescape %}
+<script src="{% static 'materials/js/guide_protection.js' %}"></script>
+</body>
+</html>

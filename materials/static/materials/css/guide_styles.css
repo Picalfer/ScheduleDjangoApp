@@ -1,0 +1,56 @@
+/* Защитные стили */
+body {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5;
+}
+
+.guide-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    background: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Запрещаем выделение текста и копирование */
+body {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+img {
+    pointer-events: none;
+    max-width: 100%;
+}
+
+/* Скрываем исходные элементы Word */
+.officetitle, .MsoTitle {
+    display: none !important;
+}
+
+body {
+    margin: auto;
+    user-select: none;
+    -webkit-user-select: none; /* Для Safari */
+    -moz-user-select: none; /* Для Firefox */
+    -ms-user-select: none; /* Для старых версий IE/Edge */
+}
+
+/* Разрешение выделения текста для ссылок */
+a {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+}
+
+/* Дополнительные стили для защиты */
+.protected-text {
+    color: #333; /* Цвет текста */
+    font-family: Arial, sans-serif; /* Шрифт */
+    line-height: 1.5; /* Межстрочный интервал */
+}

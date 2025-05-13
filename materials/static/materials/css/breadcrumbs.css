@@ -1,0 +1,21 @@
+.breadcrumbs {
+    margin-bottom: 15px;
+}
+
+.breadcrumbs a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 1.3rem;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+}
+
+.breadcrumbs a:hover {
+    color: white;
+}
+
+.breadcrumbs h1 {
+    color: white;
+    font-size: 2rem;
+    margin: 0;
+}

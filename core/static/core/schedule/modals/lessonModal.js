@@ -43,9 +43,12 @@ export class LessonModal extends Modal {
                             <input type="text" id="lesson-course" readonly>
                           </div>
                           <div class="form-group">
-                            <label for="lesson-topic">Тема урока <span class="required">*</span></label>
-                            <input type="text" id="lesson-topic" required>
-                            <div class="error-message">Это поле обязательно для заполнения</div>
+                              <label for="lesson-topic">Тема урока <span class="required">*</span></label>
+                              <div class="theme-input-group">
+                                <input type="text" id="lesson-topic" name="lesson-topic">
+                                <button type="button" class="contact-btn insert-prev-theme">Вставить прошлую тему</button>
+                              </div>
+                              <div class="previous-theme-hint">Прошлая тема: <span id="previous_theme_text">Введение в HTML</span></div>
                           </div>
                           <div class="form-group">
                             <label for="lesson-homework">Домашнее задание</label>
@@ -76,6 +79,7 @@ export class LessonModal extends Modal {
         this.submitButton = this.modalElement.querySelector('.submit-button');
         this.lessonTypeElement = this.modalElement.querySelector('.lesson-type');
         this.lessonStudentElement = this.modalElement.querySelector('.lesson-student');
+        this.insertPrevTopic = this.modalElement.querySelector('.insert-prev-theme');
 
         this.setupEventListeners();
     }
@@ -102,6 +106,17 @@ export class LessonModal extends Modal {
             if (this.topicInput.value.trim()) {
                 topicGroup.classList.remove('error');
             }
+        });
+
+        this.insertPrevTopic.addEventListener('click', function () {
+            const previousTheme = document.getElementById('previous_theme_text').textContent;
+            const currentThemeInput = document.getElementById('lesson-topic');
+
+            // Вставляем прошлую тему в текущее поле
+            currentThemeInput.value = "я же сказал, В РАБОТЕ!😁";
+
+            // Фокусируемся на поле ввода
+            currentThemeInput.focus();
         });
     }
 
@@ -159,6 +174,9 @@ export class LessonModal extends Modal {
 
         // Курс
         this.modalElement.querySelector('#lesson-course').value = lessonData.course;
+
+        // Прошлая тема
+        this.modalElement.querySelector('#previous_theme_text').textContent = "Эта фича еще в работе";
 
         const types = {
             recurring: ['🔄', 'Постоянный урок'],
