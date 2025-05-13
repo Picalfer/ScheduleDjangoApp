@@ -805,3 +805,18 @@ input[type="text"]:focus {
 .client-info a {
     color: #447e9b;
 }
+
+.theme-input-group {
+    display: flex;
+    margin-bottom: 5px;
+}
+
+.theme-input-group input {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+.previous-theme-hint {
+    color: #666;
+    font-size: 0.9em;
+}
