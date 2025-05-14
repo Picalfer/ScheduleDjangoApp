@@ -3,6 +3,7 @@ from datetime import timedelta
 from django import forms
 from django.contrib import admin
 from django.utils import timezone
+from django_admin_inline_paginator.admin import TabularInlinePaginated
 
 from core.forms import LessonAdminForm
 from core.models import Teacher, Student, Lesson, OpenSlots, BalanceOperation, Client, PhoneNumber, TeacherPayment
@@ -53,7 +54,7 @@ class TeacherPaymentAdmin(admin.ModelAdmin):
 
 class PhoneNumberInline(admin.TabularInline):
     model = PhoneNumber
-    extra = 1
+    extra = 0
     fields = ('number', 'note', 'is_primary')
     verbose_name = 'Номер телефона'
     verbose_name_plural = 'Номера телефонов'
@@ -61,13 +62,14 @@ class PhoneNumberInline(admin.TabularInline):
 
 class StudentInline(admin.TabularInline):
     model = Student
-    extra = 1
+    extra = 0
     fields = ('name', 'teacher')
 
 
-class BalanceOperationInline(admin.TabularInline):
+class BalanceOperationInline(TabularInlinePaginated):
     model = BalanceOperation
     extra = 0
+    per_page = 3
     readonly_fields = ('date', 'balance_before', 'balance_after')
     fields = ('operation_type', 'amount', 'date', 'notes', 'balance_before', 'balance_after')
 
