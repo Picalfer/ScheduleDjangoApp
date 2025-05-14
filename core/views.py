@@ -189,11 +189,11 @@ class LessonListCreate(generics.ListCreateAPIView):
             'student', 'student__client',
             'teacher', 'teacher__user'
         )
-        # Обрабатываем teacher_id если он есть
+        # Если teacher_id есть, присылаем его уроки
         teacher_id = self.request.query_params.get('teacher_id')
         if teacher_id:
             try:
-                teacher_id = int(teacher_id)  # Явное преобразование в число
+                teacher_id = int(teacher_id)
                 queryset = queryset.filter(teacher_id=teacher_id)
             except (ValueError, TypeError):
                 raise ValidationError("Invalid teacher_id format")

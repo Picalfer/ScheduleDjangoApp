@@ -107,6 +107,8 @@ export class LessonModal extends Modal {
     }
 
     open(lessonData) {
+        console.log(lessonData)
+
         this.lessonId = lessonData.id;
         this.lessonData = lessonData;
 
@@ -115,7 +117,7 @@ export class LessonModal extends Modal {
         if (lessonData.status === "scheduled") {
             this.previousThemeHint.style.display = 'block';
             this.insertPrevTopic.style.display = 'block';
-            this.previousThemeText.textContent = lessonData.previousTopic || 'Нет данных';
+            this.previousThemeText.textContent = lessonData.previous_topic || 'Нет данных';
         } else {
             this.previousThemeHint.style.display = 'none';
             this.insertPrevTopic.style.display = 'none';
@@ -153,11 +155,15 @@ export class LessonModal extends Modal {
             const previousTheme = document.getElementById('previous_theme_text').textContent;
             const currentThemeInput = document.getElementById('lesson-topic');
 
+            currentThemeInput.focus();
+
+            if (previousTheme === "Нет данных") {
+                showNotification("Нет данных")
+                return
+            }
+
             // Вставляем прошлую тему в текущее поле
             currentThemeInput.value = previousTheme;
-
-            // Фокусируемся на поле ввода
-            currentThemeInput.focus();
         });
     }
 
@@ -201,7 +207,7 @@ export class LessonModal extends Modal {
         this.modalElement.querySelector('#lesson-course').value = lessonData.course;
 
         // Прошлая тема
-        this.modalElement.querySelector('#previous_theme_text').textContent = "Эта фича еще в работе";
+        this.modalElement.querySelector('#previous_theme_text').textContent = lessonData.previous_topic;
 
         const types = {
             recurring: ['🔄', 'Постоянный урок'],
