@@ -351,6 +351,12 @@ class Lesson(models.Model):
         default=None,
         verbose_name='Причина отмены урока'
     )
+    previous_topic = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='Тема предыдущего урока'
+    )
 
     # Системные поля
     completed_at = models.DateTimeField(
@@ -384,6 +390,7 @@ class Lesson(models.Model):
             date=next_date,
             time=next_time,
             schedule=self.schedule,
+            previous_topic=self.lesson_topic,
         )
 
     def calculate_next_date_and_time(self):
