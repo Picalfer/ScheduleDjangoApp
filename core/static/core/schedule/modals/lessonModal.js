@@ -64,7 +64,7 @@ export class LessonModal extends Modal {
                     <label for="lesson-topic">Тема урока <span class="required">*</span></label>
                     <div class="input-group-with-btn">
                         <input type="text" id="lesson-topic" name="lesson-topic">
-                        <button type="button" class="contact-btn insert-prev-theme">Вставить прошлую тему</button>
+                        <button type="button" class="styled-button insert-prev-theme">Вставить прошлую тему</button>
                     </div>
                     <div class="previous-theme-hint" style="display: none;">
                         Прошлая тема: <span id="previous_theme_text"></span>
@@ -75,7 +75,7 @@ export class LessonModal extends Modal {
                     <label for="lesson-homework">Домашнее задание</label>
                     <div class="input-group-with-btn">
                         <textarea id="lesson-homework" rows="3" name="lesson-homework"></textarea>
-                        <button type="button" class="contact-btn insert-prev-homework">Вставить прошлое ДЗ</button>
+                        <button type="button" class="styled-button insert-prev-homework">Вставить прошлое ДЗ</button>
                     </div>
                     <div class="previous-homework-hint" style="display: none;">
                         Прошлое ДЗ: <span id="previous_homework_text"></span>
@@ -86,7 +86,7 @@ export class LessonModal extends Modal {
                     <label for="lesson-comment">Комментарий</label>
                     <div class="input-group-with-btn">
                         <textarea id="lesson-comment" rows="3" name="lesson-comment"></textarea>
-                        <button type="button" class="contact-btn insert-prev-comment">Вставить прошлый комментарий</button>
+                        <button type="button" class="styled-button insert-prev-comment">Вставить прошлый комментарий</button>
                     </div>
                     <div class="previous-comment-hint" style="display: none;">
                         Прошлый комментарий: <span id="previous_comment_text"></span>

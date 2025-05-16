@@ -64,10 +64,6 @@
     gap: 10px;
 }
 
-.input-group-with-btn input {
-    flex-grow: 1;
-}
-
 .previous-theme-hint, .previous-homework-hint, .previous-comment-hint {
     color: #666;
     font-size: 0.9em;
