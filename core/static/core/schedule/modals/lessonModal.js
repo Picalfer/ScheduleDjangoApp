@@ -185,9 +185,6 @@ export class LessonModal extends Modal {
         // Курс
         this.modalElement.querySelector('#lesson-course').value = lessonData.course;
 
-        // Прошлая тема
-        this.modalElement.querySelector('#previous_theme_text').textContent = lessonData.previous_topic;
-
         const types = {
             recurring: ['🔄', 'Постоянный урок'],
             demo: ['🎯', 'Демо-урок'],
