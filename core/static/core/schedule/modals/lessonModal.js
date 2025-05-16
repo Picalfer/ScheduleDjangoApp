@@ -146,7 +146,7 @@ export class LessonModal extends Modal {
     }
 
     setLessonData(lessonData) {
-        this.setPreviousData()
+        this.setPreviousData(lessonData)
         if (userData.isAdmin) {
             // Кнопка урока
             this.adminButton.href = `/admin/core/lesson/${lessonData.id}/change/`;
@@ -208,7 +208,7 @@ export class LessonModal extends Modal {
         this.modalElement.querySelector('#lesson-comment').value = lessonData.lesson_notes || '';
     }
 
-    setPreviousData() {
+    setPreviousData(lessonData) {
         if (lessonData.status === "scheduled") {
             // Тема
             this.previousThemeHint.style.display = 'block';
