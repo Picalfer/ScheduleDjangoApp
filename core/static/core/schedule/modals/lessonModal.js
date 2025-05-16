@@ -5,72 +5,107 @@ import {showNotification} from '../utils.js';
 
 export class LessonModal extends Modal {
     constructor() {
-        const adminLessonBtn = document.createElement('a');
-        adminLessonBtn.className = 'admin-link';
-        adminLessonBtn.innerHTML = '✏️';
-        adminLessonBtn.title = 'Открыть урок в админке';
-        adminLessonBtn.target = '_blank';
+        // Сначала создаем статические данные, не требующие this
+        const content = LessonModal.generateStaticContent();
+        const footer = LessonModal.generateStaticFooter();
+        const headerElements = LessonModal.createStaticAdminElements();
 
-        const adminStudentBtn = document.createElement('a');
-        adminStudentBtn.className = 'admin-link';
-        adminStudentBtn.innerHTML = '🎓';
-        adminStudentBtn.title = 'Открыть студента в админке';
-        adminStudentBtn.target = '_blank';
-        adminStudentBtn.style.display = 'none';
-
-        const adminClientBtn = document.createElement('a');
-        adminClientBtn.className = 'admin-link';
-        adminClientBtn.innerHTML = '💼';
-        adminClientBtn.title = 'Открыть клиента в админке';
-        adminClientBtn.target = '_blank';
-        adminClientBtn.style.display = 'none';
-
+        // Затем вызываем super()
         super({
             modalId: 'lesson-modal',
             title: 'Информация об уроке',
-            content: `
-                        <div class="lesson-info">
-                          <p class="lesson-type"></p>
-                          <p class="lesson-student"></p>
-                        </div>
-                        <form id="lesson-form">
-                          <div class="form-group">
-                            <label for="lesson-date">Дата</label>
-                            <input type="text" id="lesson-date" readonly>
-                          </div>
-                          <div class="form-group">
-                            <label for="lesson-course">Курс</label>
-                            <input type="text" id="lesson-course" readonly>
-                          </div>
-                          <div class="form-group">
-                              <label for="lesson-topic">Тема урока <span class="required">*</span></label>
-                              <div class="theme-input-group">
-                                <input type="text" id="lesson-topic" name="lesson-topic">
-                                <button type="button" class="contact-btn insert-prev-theme">Вставить прошлую тему</button>
-                              </div>
-                              <div class="previous-theme-hint">Прошлая тема: <span id="previous_theme_text">Введение в HTML</span></div>
-                          </div>
-                          <div class="form-group">
-                            <label for="lesson-homework">Домашнее задание</label>
-                            <textarea id="lesson-homework" rows="3"></textarea>
-                          </div>
-                          <div class="form-group">
-                            <label for="lesson-comment">Комментарий</label>
-                            <textarea id="lesson-comment" rows="3"></textarea>
-                          </div>
-                        </form>
-                      `,
-            footer: `
-                        <button class="cancel-button cancel-lesson-btn">Отменить урок</button>
-                        <button class="submit-button admit-lesson-btn">Отметить проведённым</button>
-                      `,
-            headerElements: [adminLessonBtn, adminStudentBtn, adminClientBtn],
+            content,
+            footer,
+            headerElements,
         });
 
-        this.adminButton = adminLessonBtn;
-        this.adminStudentButton = adminStudentBtn;
-        this.adminClientButton = adminClientBtn;
+        // Теперь можно использовать this
+        this.initElements();
+        this.setupEventListeners();
+    }
 
+    // Статический метод для создания элементов админки
+    static createStaticAdminElements() {
+        const createAdminLink = (icon, title) => {
+            const link = document.createElement('a');
+            link.className = 'admin-link';
+            link.innerHTML = icon;
+            link.title = title;
+            link.target = '_blank';
+            return link;
+        };
+
+        const lessonBtn = createAdminLink('✏️', 'Открыть урок в админке');
+        const studentBtn = createAdminLink('🎓', 'Открыть студента в админке');
+        const clientBtn = createAdminLink('💼', 'Открыть клиента в админке');
+
+        return [lessonBtn, studentBtn, clientBtn];
+    }
+
+    // Статический метод для генерации контента
+    static generateStaticContent() {
+        return `
+            <div class="lesson-info">
+                <p class="lesson-type"></p>
+                <p class="lesson-student"></p>
+            </div>
+            <form id="lesson-form">
+                <div class="form-group">
+                    <label for="lesson-date">Дата</label>
+                    <input type="text" id="lesson-date" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="lesson-course">Курс</label>
+                    <input type="text" id="lesson-course" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="lesson-topic">Тема урока <span class="required">*</span></label>
+                    <div class="input-group-with-btn">
+                        <input type="text" id="lesson-topic" name="lesson-topic">
+                        <button type="button" class="styled-button insert-prev-theme">Вставить прошлую тему</button>
+                    </div>
+                    <div class="previous-theme-hint" style="display: none;">
+                        Прошлая тема: <span id="previous_theme_text"></span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="lesson-homework">Домашнее задание</label>
+                    <div class="input-group-with-btn">
+                        <textarea id="lesson-homework" rows="3" name="lesson-homework"></textarea>
+                        <button type="button" class="styled-button insert-prev-homework">Вставить прошлое ДЗ</button>
+                    </div>
+                    <div class="previous-homework-hint" style="display: none;">
+                        Прошлое ДЗ: <span id="previous_homework_text"></span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="lesson-comment">Комментарий</label>
+                    <div class="input-group-with-btn">
+                        <textarea id="lesson-comment" rows="3" name="lesson-comment"></textarea>
+                        <button type="button" class="styled-button insert-prev-comment">Вставить прошлый комментарий</button>
+                    </div>
+                    <div class="previous-comment-hint" style="display: none;">
+                        Прошлый комментарий: <span id="previous_comment_text"></span>
+                    </div>
+                </div>
+            </form>
+        `;
+    }
+
+    // Статический метод для генерации футера
+    static generateStaticFooter() {
+        return `
+            <button class="cancel-button cancel-lesson-btn">Отменить урок</button>
+            <button class="submit-button admit-lesson-btn">Отметить проведённым</button>
+        `;
+    }
+
+    // Остальные методы остаются без изменений
+    initElements() {
         this.lessonId = null;
         this.lessonData = null;
         this.form = this.modalElement.querySelector('#lesson-form');
@@ -79,64 +114,39 @@ export class LessonModal extends Modal {
         this.submitButton = this.modalElement.querySelector('.submit-button');
         this.lessonTypeElement = this.modalElement.querySelector('.lesson-type');
         this.lessonStudentElement = this.modalElement.querySelector('.lesson-student');
+
         this.insertPrevTopic = this.modalElement.querySelector('.insert-prev-theme');
+        this.previousThemeHint = this.modalElement.querySelector('.previous-theme-hint');
+        this.previousThemeText = this.modalElement.querySelector('#previous_theme_text');
 
-        this.setupEventListeners();
-    }
+        this.insertPrevHomework = this.modalElement.querySelector('.insert-prev-homework');
+        this.previousHomeworkHint = this.modalElement.querySelector('.previous-homework-hint');
+        this.previousHomeworkText = this.modalElement.querySelector('#previous_homework_text');
 
-    setupEventListeners() {
-        // Наследуем базовые обработчики закрытия
-        //super.setupEventListeners();
+        this.insertPrevComment = this.modalElement.querySelector('.insert-prev-comment');
+        this.previousCommentHint = this.modalElement.querySelector('.previous-comment-hint');
+        this.previousCommentText = this.modalElement.querySelector('#previous_comment_text');
 
-        // Специфичные обработчики
-        this.cancelButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.cancelLesson();
-        });
-
-        this.submitButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (this.validateForm()) {
-                this.admitLesson();
-            }
-        });
-
-        this.topicInput.addEventListener('input', () => {
-            const topicGroup = this.topicInput.closest('.form-group');
-            if (this.topicInput.value.trim()) {
-                topicGroup.classList.remove('error');
-            }
-        });
-
-        this.insertPrevTopic.addEventListener('click', function () {
-            const previousTheme = document.getElementById('previous_theme_text').textContent;
-            const currentThemeInput = document.getElementById('lesson-topic');
-
-            // Вставляем прошлую тему в текущее поле
-            currentThemeInput.value = "я же сказал, В РАБОТЕ!😁";
-
-            // Фокусируемся на поле ввода
-            currentThemeInput.focus();
-        });
+        const [adminButton, adminStudentButton, adminClientButton] = this.modalElement.querySelectorAll('.admin-link');
+        this.adminButton = adminButton;
+        this.adminStudentButton = adminStudentButton;
+        this.adminClientButton = adminClientButton;
     }
 
     open(lessonData) {
+        console.log(lessonData)
+
         this.lessonId = lessonData.id;
         this.lessonData = lessonData;
-        console.log(`Открыт урок под id: ${this.lessonId}`);
-        console.log(lessonData);
 
-        // Устанавливаем данные урока
         this.setLessonData(lessonData);
 
-        // Настраиваем состояние формы
         this.setFormState(lessonData);
-
-        // Показываем модальное окно
         super.open();
     }
 
     setLessonData(lessonData) {
+        this.setPreviousData(lessonData)
         if (userData.isAdmin) {
             // Кнопка урока
             this.adminButton.href = `/admin/core/lesson/${lessonData.id}/change/`;
@@ -176,7 +186,7 @@ export class LessonModal extends Modal {
         this.modalElement.querySelector('#lesson-course').value = lessonData.course;
 
         // Прошлая тема
-        this.modalElement.querySelector('#previous_theme_text').textContent = "Эта фича еще в работе";
+        this.modalElement.querySelector('#previous_theme_text').textContent = lessonData.previous_topic;
 
         const types = {
             recurring: ['🔄', 'Постоянный урок'],
@@ -196,6 +206,101 @@ export class LessonModal extends Modal {
         this.modalElement.querySelector('#lesson-topic').value = lessonData.lesson_topic || '';
         this.modalElement.querySelector('#lesson-homework').value = lessonData.homework || '';
         this.modalElement.querySelector('#lesson-comment').value = lessonData.lesson_notes || '';
+    }
+
+    setPreviousData(lessonData) {
+        if (lessonData.status === "scheduled") {
+            // Тема
+            this.previousThemeHint.style.display = 'block';
+            this.insertPrevTopic.style.display = 'block';
+            this.previousThemeText.textContent = lessonData.previous_topic || 'Нет данных';
+
+            // Домашнее задание
+            this.previousHomeworkHint.style.display = 'block';
+            this.insertPrevHomework.style.display = 'block';
+            this.previousHomeworkText.textContent = lessonData.previous_homework || 'Нет данных';
+
+            // Комментарий
+            this.previousCommentHint.style.display = 'block';
+            this.insertPrevComment.style.display = 'block';
+            this.previousCommentText.textContent = lessonData.previous_comment || 'Нет данных';
+        } else {
+            // Тема
+            this.previousThemeHint.style.display = 'none';
+            this.insertPrevTopic.style.display = 'none';
+
+            // Домашнее задание
+            this.previousHomeworkHint.style.display = 'none';
+            this.insertPrevHomework.style.display = 'none';
+
+            // Комментарий
+            this.previousCommentHint.style.display = 'none';
+            this.insertPrevComment.style.display = 'none';
+        }
+    }
+
+    setupEventListeners() {
+        // Наследуем базовые обработчики закрытия
+        //super.setupEventListeners();
+
+        // Специфичные обработчики
+        this.cancelButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.cancelLesson();
+        });
+
+        this.submitButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (this.validateForm()) {
+                this.admitLesson();
+            }
+        });
+
+        this.topicInput.addEventListener('input', () => {
+            const topicGroup = this.topicInput.closest('.form-group');
+            if (this.topicInput.value.trim()) {
+                topicGroup.classList.remove('error');
+            }
+        });
+
+        function setupInsertButton(buttonId, textElementId, inputId, errorMessage) {
+            const button = document.querySelector(buttonId);
+            button.addEventListener('click', function () {
+                const previousText = document.querySelector(textElementId).textContent;
+                const input = document.querySelector(inputId);
+
+                input.focus();
+
+                if (previousText === "Нет данных") {
+                    showNotification(errorMessage);
+                    return;
+                }
+
+                input.value = previousText;
+            });
+        }
+
+        // Инициализация всех кнопок
+        setupInsertButton(
+            '.insert-prev-theme',
+            '#previous_theme_text',
+            '#lesson-topic',
+            "Нет данных по предыдущей теме"
+        );
+
+        setupInsertButton(
+            '.insert-prev-homework',
+            '#previous_homework_text',
+            '#lesson-homework',
+            "Нет данных по предыдущему домашнему заданию"
+        );
+
+        setupInsertButton(
+            '.insert-prev-comment',
+            '#previous_comment_text',
+            '#lesson-comment',
+            "Нет данных по предыдущему комментарию"
+        );
     }
 
     setFormState(lessonData) {

@@ -1,8 +1,8 @@
 @import "subheader.css";
 @import "calendar.css";
 @import "lesson.css";
-@import "modal.css";
-@import "balance-alert-modal.css";
+@import "modal/modal.css";
+@import "modal/balance-alert-modal.css";
 
 :root {
     --bg: #e0f2fe;
@@ -11,7 +11,7 @@
     --border-color: #d4d6ff;
     --primary-color: #6366f1;
     --primary-color-rgb: 99, 102, 241;
-    --primary-hover: #4f46e5;
+    --primary-hover: #3127bd;
     --success-color: #4CAF50;
     --danger-color: #dc3545;
     --gray-mix: #b3b3b3;

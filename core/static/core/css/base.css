@@ -140,3 +140,17 @@ li {
 .admin-btn:hover {
     background: #305067;
 }
+
+.styled-button {
+    background: linear-gradient(135deg, var(--primary-color), #818cf8);
+    color: white;
+    border: 1px solid var(--border-color);
+    padding: 3px 5px;
+    border-radius: 6px;
+    transition: all 0.4s ease;
+}
+
+.styled-button:hover {
+    background: linear-gradient(135deg, var(--primary-hover), #4649dc);
+    border-color: var(--text-secondary);
+}
