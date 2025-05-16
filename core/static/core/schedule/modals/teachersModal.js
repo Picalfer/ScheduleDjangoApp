@@ -87,6 +87,8 @@ export class TeachersModal extends Modal {
 
     showTeacherSchedule(teacherId, userId) {
         scheduleState.isAnother = true;
+        scheduleState.teacherId = teacherId
+        scheduleState.userId = userId
         console.log(`Просмотр расписания для User с ID: ${userId}, TeacherId: ${teacherId}`);
         calendarManager.loadSchedule(teacherId, userId);
     }

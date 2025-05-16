@@ -56,7 +56,7 @@ function setupContextMenu() {
     document.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         customContextMenu.innerHTML = `
-            <div class="menu-item" data-action="refresh">🔄 Обновить</div>
+            <div class="menu-item" data-action="refresh">🔄 Обновить расписание</div>
         `;
         customContextMenu.style.display = 'block';
         customContextMenu.style.left = `${e.pageX}px`;
@@ -79,14 +79,18 @@ function setupContextMenu() {
 
         const action = menuItem.dataset.action;
         if (action === 'refresh') {
-            location.reload();
+            calendarManager.loadSchedule(scheduleState.teacherId, scheduleState.userId)
         }
 
         customContextMenu.style.display = 'none';
     });
 }
 
-export const scheduleState = {isAnother: false};
+export const scheduleState = {
+    isAnother: false,
+    teacherId: currentTeacherId,
+    userId: currentUserId
+};
 
 // Важен порядок инициализации
 export const repository = new Repository();
