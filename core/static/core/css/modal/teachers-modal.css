@@ -1,0 +1,56 @@
+.teachers-modal .modal-content {
+    max-width: 800px;
+}
+
+.teachers-list {
+    display: grid;
+    gap: 12px;
+}
+
+.teacher-item {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    align-items: center;
+    padding: 12px;
+    border-radius: 8px;
+    background-color: var(--header-bg);
+    border: 1px solid var(--border-color);
+}
+
+.teacher-info {
+    flex-grow: 1;
+}
+
+.teacher-info strong {
+    color: var(--text-primary);
+}
+
+.teacher-education {
+    margin-top: 4px;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+.teacher-schedule-btn {
+    padding: 8px 16px;
+    font-size: 0.9em;
+    white-space: nowrap;
+    margin-left: 10px;
+}
+
+.no-teachers {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 20px 0;
+}
+
+.teachers-error {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.teachers-error p {
+    color: #d32f2f;
+    margin-bottom: 15px;
+}

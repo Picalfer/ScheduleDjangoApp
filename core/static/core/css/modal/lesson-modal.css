@@ -1,0 +1,74 @@
+.cancel-lesson-btn {
+    background: linear-gradient(
+            135deg,
+            var(--danger-color),
+            color-mix(in srgb, var(--danger-color) 50%, white)
+    );
+    transition: background 0.3s ease;
+}
+
+.admit-lesson-btn {
+    color: var(--invert-text-primary);
+    background: linear-gradient(
+            135deg,
+            var(--success-color),
+            color-mix(in srgb, var(--success-color) 50%, white)
+    );
+    transition: background 0.3s ease;
+}
+
+
+.cancel-lesson-btn:hover {
+    background: linear-gradient(135deg,
+    color-mix(in srgb, var(--danger-color) 50%, black), /* Осветленный success */ var(--danger-color)); /* Исходный цвет */
+}
+
+.admit-lesson-btn:hover {
+    color: var(--text-primary);
+    background: linear-gradient(135deg,
+    color-mix(in srgb, var(--success-color) 50%, black), /* Осветленный danger */ var(--success-color)); /* Исходный цвет */
+}
+
+/* Стили для кнопки админки */
+.admin-link {
+    display: inline-block;
+    padding: 5px 10px;
+    background-color: var(--bg-invert);
+    border-radius: 4px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.admin-link:hover {
+    background-color: #b5e2ec;
+    text-decoration: none;
+}
+
+.child-link {
+    color: #53b9ec;
+    text-decoration: none;
+    transition: color 0.2s;
+    cursor: pointer;
+}
+
+.child-link:hover {
+    color: #429ffb;
+    text-decoration: underline;
+}
+
+.input-group-with-btn {
+    display: flex;
+    margin-bottom: 5px;
+    gap: 10px;
+}
+
+.input-group-with-btn input {
+    flex-grow: 1;
+}
+
+.previous-theme-hint, .previous-homework-hint, .previous-comment-hint {
+    color: #666;
+    font-size: 0.9em;
+}

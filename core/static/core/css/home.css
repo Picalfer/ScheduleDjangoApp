@@ -1,7 +1,7 @@
 @import "subheader.css";
 @import "calendar.css";
 @import "lesson.css";
-@import "modal.css";
+@import "modal/modal.css";
 @import "balance-alert-modal.css";
 
 :root {

@@ -1,0 +1,300 @@
+@import "lesson-modal.css";
+@import "settings-modal.css";
+@import "payments-modal.css";
+@import "teachers-modal.css";
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.modal-content {
+    background: var(--bg);
+    border-radius: 16px 5px 5px 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    margin: 0 auto;
+    padding: 20px;
+    width: 30%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: auto;
+    max-height: 80vh;
+}
+
+.close {
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    font-size: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    line-height: 30px;
+    padding-bottom: 5px;
+    border-top-right-radius: 5px;
+    width: 30px;
+    height: 30px;
+    background-color: var(--bg-invert);
+    cursor: pointer;
+    color: var(--bg);
+    opacity: 0.7;
+}
+
+.close:hover {
+    opacity: 1;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--border-color), var(--header-bg));
+    border-radius: 16px 16px 0 0;
+    border-bottom: 1px solid var(--border-color);
+    padding: 20px 24px;
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
+}
+
+.modal-header h3 {
+    color: var(--text-primary);
+    font-size: 1.4em;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+/* Стили для контейнера элементов в header */
+.modal-header .header-elements {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: right;
+    align-items: center;
+    gap: 5px;
+}
+
+.modal-body {
+    padding: 10px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    background: linear-gradient(135deg, var(--header-bg), var(--border-color), var(--header-bg));
+    border-radius: 0 0 16px 16px;
+    border-top: 1px solid var(--border-color);
+    padding: 20px 24px;
+}
+
+.required {
+    color: #f44336;
+    margin-left: 3px;
+}
+
+.error-message {
+    display: none;
+    color: #f44336;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.form-group.error input {
+    border-color: #f44336;
+}
+
+.form-group.error .error-message {
+    display: block;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    background: var(--header-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.form-group input[type="text"],
+.form-group input[type="tel"],
+.form-group input[type="email"],
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg);
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.form-group input[readonly] {
+    background-color: var(--header-bg);
+    cursor: default;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="tel"]:focus,
+.form-group input[type="email"]:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+input[type="text"] {
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 10px;
+    color: var(--text-primary);
+    transition: border-color 0.3s;
+}
+
+input[type="text"]:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.form-group textarea {
+    resize: vertical;
+    width: 100%;
+    min-height: 60px;
+    padding: 5px;
+    border-radius: 5px;
+    color: var(--text-primary);
+    max-height: 200px;
+    background-color: var(--header-bg);
+    outline: none;
+}
+
+.form-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 1em;
+}
+
+.submit-button,
+.cancel-button {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.submit-button {
+    background: linear-gradient(135deg, var(--primary-color), #818cf8);
+    color: white;
+    border: none;
+}
+
+.submit-button:hover {
+    background: linear-gradient(135deg, var(--primary-hover), #6366f1);
+    transform: translateY(-1px);
+}
+
+.cancel-button {
+    background-color: white;
+    border: 1px solid var(--border-color) !important;
+}
+
+.cancel-button:hover {
+    background-color: var(--header-bg);
+    border-color: var(--text-secondary) !important;
+    color: var(--text-primary);
+}
+
+.submit-button:disabled,
+.cancel-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #cccccc;
+    color: #666666;
+    border-color: #cccccc;
+}
+
+.modal-actions {
+    padding: 20px 24px;
+    background: linear-gradient(135deg, var(--border-color), var(--header-bg));;
+    border-top: 1px solid var(--border-color);
+    border-radius: 0 0 16px 16px;
+}
+
+.modal-actions button {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.95em;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* Стили для LowBalanceSection */
+.client-info a {
+    color: #447e9b;
+}
