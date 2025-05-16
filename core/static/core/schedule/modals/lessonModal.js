@@ -54,25 +54,43 @@ export class LessonModal extends Modal {
                     <label for="lesson-date">Дата</label>
                     <input type="text" id="lesson-date" readonly>
                 </div>
+                
                 <div class="form-group">
                     <label for="lesson-course">Курс</label>
                     <input type="text" id="lesson-course" readonly>
                 </div>
+                
                 <div class="form-group">
                     <label for="lesson-topic">Тема урока <span class="required">*</span></label>
-                    <div class="theme-input-group">
+                    <div class="input-group-with-btn">
                         <input type="text" id="lesson-topic" name="lesson-topic">
-                        <button type="button" class="contact-btn insert-prev-theme">Вставить прошлую тему</button>
+                        <button type="button" class="styled-button insert-prev-theme">Вставить прошлую тему</button>
                     </div>
-                    <div class="previous-theme-hint" style="display: none;">Прошлая тема: <span id="previous_theme_text"></span></div>
+                    <div class="previous-theme-hint" style="display: none;">
+                        Прошлая тема: <span id="previous_theme_text"></span>
+                    </div>
                 </div>
+                
                 <div class="form-group">
                     <label for="lesson-homework">Домашнее задание</label>
-                    <textarea id="lesson-homework" rows="3"></textarea>
+                    <div class="input-group-with-btn">
+                        <textarea id="lesson-homework" rows="3" name="lesson-homework"></textarea>
+                        <button type="button" class="styled-button insert-prev-homework">Вставить прошлое ДЗ</button>
+                    </div>
+                    <div class="previous-homework-hint" style="display: none;">
+                        Прошлое ДЗ: <span id="previous_homework_text"></span>
+                    </div>
                 </div>
+                
                 <div class="form-group">
                     <label for="lesson-comment">Комментарий</label>
-                    <textarea id="lesson-comment" rows="3"></textarea>
+                    <div class="input-group-with-btn">
+                        <textarea id="lesson-comment" rows="3" name="lesson-comment"></textarea>
+                        <button type="button" class="styled-button insert-prev-comment">Вставить прошлый комментарий</button>
+                    </div>
+                    <div class="previous-comment-hint" style="display: none;">
+                        Прошлый комментарий: <span id="previous_comment_text"></span>
+                    </div>
                 </div>
             </form>
         `;
@@ -96,9 +114,18 @@ export class LessonModal extends Modal {
         this.submitButton = this.modalElement.querySelector('.submit-button');
         this.lessonTypeElement = this.modalElement.querySelector('.lesson-type');
         this.lessonStudentElement = this.modalElement.querySelector('.lesson-student');
+
         this.insertPrevTopic = this.modalElement.querySelector('.insert-prev-theme');
         this.previousThemeHint = this.modalElement.querySelector('.previous-theme-hint');
         this.previousThemeText = this.modalElement.querySelector('#previous_theme_text');
+
+        this.insertPrevHomework = this.modalElement.querySelector('.insert-prev-homework');
+        this.previousHomeworkHint = this.modalElement.querySelector('.previous-homework-hint');
+        this.previousHomeworkText = this.modalElement.querySelector('#previous_homework_text');
+
+        this.insertPrevComment = this.modalElement.querySelector('.insert-prev-comment');
+        this.previousCommentHint = this.modalElement.querySelector('.previous-comment-hint');
+        this.previousCommentText = this.modalElement.querySelector('#previous_comment_text');
 
         const [adminButton, adminStudentButton, adminClientButton] = this.modalElement.querySelectorAll('.admin-link');
         this.adminButton = adminButton;
@@ -114,60 +141,12 @@ export class LessonModal extends Modal {
 
         this.setLessonData(lessonData);
 
-        if (lessonData.status === "scheduled") {
-            this.previousThemeHint.style.display = 'block';
-            this.insertPrevTopic.style.display = 'block';
-            this.previousThemeText.textContent = lessonData.previous_topic || 'Нет данных';
-        } else {
-            this.previousThemeHint.style.display = 'none';
-            this.insertPrevTopic.style.display = 'none';
-        }
-
         this.setFormState(lessonData);
         super.open();
     }
 
-    setupEventListeners() {
-        // Наследуем базовые обработчики закрытия
-        //super.setupEventListeners();
-
-        // Специфичные обработчики
-        this.cancelButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.cancelLesson();
-        });
-
-        this.submitButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (this.validateForm()) {
-                this.admitLesson();
-            }
-        });
-
-        this.topicInput.addEventListener('input', () => {
-            const topicGroup = this.topicInput.closest('.form-group');
-            if (this.topicInput.value.trim()) {
-                topicGroup.classList.remove('error');
-            }
-        });
-
-        this.insertPrevTopic.addEventListener('click', function () {
-            const previousTheme = document.getElementById('previous_theme_text').textContent;
-            const currentThemeInput = document.getElementById('lesson-topic');
-
-            currentThemeInput.focus();
-
-            if (previousTheme === "Нет данных") {
-                showNotification("Нет данных")
-                return
-            }
-
-            // Вставляем прошлую тему в текущее поле
-            currentThemeInput.value = previousTheme;
-        });
-    }
-
     setLessonData(lessonData) {
+        this.setPreviousData(lessonData)
         if (userData.isAdmin) {
             // Кнопка урока
             this.adminButton.href = `/admin/core/lesson/${lessonData.id}/change/`;
@@ -227,6 +206,101 @@ export class LessonModal extends Modal {
         this.modalElement.querySelector('#lesson-topic').value = lessonData.lesson_topic || '';
         this.modalElement.querySelector('#lesson-homework').value = lessonData.homework || '';
         this.modalElement.querySelector('#lesson-comment').value = lessonData.lesson_notes || '';
+    }
+
+    setPreviousData(lessonData) {
+        if (lessonData.status === "scheduled") {
+            // Тема
+            this.previousThemeHint.style.display = 'block';
+            this.insertPrevTopic.style.display = 'block';
+            this.previousThemeText.textContent = lessonData.previous_topic || 'Нет данных';
+
+            // Домашнее задание
+            this.previousHomeworkHint.style.display = 'block';
+            this.insertPrevHomework.style.display = 'block';
+            this.previousHomeworkText.textContent = lessonData.previous_homework || 'Нет данных';
+
+            // Комментарий
+            this.previousCommentHint.style.display = 'block';
+            this.insertPrevComment.style.display = 'block';
+            this.previousCommentText.textContent = lessonData.previous_comment || 'Нет данных';
+        } else {
+            // Тема
+            this.previousThemeHint.style.display = 'none';
+            this.insertPrevTopic.style.display = 'none';
+
+            // Домашнее задание
+            this.previousHomeworkHint.style.display = 'none';
+            this.insertPrevHomework.style.display = 'none';
+
+            // Комментарий
+            this.previousCommentHint.style.display = 'none';
+            this.insertPrevComment.style.display = 'none';
+        }
+    }
+
+    setupEventListeners() {
+        // Наследуем базовые обработчики закрытия
+        //super.setupEventListeners();
+
+        // Специфичные обработчики
+        this.cancelButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.cancelLesson();
+        });
+
+        this.submitButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (this.validateForm()) {
+                this.admitLesson();
+            }
+        });
+
+        this.topicInput.addEventListener('input', () => {
+            const topicGroup = this.topicInput.closest('.form-group');
+            if (this.topicInput.value.trim()) {
+                topicGroup.classList.remove('error');
+            }
+        });
+
+        function setupInsertButton(buttonId, textElementId, inputId, errorMessage) {
+            const button = document.querySelector(buttonId);
+            button.addEventListener('click', function () {
+                const previousText = document.querySelector(textElementId).textContent;
+                const input = document.querySelector(inputId);
+
+                input.focus();
+
+                if (previousText === "Нет данных") {
+                    showNotification(errorMessage);
+                    return;
+                }
+
+                input.value = previousText;
+            });
+        }
+
+        // Инициализация всех кнопок
+        setupInsertButton(
+            '.insert-prev-theme',
+            '#previous_theme_text',
+            '#lesson-topic',
+            "Нет данных по предыдущей теме"
+        );
+
+        setupInsertButton(
+            '.insert-prev-homework',
+            '#previous_homework_text',
+            '#lesson-homework',
+            "Нет данных по предыдущему домашнему заданию"
+        );
+
+        setupInsertButton(
+            '.insert-prev-comment',
+            '#previous_comment_text',
+            '#lesson-comment',
+            "Нет данных по предыдущему комментарию"
+        );
     }
 
     setFormState(lessonData) {

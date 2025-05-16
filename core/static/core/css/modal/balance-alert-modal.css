@@ -115,3 +115,7 @@
     align-items: center;
     gap: 3px;
 }
+
+.client-info a {
+    color: #447e9b;
+}

@@ -194,13 +194,3 @@
     background-color: var(--bg);
     border-color: var(--text-secondary);
 }
-
-#current-week {
-    background: linear-gradient(135deg, var(--primary-color), #818cf8);
-    color: white;
-    border: none;
-}
-
-#current-week:hover {
-    background: linear-gradient(135deg, var(--primary-hover), #6366f1);
-}
