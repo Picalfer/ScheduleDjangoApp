@@ -357,6 +357,18 @@ class Lesson(models.Model):
         null=True,
         verbose_name='Тема предыдущего урока'
     )
+    previous_homework = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='ДЗ предыдущего урока'
+    )
+    previous_comment = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='Комментарий к предыдущему уроку'
+    )
 
     # Системные поля
     completed_at = models.DateTimeField(
@@ -391,6 +403,8 @@ class Lesson(models.Model):
             time=next_time,
             schedule=self.schedule,
             previous_topic=self.lesson_topic,
+            previous_homework=self.homework,
+            previous_comment=self.lesson_notes,
         )
 
     def calculate_next_date_and_time(self):
