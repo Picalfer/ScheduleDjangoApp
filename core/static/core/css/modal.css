@@ -1,14 +1,3 @@
-.form-group textarea {
-    resize: vertical;
-    width: 100%;
-    min-height: 60px;
-    padding: 5px;
-    border-radius: 5px;
-    color: var(--text-primary);
-    max-height: 200px;
-    background-color: var(--header-bg);
-}
-
 .required {
     color: #f44336;
     margin-left: 3px;
@@ -65,9 +54,22 @@
 .form-group input[type="text"]:focus,
 .form-group input[type="tel"]:focus,
 .form-group input[type="email"]:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form-group textarea:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.form-group textarea {
+    resize: vertical;
+    width: 100%;
+    min-height: 60px;
+    padding: 5px;
+    border-radius: 5px;
+    color: var(--text-primary);
+    max-height: 200px;
+    background-color: var(--header-bg);
+    outline: none;
 }
 
 .form-group select {
@@ -806,17 +808,19 @@ input[type="text"]:focus {
     color: #447e9b;
 }
 
-.theme-input-group {
+/* TODO вынести в отдельный файл - стили для модального окна урока */
+
+.input-group-with-btn {
     display: flex;
     margin-bottom: 5px;
+    gap: 10px;
 }
 
-.theme-input-group input {
+.input-group-with-btn input {
     flex-grow: 1;
-    margin-right: 10px;
 }
 
-.previous-theme-hint {
+.previous-theme-hint, .previous-homework-hint, .previous-comment-hint {
     color: #666;
     font-size: 0.9em;
 }
