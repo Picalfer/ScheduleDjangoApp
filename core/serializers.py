@@ -12,6 +12,17 @@ class LessonSerializer(serializers.ModelSerializer):
     start_date = serializers.DateField(source='date', read_only=True)
     balance = serializers.SerializerMethodField(read_only=True)
     is_reliable = serializers.SerializerMethodField()
+    conference_link = serializers.SerializerMethodField()
+
+    def get_conference_link(self, obj):
+        if not obj.teacher:
+            return None
+
+        if obj.platform == 'zoom' and obj.teacher.zoom_link:
+            return obj.teacher.zoom_link
+        elif obj.platform == 'google-meet' and obj.teacher.google_meet_link:
+            return obj.teacher.google_meet_link
+        return None
 
     def get_is_reliable(self, obj):
         return obj.is_reliable
