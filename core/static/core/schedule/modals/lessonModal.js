@@ -46,14 +46,17 @@ export class LessonModal extends Modal {
     static generateStaticContent() {
         return `
             <div class="lesson-info">
+            <div style="display: flex; justify-content: space-between">
                 <p class="lesson-type"></p>
-                <div class="platform-block">
-                    <button class="conference-btn" disabled>
-                    <span class="platform-icon"></span>
-                    <span class="platform-name"></span>
+                <button class="conference-btn" disabled>
+                    <span class="visible-text">
+                        <span class="platform-icon"></span>
+                        <span class="platform-name"></span>
+                    </span>
+                    <span class="hidden-tooltip">Добавьте ссылку в настройках профиля</span>
                 </button>
-                </div>
-                <p class="lesson-student"></p>
+            </div>
+            <p class="lesson-student"></p>
             </div>
             <form id="lesson-form">
                 <div class="form-group">
@@ -230,6 +233,7 @@ export class LessonModal extends Modal {
         } else {
             this.conferenceBtn.disabled = true;
             this.conferenceBtn.onclick = null;
+            this.conferenceBtn.classList.add("disabled");
         }
 
         // Ученик
