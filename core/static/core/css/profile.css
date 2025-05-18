@@ -22,7 +22,8 @@ form label {
 }
 
 form input[type="text"],
-form input[type="email"] {
+form input[type="email"],
+form input[type="url"] {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
@@ -43,4 +44,44 @@ form button {
 
 form button:hover {
     background: #0056b3;
+}
+
+a {
+    color: white;
+}
+
+h3 {
+    margin-bottom: 1rem;
+}
+
+.conference-links {
+    margin: 20px 0;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+}
+
+.link-field {
+    margin-bottom: 15px;
+}
+
+.link-field label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.link-field input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.platform-icon {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    margin-right: 10px;
 }

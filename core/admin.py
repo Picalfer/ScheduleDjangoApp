@@ -22,7 +22,7 @@ class TeacherPaymentInline(admin.TabularInline):  # или admin.StackedInline
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
     inlines = [TeacherPaymentInline]
-    list_display = ('id', 'get_full_name', 'user')
+    list_display = ('id', 'get_full_name', 'user', 'zoom_link', 'google_meet_link')
 
     def get_full_name(self, obj):
         return obj.user.get_full_name()
@@ -115,7 +115,7 @@ class OpenSlotsAdmin(admin.ModelAdmin):
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
     form = LessonAdminForm
-    list_display = ('date', 'status', 'lesson_type', 'teacher', 'time', 'student', 'course')
+    list_display = ('date', 'status', 'lesson_type', 'platform', 'teacher', 'time', 'student', 'course')
     list_filter = ('lesson_type', 'status', 'date')
     search_fields = ['student__name']
 
@@ -123,7 +123,7 @@ class LessonAdmin(admin.ModelAdmin):
         # Для создания нового урока (когда obj=None)
         if obj is None:
             return [
-                'student', 'teacher', 'course',
+                'student', 'teacher', 'course', 'platform',
                 'lesson_type', 'date', 'time', 'schedule',
             ]
         # Для редактирования существующего урока
