@@ -95,7 +95,7 @@
 
 .platform-name {
     font-weight: 500;
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 .conference-btn {

@@ -48,13 +48,10 @@ export class LessonModal extends Modal {
             <div class="lesson-info">
                 <p class="lesson-type"></p>
                 <div class="platform-block">
-                    <div class="platform-info">
-                        <span class="platform-icon"></span>
-                        <span class="platform-name"></span>
-                    </div>
                     <button class="conference-btn" disabled>
-                        <span class="btn-text">Запустить</span>
-                    </button>
+                    <span class="platform-icon"></span>
+                    <span class="platform-name"></span>
+                </button>
                 </div>
                 <p class="lesson-student"></p>
             </div>
