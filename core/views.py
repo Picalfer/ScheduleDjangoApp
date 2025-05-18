@@ -409,14 +409,21 @@ def home(request):
 
 @login_required
 def profile(request):
-    user = request.user
     if request.method == 'POST':
-        form = ProfileForm(request.POST, instance=user)
+        form = ProfileForm(request.POST, instance=request.user)
         if form.is_valid():
-            form.save()
-            return redirect('profile')  # Перенаправляем обратно на страницу профиля
+            user = form.save()
+
+            # Обновляем ссылки преподавателя
+            if hasattr(user, 'teacher'):
+                user.teacher.zoom_link = request.POST.get('zoom_link', '').strip() or None
+                user.teacher.google_meet_link = request.POST.get('google_meet_link', '').strip() or None
+                user.teacher.save()
+
+            return redirect('profile')
     else:
-        form = ProfileForm(instance=user)
+        form = ProfileForm(instance=request.user)
+
     return render(request, 'core/profile.html', {'form': form})
 
 

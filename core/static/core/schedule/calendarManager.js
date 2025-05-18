@@ -1,5 +1,5 @@
 import {DAYS_OF_WEEK, showNotification} from "./utils.js";
-import {repository, settingsManager} from "./app.js";
+import {repository, scheduleState, settingsManager} from "./app.js";
 import {WeekManager} from "./weekManager.js";
 import {LessonManager} from "./lessonManager.js";
 
@@ -11,6 +11,10 @@ export class CalendarManager {
         this.openSlots = {};
         this.startHour = 6;
         this.endHour = 18;
+
+        scheduleState.teacherId = currentTeacherId
+        scheduleState.userId = currentUserId
+        scheduleState.isAnother = false
 
         this.loadSchedule();
         this.updateCalendarUi()

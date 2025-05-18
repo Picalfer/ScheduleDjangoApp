@@ -46,8 +46,17 @@ export class LessonModal extends Modal {
     static generateStaticContent() {
         return `
             <div class="lesson-info">
+            <div style="display: flex; justify-content: space-between">
                 <p class="lesson-type"></p>
-                <p class="lesson-student"></p>
+                <button class="conference-btn" disabled>
+                    <span class="visible-text">
+                        <span class="platform-icon"></span>
+                        <span class="platform-name"></span>
+                    </span>
+                    <span class="hidden-tooltip">Добавьте ссылку в настройках профиля</span>
+                </button>
+            </div>
+            <p class="lesson-student"></p>
             </div>
             <form id="lesson-form">
                 <div class="form-group">
@@ -114,6 +123,10 @@ export class LessonModal extends Modal {
         this.submitButton = this.modalElement.querySelector('.submit-button');
         this.lessonTypeElement = this.modalElement.querySelector('.lesson-type');
         this.lessonStudentElement = this.modalElement.querySelector('.lesson-student');
+
+        this.platformIcon = this.modalElement.querySelector('.platform-icon');
+        this.platformName = this.modalElement.querySelector('.platform-name');
+        this.conferenceBtn = this.modalElement.querySelector('.conference-btn');
 
         this.insertPrevTopic = this.modalElement.querySelector('.insert-prev-theme');
         this.previousThemeHint = this.modalElement.querySelector('.previous-theme-hint');
@@ -185,16 +198,43 @@ export class LessonModal extends Modal {
         // Курс
         this.modalElement.querySelector('#lesson-course').value = lessonData.course;
 
+        // Тип урока
         const types = {
             recurring: ['🔄', 'Постоянный урок'],
             demo: ['🎯', 'Демо-урок'],
             single: ['1️⃣', 'Разовый урок']
         };
 
-        // Тип урока
         const [emoji, text] = types[lessonData.lesson_type] || ['📅', 'Урок'];
 
         this.lessonTypeElement.innerHTML = `${emoji} ${text}`;
+
+        // Тип платформы
+        const platforms = {
+            "google-meet": {
+                icon: "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACB0lEQVR4AWPAB0bBKHjlYmzzfRXPkT97mO+TjHcz3/69m6X//34GDrItf+Vs9vnHMt6Xv/ew/CcXAx0TT7blr5xN/39fwP+TQgfMJ9tysAPmCfynlgO0V4XymKwIWm6yIvi8yfIQB/yWIxzwlxoOMF8SJAO0+DQQ/wdh4xXB8/FZjnDAUr63lDrAaEWQBdDS51DLMR2wNTLf9axf2NdzfiH/0fGXFUKniUn1uBywb5PkWqCFv0GW4nSAU+vXeqfWL/+x4pbPocSkHXSLf+1h+dM9X/aVymSXSyAL6eqAz7vY/oRP0Pwv0WDxX3miyzO6OuD+Vq5f1p0GIMshDpjg9ItuDji3gf+9VqsJyGI4Vup3+k8XB+xZLXRDptEcZjH9HaAx3eMS0MKBcwDIUO3ZXs8lGwfQASCsO9/3i2SzJcIBE5z+0M0BMGy4JOCbTJsNNBc4v6anAxAWLAv8KNdt91llkst1gg6Qy75RrpBz/T8mvvHDYFbBNqCG/URgbHH9W3eB30aCDpBIu1wvmX7pPzasPyfrFUgD6RhhkcnKoHqyHaA3s/AP6RZjWmS6PCgcyP9OsgN0ZxSTaTmmRcarQm2QquXJdAwBBLBYHqAAihIQjeSAi/G4HGAwJ/sNJQ4wWR6cTTALKSTc5wBathqIf6M7wHBB0i0yLf8NxOsN1gcI4LN7FIwCACcjGypcbDtgAAAAAElFTkSuQmCC')",
+                name: "Google Meet"
+            },
+            "zoom": {
+                icon: "url('data:image/png;base64,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')",
+                name: "Zoom"
+            }
+        };
+
+        const platform = platforms[lessonData.platform];
+
+        this.platformIcon.style.backgroundImage = platform.icon;
+        this.platformName.textContent = platform.name;
+
+        // Настройка кнопки
+        if (lessonData.conference_link) {
+            this.conferenceBtn.disabled = false;
+            this.conferenceBtn.onclick = () => window.open(lessonData.conference_link, '_blank');
+        } else {
+            this.conferenceBtn.disabled = true;
+            this.conferenceBtn.onclick = null;
+            this.conferenceBtn.classList.add("disabled");
+        }
 
         // Ученик
         this.lessonStudentElement.textContent = `Ученик: ${lessonData.student_name || lessonData.student}`;

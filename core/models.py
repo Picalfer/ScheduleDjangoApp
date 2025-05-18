@@ -21,6 +21,8 @@ class UserSettings(models.Model):
 
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    zoom_link = models.URLField(max_length=255, blank=True, null=True, verbose_name="Zoom ссылка")
+    google_meet_link = models.URLField(max_length=255, blank=True, null=True, verbose_name="Google Meet ссылка")
 
     @property
     def name(self):
@@ -280,6 +282,12 @@ class Lesson(models.Model):
         ('completed', 'Проведён'),
         ('canceled', 'Отменён'),
     ]
+
+    PLATFORMS_CHOICES = [
+        ('google-meet', 'Google Meet'),
+        ('zoom', 'Zoom'),
+    ]
+
     student_name = models.CharField(
         max_length=100,
         blank=True,
@@ -302,6 +310,12 @@ class Lesson(models.Model):
         choices=STATUS_CHOICES,
         default='scheduled',
         verbose_name='Статус'
+    )
+    platform = models.CharField(
+        max_length=15,
+        choices=PLATFORMS_CHOICES,
+        default='google-meet',
+        verbose_name='Платформа'
     )
 
     # Для разовых уроков
@@ -405,6 +419,7 @@ class Lesson(models.Model):
             previous_topic=self.lesson_topic,
             previous_homework=self.homework,
             previous_comment=self.lesson_notes,
+            platform=self.platform,
         )
 
     def calculate_next_date_and_time(self):
