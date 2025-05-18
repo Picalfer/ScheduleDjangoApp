@@ -419,6 +419,7 @@ class Lesson(models.Model):
             previous_topic=self.lesson_topic,
             previous_homework=self.homework,
             previous_comment=self.lesson_notes,
+            platform=self.platform,
         )
 
     def calculate_next_date_and_time(self):
