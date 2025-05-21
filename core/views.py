@@ -478,6 +478,11 @@ def weekly_payments(request):
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 
+def payments_count(request):
+    count = TeacherPayment.objects.filter(is_paid=False).count()
+    return JsonResponse({'count': count})
+
+
 @require_POST
 def mark_payment_as_paid(request, payment_id):
     try:
@@ -570,8 +575,3 @@ def low_balance_clients_count(request):
     except Exception as e:
         logger.error(f"Error in low_balance_clients_count: {str(e)}", exc_info=True)
         return JsonResponse({'count': 0, 'error': str(e)}, status=500)
-
-
-def payments_count(request):
-    count = TeacherPayment.objects.count()
-    return JsonResponse({'count': count})
