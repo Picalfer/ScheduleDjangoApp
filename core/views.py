@@ -4,6 +4,7 @@ from datetime import timedelta
 
 from django.db import transaction
 
+from .constants import EXCLUDED_TEACHERS_IDS
 from .services.payment_service import calculate_weekly_payments
 
 logger = logging.getLogger(__name__)
@@ -31,13 +32,6 @@ from .forms import RegisterForm, LoginForm
 from .models import Lesson, Teacher, Student, TeacherPayment, Client
 from .models import OpenSlots, UserSettings
 from .serializers import LessonSerializer, TeacherSerializer, StudentSerializer, TeacherPaymentSerializer
-
-EXCLUDED_TEACHERS_IDS = list(
-    User.objects.filter(
-        Q(first_name='Артур', last_name='Кожемякин') |
-        Q(first_name='Мария', last_name='Вакулина')
-    ).values_list('id', flat=True)
-)
 
 
 @require_POST
@@ -462,8 +456,8 @@ def generate_weekly_payments(request):
 def weekly_payments(request):
     try:
         # calculate_weekly_payments()
-        # payments = TeacherPayment.objects.filter(is_paid=False).select_related('teacher')
-        payments = TeacherPayment.objects.select_related('teacher')
+        payments = TeacherPayment.objects.filter(is_paid=False).select_related('teacher')
+        # payments = TeacherPayment.objects.select_related('teacher')
         data = [{
             'id': p.id,
             'created_at': p.local_created_at,
@@ -482,6 +476,11 @@ def weekly_payments(request):
         return JsonResponse({'status': 'success', 'payments': data})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+
+def payments_count(request):
+    count = TeacherPayment.objects.filter(is_paid=False).count()
+    return JsonResponse({'count': count})
 
 
 @require_POST
@@ -576,8 +575,3 @@ def low_balance_clients_count(request):
     except Exception as e:
         logger.error(f"Error in low_balance_clients_count: {str(e)}", exc_info=True)
         return JsonResponse({'count': 0, 'error': str(e)}, status=500)
-
-
-def payments_count(request):
-    count = TeacherPayment.objects.count()
-    return JsonResponse({'count': count})

@@ -1,8 +1,8 @@
-# services/payment_service.py
 from datetime import timedelta
 
 from django.utils import timezone
 
+from core.constants import EXCLUDED_TEACHERS_IDS
 from core.models import Lesson, Teacher, TeacherPayment
 
 
@@ -19,7 +19,10 @@ def calculate_weekly_payments():
         status='completed'
     )
 
-    for teacher in Teacher.objects.all():
+    # Получаем всех учителей, кроме исключенных
+    teachers = Teacher.objects.exclude(user__id__in=EXCLUDED_TEACHERS_IDS)
+
+    for teacher in teachers:
         teacher_lessons = completed_lessons.filter(teacher=teacher)
         count = teacher_lessons.count()
 
