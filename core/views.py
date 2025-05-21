@@ -8,11 +8,12 @@ from .services.payment_service import calculate_weekly_payments
 
 logger = logging.getLogger(__name__)
 
+from django.db.models import Exists, OuterRef, Q
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.db.models import Q, Prefetch
+from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
@@ -30,6 +31,13 @@ from .forms import RegisterForm, LoginForm
 from .models import Lesson, Teacher, Student, TeacherPayment, Client
 from .models import OpenSlots, UserSettings
 from .serializers import LessonSerializer, TeacherSerializer, StudentSerializer, TeacherPaymentSerializer
+
+EXCLUDED_TEACHERS_IDS = list(
+    User.objects.filter(
+        Q(first_name='Артур', last_name='Кожемякин') |
+        Q(first_name='Мария', last_name='Вакулина')
+    ).values_list('id', flat=True)
+)
 
 
 @require_POST
@@ -503,48 +511,71 @@ def mark_payment_as_paid(request, payment_id):
         }, status=404)
 
 
+def get_filtered_low_balance_clients_queryset():
+    """Возвращает клиентов с балансом <= 2, у которых есть дети у преподавателей школы."""
+    return Client.objects.filter(balance__lte=2).annotate(
+        has_valid_student=Exists(
+            Student.objects.filter(
+                client_id=OuterRef('id'),
+                teacher__user__isnull=False
+            ).exclude(teacher__user__id__in=EXCLUDED_TEACHERS_IDS)
+        )
+    ).filter(has_valid_student=True)
+
+
 def low_balance_clients(request):
     try:
-        clients = Client.objects.filter(balance__lte=2) \
-            .prefetch_related(
+        clients = get_filtered_low_balance_clients_queryset().prefetch_related(
             'phone_numbers',
-            Prefetch('students', queryset=Student.objects.select_related('teacher'))
+            Prefetch(
+                'students',
+                queryset=Student.objects.select_related('teacher__user').order_by('id')
+            )
         )
 
         clients_data = []
         for client in clients:
-            if not hasattr(client, 'phone_numbers'):
-                logger.warning(f"Client {client.id} has no phone numbers relation")
             primary_phone = client.primary_phone
+            children_data = []
+
+            for student in client.students.all():
+                teacher = student.teacher
+                teacher_name = (
+                    f"{teacher.user.first_name} {teacher.user.last_name}"
+                    if teacher and teacher.user else None
+                )
+
+                children_data.append({
+                    'id': student.id,
+                    'name': student.name,
+                    'teacher': teacher_name,
+                    'is_excluded_teacher': teacher and teacher.user.id in EXCLUDED_TEACHERS_IDS,
+                    'notes': student.notes
+                })
+
             clients_data.append({
                 'id': client.id,
                 'name': client.name,
                 'balance': client.balance,
                 'phone': primary_phone.number if primary_phone else None,
                 'phone_note': primary_phone.note if primary_phone else None,
-                'children': [
-                    {
-                        'id': student.id,
-                        'name': student.name,
-                        'teacher': student.teacher.name if student.teacher else None,
-                        'notes': student.notes
-                    }
-                    for student in client.students.all()
-                ]
+                'children': children_data
             })
 
-        return JsonResponse({
-            'status': 'success',
-            'clients': clients_data
-        })
+        return JsonResponse({'status': 'success', 'clients': clients_data})
+
     except Exception as e:
         logger.error(f"Error in low_balance_clients: {str(e)}", exc_info=True)
-        return JsonResponse({'status': 'error', 'message': 'Internal server error'}, status=500)
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
 def low_balance_clients_count(request):
-    count = Client.objects.filter(balance__lte=2).count()
-    return JsonResponse({'count': count})
+    try:
+        count = get_filtered_low_balance_clients_queryset().count()
+        return JsonResponse({'count': count})
+    except Exception as e:
+        logger.error(f"Error in low_balance_clients_count: {str(e)}", exc_info=True)
+        return JsonResponse({'count': 0, 'error': str(e)}, status=500)
 
 
 def payments_count(request):
