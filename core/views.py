@@ -456,8 +456,8 @@ def generate_weekly_payments(request):
 def weekly_payments(request):
     try:
         # calculate_weekly_payments()
-        # payments = TeacherPayment.objects.filter(is_paid=False).select_related('teacher')
-        payments = TeacherPayment.objects.select_related('teacher')
+        payments = TeacherPayment.objects.filter(is_paid=False).select_related('teacher')
+        # payments = TeacherPayment.objects.select_related('teacher')
         data = [{
             'id': p.id,
             'created_at': p.local_created_at,
