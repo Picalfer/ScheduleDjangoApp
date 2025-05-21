@@ -4,6 +4,7 @@ from datetime import timedelta
 
 from django.db import transaction
 
+from .constants import EXCLUDED_TEACHERS_IDS
 from .services.payment_service import calculate_weekly_payments
 
 logger = logging.getLogger(__name__)
@@ -31,13 +32,6 @@ from .forms import RegisterForm, LoginForm
 from .models import Lesson, Teacher, Student, TeacherPayment, Client
 from .models import OpenSlots, UserSettings
 from .serializers import LessonSerializer, TeacherSerializer, StudentSerializer, TeacherPaymentSerializer
-
-EXCLUDED_TEACHERS_IDS = list(
-    User.objects.filter(
-        Q(first_name='Артур', last_name='Кожемякин') |
-        Q(first_name='Мария', last_name='Вакулина')
-    ).values_list('id', flat=True)
-)
 
 
 @require_POST
