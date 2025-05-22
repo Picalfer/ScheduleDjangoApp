@@ -38,6 +38,7 @@ export function showNotification(message, type = 'info') {
     notification.style.display = 'block';
     notification.style.opacity = '1';
     notification.style.zIndex = '1001';
+    notification.style.textAlign = 'center';
     notification.style.transform = 'translateX(-50%) translateY(0)';
 
     // Скрыть уведомление через 3 секунды
