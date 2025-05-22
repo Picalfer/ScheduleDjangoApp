@@ -71,3 +71,9 @@ nav {
 .modal-content {
     width: 90%;
 }
+
+#week-info {
+    position: sticky;
+    top: 0;
+    left: 0;
+}
