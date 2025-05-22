@@ -11,6 +11,10 @@ class Course(models.Model):
     def __str__(self):
         return self.title
 
+    class Meta:
+        verbose_name = 'Курс'
+        verbose_name_plural = 'Курсы'
+
 
 class Level(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='levels')
@@ -21,6 +25,9 @@ class Level(models.Model):
     class Meta:
         ordering = ['order']
         unique_together = [('course', 'title')]  # Чтобы названия не повторялись в рамках курса
+
+        verbose_name = 'Уровень'
+        verbose_name_plural = 'Уровни'
 
     def __str__(self):
         return f"{self.course.title} - {self.title}"
@@ -59,6 +66,8 @@ class Guide(models.Model):
 
     class Meta:
         ordering = ['order']
+        verbose_name = 'Методичка'
+        verbose_name_plural = 'Методички'
 
     def __str__(self):
         return self.title
