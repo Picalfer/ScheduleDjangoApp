@@ -118,7 +118,7 @@
 .conference-btn:hover:not([disabled]) {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
-    animation: pulse 1.5s infinite;
+    animation: pulse-conf-btn 1.5s infinite;
 }
 
 .conference-btn:active:not([disabled]) {
@@ -131,7 +131,7 @@
     opacity: 0.7;
 }
 
-@keyframes pulse {
+@keyframes pulse-conf-btn {
     0% {
         box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
     }
