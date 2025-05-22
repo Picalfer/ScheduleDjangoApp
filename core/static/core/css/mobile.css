@@ -20,7 +20,8 @@ header {
 
 #week-info-left {
     flex-shrink: 0;
-    flex-direction: column;
+    max-width: 22%;
+    flex-wrap: wrap;
 }
 
 nav {
@@ -76,4 +77,8 @@ nav {
     position: sticky;
     top: 0;
     left: 0;
+}
+
+.nav-button {
+    width: min-content;
 }
