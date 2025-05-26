@@ -70,7 +70,7 @@ class BalanceOperationInline(TabularInlinePaginated):
     model = BalanceOperation
     extra = 0
     per_page = 3
-    readonly_fields = ('date', 'balance_before', 'balance_after')
+    readonly_fields = ('balance_before', 'balance_after')
     fields = ('operation_type', 'amount', 'date', 'notes', 'balance_before', 'balance_after')
 
 

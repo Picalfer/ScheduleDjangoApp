@@ -50,6 +50,7 @@ main {
     border-radius: 0.25rem;
     text-decoration: none;
     display: inline-flex;
+    justify-content: center;
     align-items: center;
     gap: 0.5rem;
 }
@@ -97,6 +98,7 @@ main {
 .course-card {
     width: 250px;
     height: 200px;
+    margin: auto;
     background: rgb(255, 255, 255);
     border-radius: 8px;
     overflow: hidden;
@@ -150,4 +152,9 @@ main {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.courses-grid {
+    overflow-y: auto; /* Включаем вертикальную прокрутку */
+    max-height: calc(100vh - 100px - 150px); /* Вычисляем максимальную высоту: высота экрана - высота хедера - высота заголовка секции*/
 }

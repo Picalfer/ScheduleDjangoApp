@@ -215,7 +215,7 @@ class BalanceOperation(models.Model):
     amount = models.IntegerField(verbose_name='Количество уроков')
     balance_before = models.IntegerField(verbose_name='Баланс до операции')
     balance_after = models.IntegerField(verbose_name='Баланс после операции')
-    date = models.DateTimeField(auto_now_add=True, verbose_name='Дата операции')
+    date = models.DateTimeField(default=timezone.now, verbose_name='Дата операции')
     notes = models.CharField(max_length=100, blank=True, verbose_name='Комментарий')
 
     def clean(self):
