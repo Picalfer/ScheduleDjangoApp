@@ -40,33 +40,25 @@ nav {
     gap: 7px;
 }
 
-/* Контейнер для основного контента */
 #schedule-container {
     flex: 1;
     overflow: auto;
     width: 100%;
 }
 
-/* Широкие внутренние контейнеры */
 #headers, #schedule {
-    width: 190%; /* Или ваша нужная ширина */
-    min-width: 1200px; /* Минимальная ширина */
+    width: 190%;
     display: flex;
+    min-width: 1200px;
 }
 
-/* Стили для заголовков дней */
 .day-header {
     flex: 1;
 }
 
-/* Стили для колонок с временем */
+/* Стили для колонки со временем и хедера времени */
 .time-column, .time-header {
-    flex: 0;
-    width: 15vw;
-}
-
-.time-header {
-    padding: 5px 8px;
+    flex: 0 0 70px
 }
 
 .modal-content {
@@ -77,8 +69,28 @@ nav {
     position: sticky;
     top: 0;
     left: 0;
+    z-index: 101;
 }
 
 .nav-button {
     width: min-content;
+}
+
+#headers {
+    min-width: 1268px;
+}
+
+.schedule-area {
+    width: 220%;
+}
+
+/* закрашиваем пустое место между скроллами в углу экрана */
+.scrollable-area::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    background-color: var(--bg);
 }
