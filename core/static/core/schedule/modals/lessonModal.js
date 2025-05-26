@@ -28,7 +28,7 @@ export class LessonModal extends Modal {
     static createStaticAdminElements() {
         const createAdminLink = (icon, title) => {
             const link = document.createElement('a');
-            link.className = 'admin-link';
+            link.className = 'admin-link styled-button';
             link.innerHTML = icon;
             link.title = title;
             link.target = '_blank';
@@ -36,10 +36,9 @@ export class LessonModal extends Modal {
         };
 
         const lessonBtn = createAdminLink('✏️', 'Открыть урок в админке');
-        const studentBtn = createAdminLink('🎓', 'Открыть студента в админке');
-        const clientBtn = createAdminLink('💼', 'Открыть клиента в админке');
+        const clientBtn = createAdminLink('🙋‍♂️', 'Открыть клиента в админке');
 
-        return [lessonBtn, studentBtn, clientBtn];
+        return [lessonBtn, clientBtn];
     }
 
     // Статический метод для генерации контента
@@ -140,9 +139,8 @@ export class LessonModal extends Modal {
         this.previousCommentHint = this.modalElement.querySelector('.previous-comment-hint');
         this.previousCommentText = this.modalElement.querySelector('#previous_comment_text');
 
-        const [adminButton, adminStudentButton, adminClientButton] = this.modalElement.querySelectorAll('.admin-link');
-        this.adminButton = adminButton;
-        this.adminStudentButton = adminStudentButton;
+        const [adminLessonButton, adminClientButton] = this.modalElement.querySelectorAll('.admin-link');
+        this.adminLessonButton = adminLessonButton;
         this.adminClientButton = adminClientButton;
     }
 
@@ -161,19 +159,9 @@ export class LessonModal extends Modal {
     setLessonData(lessonData) {
         this.setPreviousData(lessonData)
         if (userData.isAdmin) {
-            // Кнопка урока
-            this.adminButton.href = `/admin/core/lesson/${lessonData.id}/change/`;
-            this.adminButton.style.display = 'inline-block';
+            this.adminLessonButton.href = `/admin/core/lesson/${lessonData.id}/change/`;
+            this.adminLessonButton.style.display = 'inline-block';
 
-            // Кнопка студента (если есть student_id в lessonData)
-            if (lessonData.student) {
-                this.adminStudentButton.href = `/admin/core/student/${lessonData.student}/change/`;
-                this.adminStudentButton.style.display = 'inline-block';
-            } else {
-                this.adminStudentButton.style.display = 'none';
-            }
-
-            // Кнопка клиента (если есть client_id в lessonData)
             if (lessonData.client) {
                 this.adminClientButton.href = `/admin/core/client/${lessonData.client}/change/`;
                 this.adminClientButton.style.display = 'inline-block';
@@ -182,8 +170,7 @@ export class LessonModal extends Modal {
             }
         } else {
             // Скрываем все кнопки для не-админов
-            this.adminButton.style.display = 'none';
-            this.adminStudentButton.style.display = 'none';
+            this.adminLessonButton.style.display = 'none';
             this.adminClientButton.style.display = 'none';
         }
 
