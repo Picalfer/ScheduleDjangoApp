@@ -11,6 +11,10 @@ form {
     border-radius: 10px;
 }
 
+a {
+    color: white;
+}
+
 form p {
     margin-bottom: 15px;
 }
