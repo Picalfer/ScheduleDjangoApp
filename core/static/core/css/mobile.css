@@ -94,3 +94,8 @@ nav {
     height: 10px;
     background-color: var(--bg);
 }
+
+#notification {
+    width: 90%;
+    padding: 7px;
+}
