@@ -1,0 +1,347 @@
+main {
+    padding: 2rem;
+    display: block;
+    background-color: rgba(0, 0, 0, 0.52);
+}
+
+.stats-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    color: black;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.stats-header {
+    color: #5192d3;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.stats-updated {
+    text-align: center;
+    color: #7f8c8d;
+    margin-bottom: 30px;
+    font-size: 0.9em;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card h2 {
+    margin-top: 0;
+    color: #34495e;
+    font-size: 1.3em;
+}
+
+.stat-value {
+    text-align: center;
+    font-size: 2.5em;
+    font-weight: bold;
+    margin: 15px 0;
+    color: #2c3e50;
+}
+
+.stat-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: #7f8c8d;
+}
+
+.stat-details .negative {
+    color: #e74c3c;
+}
+
+.stats-tables {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.stats-table {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stats-table h2 {
+    margin-top: 0;
+    color: #34495e;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f8f9fa;
+    color: #34495e;
+}
+
+tr:hover {
+    background-color: #f5f5f5;
+}
+
+/* Цветовые темы для карточек */
+.stat-card.clients {
+    border-top: 4px solid #3498db;
+}
+
+/* Общие стили карточки */
+.stat-card.teachers {
+    border-top: 4px solid #9c27b0;
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card.teachers h2 {
+    margin-top: 0;
+    color: #5e35b1;
+    font-size: 1.3em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stat-card.teachers .stat-value {
+    font-size: 2.8em;
+    font-weight: bold;
+    margin: 10px 0;
+    color: #7e57c2;
+    text-align: center;
+}
+
+/* Стили для деталей */
+.stat-card.teachers .stat-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.detail-label {
+    color: #546e7a;
+    font-size: 0.95em;
+}
+
+.detail-value {
+    font-weight: 600;
+    font-size: 1em;
+}
+
+/* Цветовые акценты */
+.positive {
+    color: #2e7d32;
+}
+
+.negative {
+    color: #c62828;
+}
+
+.neutral {
+    color: #0277bd;
+}
+
+/* Иконки трендов */
+.detail-value.positive::after {
+    content: "↑";
+    margin-left: 3px;
+}
+
+.detail-value.negative::after {
+    content: "↓";
+    margin-left: 3px;
+}
+
+.stat-card.lessons {
+    border-top: 4px solid #2ecc71;
+}
+
+.stat-card.finance {
+    border-top: 4px solid #f39c12;
+}
+
+/* Стили для секции нагрузки */
+.workload-section {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 25px;
+    margin: 30px 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.workload-section h2 {
+    color: #2c3e50;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Стили для рекомендации */
+.recommendation {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    font-weight: 600;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+}
+
+.recommendation.urgent {
+    background-color: #fff0f0;
+    color: #d32f2f;
+    border-left: 5px solid #d32f2f;
+}
+
+/* Карусель преподавателей */
+.teacher-workload-carousel {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding: 15px 5px;
+    scrollbar-width: thin;
+    scrollbar-color: #3498db #f1f1f1;
+}
+
+/* Стили для полосы прокрутки */
+.teacher-workload-carousel::-webkit-scrollbar {
+    height: 8px;
+}
+
+.teacher-workload-carousel::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.teacher-workload-carousel::-webkit-scrollbar-thumb {
+    background: #3498db;
+    border-radius: 10px;
+}
+
+/* Карточка преподавателя */
+.teacher-card {
+    min-width: 280px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    background: white;
+    border-top: 4px solid;
+    transition: transform 0.3s ease;
+}
+
+.teacher-card:hover {
+    transform: translateY(-5px);
+}
+
+.teacher-card h3 {
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+    font-size: 1.2em;
+}
+
+/* Индикатор нагрузки */
+.workload-bar {
+    height: 30px;
+    background: #f5f7fa;
+    border-radius: 15px;
+    margin: 15px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 15px;
+    transition: width 0.5s ease;
+}
+
+.workload-bar span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: #000000;
+    font-weight: bold;
+    font-size: 13px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Цветовые статусы */
+.workload-danger {
+    border-color: #d32f2f;
+}
+
+.workload-danger .bar-fill {
+    background: linear-gradient(90deg, #d32f2f, #f44336);
+}
+
+.workload-warning {
+    border-color: #ffa000;
+}
+
+.workload-warning .bar-fill {
+    background: linear-gradient(90deg, #ffa000, #ffc107);
+}
+
+.workload-success {
+    border-color: #388e3c;
+}
+
+.workload-success .bar-fill {
+    background: linear-gradient(90deg, #388e3c, #4caf50);
+}
+
+/* Детали нагрузки */
+.workload-details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95em;
+    color: #546e7a;
+    margin-top: 15px;
+}
+
+.workload-details span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.workload-details span:first-child::before {
+    content: "🆓";
+}
+
+.workload-details span:last-child::before {
+    content: "✅";
+}
