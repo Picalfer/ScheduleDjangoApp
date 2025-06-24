@@ -222,6 +222,7 @@
     align-items: center;
     padding: 2px;
     font-size: 18px;
+    color: var(--text-primary);
 }
 
 #schedule-info-text {
