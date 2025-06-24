@@ -58,6 +58,8 @@ class PhoneNumberInline(admin.TabularInline):
     model = PhoneNumber
     extra = 0
     fields = ('number', 'note', 'is_primary')
+    search_fields = ['number', 'note']
+    list_filter = ['is_primary']
     verbose_name = 'Номер телефона'
     verbose_name_plural = 'Номера телефонов'
 

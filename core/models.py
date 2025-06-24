@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils import timezone
+from phonenumber_field.modelfields import PhoneNumberField
 from safedelete import SOFT_DELETE, DELETED_VISIBLE_BY_PK
 from safedelete.models import SafeDeleteModel
 
@@ -130,9 +131,11 @@ class PhoneNumber(models.Model):
         related_name='phone_numbers',
         verbose_name='Клиент'
     )
-    number = models.CharField(
-        max_length=20,
-        verbose_name='Номер телефона'
+    number = PhoneNumberField(
+        verbose_name='Номер телефона',
+        help_text='В международном формате (+79161234567)',
+        region=None,
+        blank=False
     )
     note = models.CharField(
         max_length=100,
@@ -150,7 +153,7 @@ class PhoneNumber(models.Model):
         ordering = ['-is_primary', 'id']
 
     def __str__(self):
-        return f"{self.number} ({self.note})" if self.note else self.number
+        return f"{self.number} ({self.note})" if self.note else str(self.number)
 
 
 class Student(models.Model):

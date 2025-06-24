@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'materials.apps.MaterialsConfig',
     'django_cleanup.apps.CleanupConfig',
     'safedelete',
+    'phonenumber_field',
 ]
 
 if DEBUG:
