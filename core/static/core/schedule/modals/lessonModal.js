@@ -1,5 +1,5 @@
 import {Modal} from './modal.js';
-import {calendarManager, repository} from "../app.js";
+import {calendarManager, repository, scheduleState} from "../app.js";
 import * as utils from '../utils.js';
 import {showNotification} from '../utils.js';
 
@@ -383,7 +383,7 @@ export class LessonModal extends Modal {
                 );
             }
 
-            calendarManager.loadSchedule();
+            calendarManager.loadSchedule(scheduleState.teacherId, scheduleState.userId);
             this.close();
         } catch (error) {
             console.error("Ошибка при проведении урока:", error);
@@ -406,7 +406,7 @@ export class LessonModal extends Modal {
                 try {
                     await repository.cancelLesson(this.lessonId, reason);
                     showNotification(`Урок отменен!`, "success");
-                    calendarManager.loadSchedule();
+                    calendarManager.loadSchedule(scheduleState.teacherId, scheduleState.userId);
                     this.close();
                 } catch (error) {
                     console.error("Ошибка при отмене урока:", error);
