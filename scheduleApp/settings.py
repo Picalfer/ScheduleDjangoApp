@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'materials.apps.MaterialsConfig',
     'django_cleanup.apps.CleanupConfig',
+    'safedelete',
 ]
 
 MIDDLEWARE = [

@@ -4,9 +4,11 @@ from django import forms
 from django.contrib import admin
 from django.utils import timezone
 from django_admin_inline_paginator.admin import TabularInlinePaginated
+from safedelete.admin import SafeDeleteAdmin
 
 from core.forms import LessonAdminForm
-from core.models import Teacher, Student, Lesson, OpenSlots, BalanceOperation, Client, PhoneNumber, TeacherPayment
+from core.models import Teacher, Student, Lesson, OpenSlots, BalanceOperation, Client, PhoneNumber, TeacherPayment, \
+    DeletedClient
 
 
 class TeacherPaymentInline(admin.TabularInline):  # или admin.StackedInline
@@ -75,17 +77,47 @@ class BalanceOperationInline(TabularInlinePaginated):
 
 
 @admin.register(Client)
-class ClientAdmin(admin.ModelAdmin):
-    list_display = ('name', 'balance', 'email', 'display_phones')
+class ClientAdmin(SafeDeleteAdmin):
+    list_display = ('name', 'balance', 'email', 'display_phones',)
     readonly_fields = ('balance',)
     search_fields = ('name', 'email', 'phone_numbers__number')
     inlines = [PhoneNumberInline, StudentInline, BalanceOperationInline]
+
+    def get_queryset(self, request):
+        # Только неудалённые
+        return Client.objects.all()
 
     def display_phones(self, obj):
         phones = obj.phone_numbers.all()
         return ", ".join(str(phone) for phone in phones)
 
     display_phones.short_description = 'Телефоны'
+
+
+@admin.register(DeletedClient)
+class DeletedClientAdmin(SafeDeleteAdmin):
+    list_display = ('name', 'balance', 'email', 'display_phones', 'deleted')
+    readonly_fields = ('balance', 'deleted')
+    search_fields = ('name', 'email', 'phone_numbers__number')
+    inlines = [PhoneNumberInline, StudentInline, BalanceOperationInline]
+    actions = ['undelete_selected']
+
+    def get_queryset(self, request):
+        # Только удалённые
+        return Client.deleted_objects.all()
+
+    def display_phones(self, obj):
+        phones = obj.phone_numbers.all()
+        return ", ".join(str(phone) for phone in phones)
+
+    display_phones.short_description = 'Телефоны'
+
+    def undelete_selected(self, request, queryset):
+        for obj in queryset:
+            obj.undelete()
+        self.message_user(request, "Выбранные клиенты восстановлены.")
+
+    undelete_selected.short_description = "Восстановить выбранных"
 
 
 @admin.register(Student)

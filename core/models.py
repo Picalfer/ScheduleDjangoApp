@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils import timezone
+from safedelete import SOFT_DELETE, DELETED_VISIBLE_BY_PK
+from safedelete.models import SafeDeleteModel
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +50,10 @@ class OpenSlots(models.Model):
         return f"Open slots for {self.teacher.username}"
 
 
-class Client(models.Model):
+class Client(SafeDeleteModel):
+    _safedelete_policy = SOFT_DELETE
+    _safedelete_visibility = DELETED_VISIBLE_BY_PK
+
     name = models.CharField(max_length=100, verbose_name='Имя родителя')
     email = models.EmailField(blank=True, verbose_name='Email')
 
@@ -109,6 +114,13 @@ class Client(models.Model):
         indexes = [
             models.Index(fields=['balance']),
         ]
+
+
+class DeletedClient(Client):
+    class Meta:
+        proxy = True
+        verbose_name = "Удалённый клиент"
+        verbose_name_plural = "Корзина клиентов"
 
 
 class PhoneNumber(models.Model):
