@@ -414,11 +414,6 @@ class Lesson(models.Model):
         null=True,
         verbose_name='Фактическое время проведения'
     )
-    canceled_at = models.DateTimeField(
-        blank=True,
-        null=True,
-        verbose_name='Фактическое время проведения'
-    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
 
     def create_next_lesson(self):
