@@ -64,6 +64,13 @@
     align-items: center;
 }
 
+.modal-header.has-subtitle {
+    justify-content: space-around;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+}
+
 .modal-header h3 {
     color: var(--text-primary);
     font-size: 1.4em;
