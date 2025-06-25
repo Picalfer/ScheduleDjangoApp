@@ -141,9 +141,13 @@ def cancel_lesson(request, lesson_id):
         if lesson.status != 'scheduled':
             return JsonResponse({'status': 'error', 'message': 'Этот урок нельзя отменить'}, status=400)
 
-        lesson.cancel_reason = data.get('cancel_reason') or None
+        lesson.cancelled_by = data.get('cancelled_by')
+        lesson.is_custom_reason = data.get('is_custom_reason', False)
+        lesson.cancel_reason = data.get('cancel_reason')
+
         lesson.status = 'canceled'
         lesson.canceled_at = now()
+
         lesson.save()
 
         response_data = {

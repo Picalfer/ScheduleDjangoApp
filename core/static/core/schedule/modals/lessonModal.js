@@ -414,6 +414,7 @@ export class LessonModal extends Modal {
                 try {
                     // Отправляем полные данные на сервер
                     await repository.cancelLesson(this.lessonId, cancelData);
+                    console.log(cancelData)
 
                     showNotification(`Урок отменен!`, "success");
                     calendarManager.loadSchedule(scheduleState.teacherId, scheduleState.userId);
