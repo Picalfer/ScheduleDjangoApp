@@ -1,7 +1,7 @@
 import {Modal} from './modal.js';
 import {calendarManager, repository, scheduleState} from "../app.js";
-import * as utils from '../utils.js';
 import {showNotification} from '../utils.js';
+import {CancelLessonModal} from "./cancelLessonModal.js";
 
 export class LessonModal extends Modal {
     constructor() {
@@ -395,27 +395,57 @@ export class LessonModal extends Modal {
     }
 
     cancelLesson() {
-        utils.showConfirmationModal({
-            text: "Введите причину отмены:",
-            inputConfig: {
-                type: 'textarea',
-                placeholder: 'Минимум 5 символов',
-                required: true
-            },
-            onConfirm: async (reason) => {
+        const modal = new CancelLessonModal({
+            onConfirm: async ({side, reason, reasonText}) => {
+                // Формируем полные данные для отправки
+                const cancelData = {
+                    cancelled_by: side,
+                    cancel_reason: reason === 'other' ? reasonText : reason,
+                    is_custom_reason: reason === 'other'
+                };
+
+                // Логируем полные данные в консоль
+                console.log('Отмена урока:', {
+                    lessonId: this.lessonId,
+                    ...cancelData,
+                    timestamp: new Date().toISOString()
+                });
+
                 try {
-                    await repository.cancelLesson(this.lessonId, reason);
+                    // Отправляем полные данные на сервер
+                    await repository.cancelLesson(this.lessonId, cancelData);
+                    console.log(cancelData)
+
                     showNotification(`Урок отменен!`, "success");
                     calendarManager.loadSchedule(scheduleState.teacherId, scheduleState.userId);
                     this.close();
                 } catch (error) {
-                    console.error("Ошибка при отмене урока:", error);
+                    console.error("Ошибка при отмене урока:", {
+                        errorDetails: error,
+                        requestData: cancelData,
+                        timestamp: new Date().toISOString()
+                    });
+
                     showNotification(
                         error.message || "Произошла ошибка при отмене урока",
                         "error"
                     );
                 }
+            },
+            onCancel: () => {
+                console.log('Пользователь отменил выбор причины отмены урока', {
+                    lessonId: this.lessonId,
+                    timestamp: new Date().toISOString()
+                });
             }
+        });
+
+        modal.open();
+
+        console.log('Открыто окно отмены урока для:', {
+            lessonId: this.lessonId,
+            lessonData: this.lessonData,
+            timestamp: new Date().toISOString()
         });
     }
 

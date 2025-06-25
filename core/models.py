@@ -373,12 +373,21 @@ class Lesson(models.Model):
         null=True,
         verbose_name='Домашнее задание'
     )
-    cancel_reason = models.CharField(
-        max_length=255,
+    cancelled_by = models.CharField(
+        max_length=10,
         blank=True,
         null=True,
-        default=None,
-        verbose_name='Причина отмены урока'
+        choices=[('teacher', 'Преподаватель'), ('student', 'Ученик')],
+        verbose_name='Кто отменил урок'
+    )
+    is_custom_reason = models.BooleanField(
+        default=False,
+        verbose_name='Кастомная причина'
+    )
+    cancel_reason = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name='Текст причины отмены'
     )
     previous_topic = models.CharField(
         max_length=255,

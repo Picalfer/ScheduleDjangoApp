@@ -148,10 +148,6 @@ export class Repository {
                 throw new Error('CSRF token not found');
             }
 
-            const payload = {
-                cancel_reason: reason || null
-            };
-
             const response = await fetch(`/api/cancel-lesson/${lessonId}/`, {
                 method: 'POST',
                 headers: {
@@ -160,7 +156,11 @@ export class Repository {
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 credentials: 'include',
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                    cancelled_by: reason.cancelled_by,
+                    is_custom_reason: reason.is_custom_reason,
+                    cancel_reason: reason.cancel_reason
+                })
             });
 
             if (!response.ok) {
