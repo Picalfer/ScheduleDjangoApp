@@ -21,9 +21,10 @@ export class CancelLessonModal extends Modal {
         this.initElements();
         this.setupEventListeners();
 
-        this.selectedSide = null;
-        this.selectedReason = null;
-        this.otherReasonText = '';
+        this.cancelled_by = null;
+        this.cancel_reason = null;
+        this.is_custom_reason = false;
+        this.other_reason_text = '';
     }
 
     static generateContent() {
@@ -87,7 +88,12 @@ export class CancelLessonModal extends Modal {
     setupEventListeners() {
         this.sideOptions.forEach(option => {
             option.addEventListener('change', (e) => {
-                this.selectedSide = e.target.value;
+                const selectedValue = e.target.value; // "teacher" или "student"
+                const selectedLabel = e.target.closest('label').querySelector('.text').textContent;
+
+                this.selectedSide = selectedValue;
+                this.cancelled_by = selectedLabel;
+
                 this.updateReasons();
                 this.reasonsSection.style.display = 'block';
                 this.checkFormValidity();
@@ -95,22 +101,20 @@ export class CancelLessonModal extends Modal {
         });
 
         this.reasonSelect.addEventListener('change', (e) => {
-            this.selectedReason = e.target.value;
-            this.otherReasonContainer.style.display = this.selectedReason === 'other' ? 'block' : 'none';
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            this.is_custom_reason = e.target.value === 'other';
+            this.cancel_reason = this.is_custom_reason ? '' : selectedOption.text;
+            this.otherReasonContainer.style.display = this.is_custom_reason ? 'block' : 'none';
             this.checkFormValidity();
         });
 
         this.otherReasonInput.addEventListener('input', (e) => {
-            this.otherReasonText = e.target.value;
-            const count = this.otherReasonText.length;
-            this.currentCharCount.textContent = count;
+            this.other_reason_text = e.target.value;
+            this.cancel_reason = this.other_reason_text;
 
-            // Меняем цвет счётчика если символов недостаточно
-            if (count < 5) {
-                this.charCounter.style.color = 'var(--danger-color)';
-            } else {
-                this.charCounter.style.color = 'var(--success-color)';
-            }
+            const count = this.other_reason_text.length;
+            this.currentCharCount.textContent = count;
+            this.charCounter.style.color = count < 5 ? 'var(--danger-color)' : 'var(--success-color)';
 
             this.checkFormValidity();
         });
@@ -121,14 +125,14 @@ export class CancelLessonModal extends Modal {
                 return;
             }
 
-            const reasonData = {
-                side: this.selectedSide,
-                reason: this.selectedReason,
-                reasonText: this.selectedReason === 'other' ? this.otherReasonText : null
+            const cancelData = {
+                cancelled_by: this.cancelled_by,
+                cancel_reason: this.cancel_reason,
+                is_custom_reason: this.is_custom_reason
             };
 
             if (this.onConfirm) {
-                this.onConfirm(reasonData);
+                this.onConfirm(cancelData);
             }
             this.close();
         });
@@ -174,15 +178,10 @@ export class CancelLessonModal extends Modal {
         this.charCounter.style.color = 'var(--danger-color)';
     }
 
+
     isFormValid() {
-        if (!this.selectedSide || !this.selectedReason) return false;
-
-        // Если выбрана "другая причина", проверяем длину текста
-        if (this.selectedReason === 'other' && this.otherReasonText.length < 5) {
-            return false;
-        }
-
-        return true;
+        if (!this.cancelled_by || !this.cancel_reason) return false;
+        return !(this.is_custom_reason && this.other_reason_text.length < 5);
     }
 
     checkFormValidity() {
