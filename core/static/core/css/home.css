@@ -73,13 +73,24 @@ body {
     height: var(--scrollbar-size);;
 }
 
+textarea::-webkit-scrollbar {
+    width: var(5px);
+    height: var(--scrollbar-size);;
+}
+
 ::-webkit-scrollbar-track {
     background: var(--bg);
+    cursor: pointer;
 }
 
 ::-webkit-scrollbar-thumb {
     background-color: var(--primary-color);
     border-radius: 4px;
+    cursor: grab;
+}
+
+::-webkit-scrollbar-thumb:active {
+    cursor: grabbing;
 }
 
 #custom-context-menu {

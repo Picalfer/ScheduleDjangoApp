@@ -377,6 +377,13 @@ export class LessonModal extends Modal {
             }
         });
 
+        document.querySelectorAll('.form-group textarea').forEach(textarea => {
+            textarea.addEventListener('input', function () {
+                this.style.height = 'auto'; // Сбрасываем высоту
+                this.style.height = Math.min(this.scrollHeight, 200) + 'px'; // Устанавливаем новую высоту (не более 200px)
+            });
+        });
+
         function setupInsertButton(buttonId, textElementId, inputId, errorMessage) {
             const button = document.querySelector(buttonId);
             button.addEventListener('click', function () {
