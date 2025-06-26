@@ -54,3 +54,5 @@ python manage.py graph_models --pydot -a --group-models -o erd_detailed.png
 ```bash
 pip install -r requirements.txt
 ```
+
+test
