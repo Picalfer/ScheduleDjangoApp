@@ -151,8 +151,8 @@ class OpenSlotsAdmin(admin.ModelAdmin):
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
     form = LessonAdminForm
-    list_display = ('date', 'status', 'lesson_type', 'platform', 'teacher', 'time', 'student', 'course')
-    list_filter = ('lesson_type', 'status', 'date')
+    list_display = ('id', 'date', 'status', 'lesson_type', 'platform', 'teacher', 'time', 'student', 'course')
+    list_filter = ('lesson_type', 'status', 'date', 'platform', 'teacher', 'course')
     search_fields = ['student__name']
 
     def get_fields(self, request, obj=None):
