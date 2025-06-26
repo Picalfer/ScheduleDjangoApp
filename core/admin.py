@@ -78,46 +78,48 @@ class BalanceOperationInline(TabularInlinePaginated):
     fields = ('operation_type', 'amount', 'date', 'notes', 'balance_before', 'balance_after')
 
 
-@admin.register(Client)
-class ClientAdmin(SafeDeleteAdmin):
-    list_display = ('name', 'balance', 'email', 'display_phones',)
+class ClientAdminMixin:
+    list_display = ('name', 'students', 'teachers', 'balance', 'email', 'primary_phone')
     readonly_fields = ('balance',)
     search_fields = ('name', 'email', 'phone_numbers__number')
     inlines = [PhoneNumberInline, StudentInline, BalanceOperationInline]
 
     def get_queryset(self, request):
-        # Только неудалённые
-        return Client.objects.all()
+        return Client.objects.prefetch_related('students__teacher').all()
 
-    def display_phones(self, obj):
-        phones = obj.phone_numbers.all()
-        return ", ".join(str(phone) for phone in phones)
+    def students(self, obj):
+        students = obj.students.all()
+        return ", ".join(str(student.name) for student in students)
 
-    display_phones.short_description = 'Телефоны'
+    students.short_description = 'Ученики'
+
+    def teachers(self, obj):
+        students = obj.students.all()
+        teachers = {str(student.teacher) for student in students if student.teacher}
+        return ", ".join(teachers)
+
+    teachers.short_description = 'Учителя'
+
+
+@admin.register(Client)
+class ClientAdmin(ClientAdminMixin, SafeDeleteAdmin):
+    pass
 
 
 @admin.register(DeletedClient)
-class DeletedClientAdmin(SafeDeleteAdmin):
-    list_display = ('name', 'balance', 'email', 'display_phones', 'deleted')
+class DeletedClientAdmin(ClientAdminMixin, SafeDeleteAdmin):
+    list_display = ('name', 'students', 'teachers', 'balance', 'email', 'primary_phone', 'deleted')
     readonly_fields = ('balance', 'deleted')
-    search_fields = ('name', 'email', 'phone_numbers__number')
-    inlines = [PhoneNumberInline, StudentInline, BalanceOperationInline]
     actions = ['undelete_selected']
 
     def get_queryset(self, request):
-        # Только удалённые
-        return Client.deleted_objects.all()
-
-    def display_phones(self, obj):
-        phones = obj.phone_numbers.all()
-        return ", ".join(str(phone) for phone in phones)
-
-    display_phones.short_description = 'Телефоны'
+        # Только удалённые объекты
+        return Client.deleted_objects.prefetch_related('students__teacher').all()
 
     def undelete_selected(self, request, queryset):
         for obj in queryset:
             obj.undelete()
-        self.message_user(request, "Выбранные клиенты восстановлены.")
+        self.message_user(request, "Выбранные клиенты восстановены.")
 
     undelete_selected.short_description = "Восстановить выбранных"
 

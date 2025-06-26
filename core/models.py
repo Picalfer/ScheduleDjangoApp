@@ -75,6 +75,8 @@ class Client(SafeDeleteModel):
         except Exception:
             return None
 
+    primary_phone.fget.short_description = "Основной телефон"
+
     def add_lessons(self, amount, student, note=''):
         """Пополнение баланса с логированием"""
         if amount <= 0:
