@@ -31,6 +31,9 @@ class Teacher(models.Model):
     def name(self):
         return f"{self.user.first_name} {self.user.last_name}".strip()
 
+    def get_full_name(self):
+        return self.user.get_full_name() or self.user.username
+
     def __str__(self):
         return self.user.get_full_name() or self.user.username
 
@@ -40,7 +43,8 @@ class Teacher(models.Model):
 
 
 class OpenSlots(models.Model):
-    teacher = models.OneToOneField(User, on_delete=models.CASCADE, related_name='open_slots')
+    teacher = models.OneToOneField(Teacher, on_delete=models.CASCADE,
+                                   related_name='open_slots')  # <- Меняем User на Teacher
     weekly_open_slots = models.JSONField(default=dict)
 
     class Meta:
@@ -48,7 +52,7 @@ class OpenSlots(models.Model):
         verbose_name_plural = 'Открытые часы'
 
     def __str__(self):
-        return f"Open slots for {self.teacher.username}"
+        return f"Open slots for {self.teacher.name}"
 
 
 class Client(SafeDeleteModel):
