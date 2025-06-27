@@ -1,3 +1,4 @@
+import os
 import re
 
 from django.db import models
@@ -66,10 +67,54 @@ class Guide(models.Model):
     assets = models.FileField("Ресурсы (zip)", upload_to=guide_upload_path, null=True, blank=True)
     order = models.PositiveIntegerField("Порядок", default=0)
 
+    def unpack_assets(self):
+        """Распаковывает архив с ресурсами и удаляет его"""
+        import zipfile
+        import os
+
+        if not self.assets:
+            return
+
+        target_dir = os.path.dirname(self.html_file.path) if self.html_file else os.path.dirname(self.assets.path)
+
+        try:
+            # Распаковываем архив
+            with zipfile.ZipFile(self.assets.path, 'r') as zip_ref:
+                zip_ref.extractall(target_dir)
+            print(f"Архив успешно распакован в {target_dir}")
+
+            # Удаляем ZIP-архив после распаковки
+            os.remove(self.assets.path)
+            print(f"Архив {self.assets.path} удалён")
+
+            # Обновляем поле assets в модели (очищаем)
+            self.assets = None
+            self.save(update_fields=['assets'])
+
+        except Exception as e:
+            print(f"Ошибка: {e}")
+
+    def assets_url(self):
+        """Возвращает URL папки с ресурсами"""
+        if self.html_file:
+            return os.path.dirname(self.html_file.url) + '/'
+        return ''
+
     def save(self, *args, **kwargs):
+        # Получаем старую версию объекта (если есть)
+        old_assets = None
+        if self.pk:
+            old_guide = Guide.objects.get(pk=self.pk)
+            old_assets = old_guide.assets
+
         super().save(*args, **kwargs)
-        if self.html_file:  # Если загружен HTML-файл
+
+        if self.html_file:
             self.clean_google_redirects()
+
+        # Распаковываем архив, если он есть и изменился
+        if self.assets and self.assets != old_assets:
+            self.unpack_assets()  # <- Это вызов новой функции
 
     def clean_google_redirects(self):
         """Удаляет google-редиректы из ссылок в HTML."""
@@ -84,11 +129,6 @@ class Guide(models.Model):
             f.seek(0)
             f.write(cleaned_content)
             f.truncate()
-
-    def assets_url(self):
-        if self.assets:
-            return self.assets.url.replace('.zip', '')
-        return ''
 
     class Meta:
         ordering = ['order']
