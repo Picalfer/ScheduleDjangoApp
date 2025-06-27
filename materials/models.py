@@ -1,11 +1,37 @@
 import re
 
 from django.db import models
+from django.utils.text import slugify
+from transliterate import translit
+
+
+def transliterate_slug(text):
+    """Транслитерирует текст и создает slug"""
+    try:
+        transliterated = translit(text, 'ru', reversed=True)
+    except:
+        transliterated = text
+    return slugify(transliterated)
+
+
+def guide_upload_path(instance, filename):
+    # Формируем путь: courses/{course_slug}/levels/{level_slug}/{guide_slug}/{filename}
+    course_slug = transliterate_slug(instance.level.course.title)
+    level_slug = transliterate_slug(instance.level.title)
+    guide_slug = transliterate_slug(instance.title)
+    return f'courses/{course_slug}/levels/{level_slug}/{guide_slug}/{filename}'
+
+
+def course_cover_upload_path(instance, filename):
+    # Формируем путь: courses/{course_slug}/cover.{расширение_файла}
+    course_slug = transliterate_slug(instance.title)
+    ext = filename.split('.')[-1]
+    return f'courses/{course_slug}/cover.{ext}'
 
 
 class Course(models.Model):
     title = models.CharField("Название курса", max_length=200)
-    cover = models.FileField("Обложка", upload_to="courses/covers/", blank=True)
+    cover = models.FileField("Обложка", upload_to=course_cover_upload_path, blank=True)
     description = models.TextField("Описание", blank=True)
 
     def __str__(self):
@@ -36,8 +62,8 @@ class Level(models.Model):
 class Guide(models.Model):
     level = models.ForeignKey(Level, on_delete=models.CASCADE, related_name='guides')
     title = models.CharField("Название", max_length=200)
-    html_file = models.FileField("HTML файл", upload_to="guides/html/", null=True, blank=True)
-    assets = models.FileField("Ресурсы (zip)", upload_to="guides/assets/", null=True, blank=True)
+    html_file = models.FileField("HTML файл", upload_to=guide_upload_path, null=True, blank=True)
+    assets = models.FileField("Ресурсы (zip)", upload_to=guide_upload_path, null=True, blank=True)
     order = models.PositiveIntegerField("Порядок", default=0)
 
     def save(self, *args, **kwargs):
