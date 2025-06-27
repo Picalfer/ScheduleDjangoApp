@@ -138,3 +138,26 @@ class Guide(models.Model):
 
     def __str__(self):
         return self.title
+
+    def delete(self, *args, **kwargs):
+        """Удаляет всю папку методички при удалении объекта"""
+        import shutil
+
+        # Получаем путь к папке методички
+        if self.html_file:
+            guide_dir = os.path.dirname(self.html_file.path)
+        elif self.assets:
+            guide_dir = os.path.dirname(self.assets.path)
+        else:
+            guide_dir = None
+
+        # Сначала вызываем стандартное удаление
+        super().delete(*args, **kwargs)
+
+        # Затем удаляем папку (если она существует)
+        if guide_dir and os.path.exists(guide_dir):
+            try:
+                shutil.rmtree(guide_dir)
+                print(f"Папка методички удалена: {guide_dir}")
+            except Exception as e:
+                print(f"Ошибка при удалении папки: {e}")
