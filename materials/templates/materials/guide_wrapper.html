@@ -2,12 +2,13 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <title>{{ guide.title }}</title>
+    <title>{{ guide.title }} | {{ guide.level.course.title }}</title>
     {% if guide.level.course.cover %}
         <link rel="icon" href="{{ guide.level.course.cover.url }}" type="image/png">
     {% endif %}
     <link rel="stylesheet" href="{% static 'materials/css/guide_styles.css' %}">
     <base href="{{ guide.assets_url }}" target="_blank">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 {% autoescape off %}
