@@ -114,18 +114,19 @@ class Guide(models.Model):
 
         # Распаковываем архив, если он есть и изменился
         if self.assets and self.assets != old_assets:
-            self.unpack_assets()  # <- Это вызов новой функции
+            self.unpack_assets()
 
     def clean_google_redirects(self):
         """Удаляет google-редиректы из ссылок в HTML."""
         with open(self.html_file.path, 'r+', encoding='utf-8') as f:
             content = f.read()
-            # Регулярка для поиска google-редиректов
+
             cleaned_content = re.sub(
                 r'https?://www\.google\.com/url\?q=([^&]+)&[^"]+',
-                lambda m: m.group(1),  # Оставляем только оригинальный URL
+                lambda m: m.group(1),
                 content
             )
+
             f.seek(0)
             f.write(cleaned_content)
             f.truncate()
