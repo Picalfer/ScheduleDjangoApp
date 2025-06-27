@@ -34,6 +34,7 @@ class Course(models.Model):
     title = models.CharField("Название курса", max_length=200)
     cover = models.FileField("Обложка", upload_to=course_cover_upload_path, blank=True)
     description = models.TextField("Описание", blank=True)
+    folder_slug = models.SlugField(max_length=200, blank=True, editable=False)
 
     def __str__(self):
         return self.title
@@ -41,6 +42,12 @@ class Course(models.Model):
     class Meta:
         verbose_name = 'Курс'
         verbose_name_plural = 'Курсы'
+
+    def save(self, *args, **kwargs):
+        # Генерируем slug папки только при первом создании курса
+        if not self.folder_slug:
+            self.folder_slug = transliterate_slug(self.title)
+        super().save(*args, **kwargs)
 
 
 class Level(models.Model):
