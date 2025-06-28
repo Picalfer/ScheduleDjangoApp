@@ -7,7 +7,7 @@ from transliterate import translit
 
 
 def transliterate_slug(text):
-    """Транслитерирует текст и создает slug"""
+    """Транслитерирует текст и создает slug (для папок, путей)"""
     try:
         transliterated = translit(text, 'ru', reversed=True)
     except:
@@ -70,8 +70,8 @@ class Level(models.Model):
 class Guide(models.Model):
     level = models.ForeignKey(Level, on_delete=models.CASCADE, related_name='guides')
     title = models.CharField("Название", max_length=200)
-    html_file = models.FileField("HTML файл", upload_to=guide_upload_path, null=True, blank=True)
-    assets = models.FileField("Ресурсы (zip)", upload_to=guide_upload_path, null=True, blank=True)
+    html_file = models.FileField("HTML файл", upload_to=guide_upload_path, max_length=255, null=True, blank=True)
+    assets = models.FileField("Ресурсы (zip)", upload_to=guide_upload_path, max_length=255, null=True, blank=True)
     order = models.PositiveIntegerField("Порядок", default=0)
 
     def unpack_assets(self):

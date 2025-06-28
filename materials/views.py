@@ -1,6 +1,12 @@
 from django.shortcuts import get_object_or_404, render
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from transliterate import translit
 
-from .models import Course, Level, Guide
+from materials.models import Guide, Level
+from .models import Course
 
 
 def hub(request):
@@ -45,3 +51,56 @@ def view_guide(request, guide_id):
         'guide': guide,
         'assets_url': guide.assets_url()
     })
+
+
+class GuideUploadAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Получаем данные из запроса
+        level_id = request.data.get('level_id')
+        title = request.data.get('title')
+        html_file = request.FILES.get('html_file')
+        assets_zip = request.FILES.get('assets_zip')
+        order = request.data.get('order', 0)
+
+        from rest_framework.exceptions import ValidationError
+
+        if not level_id:
+            raise ValidationError('level_id is required')
+
+        try:
+            level = Level.objects.get(pk=level_id)
+
+            # Создаём методичку
+            guide = Guide.objects.create(
+                level=level,
+                title=title,
+                order=order
+            )
+
+            # Сохраняем файлы
+            if html_file:
+                try:
+                    transliterated = translit(html_file.name, 'ru', reversed=True)
+                except:
+                    transliterated = html_file.name
+
+                guide.html_file.save(transliterated, html_file)
+
+            if assets_zip:
+                guide.assets.save(assets_zip.name, assets_zip)
+
+            return Response({
+                'status': 'success',
+                'guide_id': guide.id,
+                'html_path': guide.html_file.url if guide.html_file else None,
+                'assets_path': guide.assets.url if guide.assets else None
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            print(e)
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
