@@ -50,3 +50,7 @@ class GuideAdmin(admin.ModelAdmin):
         return obj.level.course
 
     course.short_description = 'Курс'
+
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.delete()
