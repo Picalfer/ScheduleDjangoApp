@@ -83,14 +83,13 @@ class Guide(models.Model):
             return
 
         target_dir = os.path.dirname(self.html_file.path) if self.html_file else os.path.dirname(self.assets.path)
+        self._cached_assets_path = target_dir  # 💡 сохраняем для delete
 
         try:
-            # Распаковываем архив
             with zipfile.ZipFile(self.assets.path, 'r') as zip_ref:
                 zip_ref.extractall(target_dir)
             print(f"Архив успешно распакован в {target_dir}")
 
-            # Удаляем ZIP-архив после распаковки
             os.remove(self.assets.path)
             print(f"Архив {self.assets.path} удалён")
 
@@ -147,24 +146,24 @@ class Guide(models.Model):
         return self.title
 
     def delete(self, *args, **kwargs):
-        """Удаляет всю папку методички при удалении объекта"""
         import shutil
 
-        # Получаем путь к папке методички
+        # Получаем путь к папке
+        guide_dir = None
         if self.html_file:
             guide_dir = os.path.dirname(self.html_file.path)
         elif self.assets:
             guide_dir = os.path.dirname(self.assets.path)
-        else:
-            guide_dir = None
+        elif hasattr(self, '_cached_assets_path'):
+            guide_dir = self._cached_assets_path
 
-        # Сначала вызываем стандартное удаление
+        print(f"[DELETE] Удаляется: {self.title}, путь: {guide_dir}")
+
         super().delete(*args, **kwargs)
 
-        # Затем удаляем папку (если она существует)
         if guide_dir and os.path.exists(guide_dir):
             try:
                 shutil.rmtree(guide_dir)
-                print(f"Папка методички удалена: {guide_dir}")
+                print(f"[DELETE] Папка методички удалена: {guide_dir}")
             except Exception as e:
-                print(f"Ошибка при удалении папки: {e}")
+                print(f"[DELETE] Ошибка при удалении папки: {e}")
