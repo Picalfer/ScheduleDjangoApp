@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404, render
 from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -51,6 +52,27 @@ def view_guide(request, guide_id):
         'guide': guide,
         'assets_url': guide.assets_url()
     })
+
+
+@api_view(['GET'])
+def courses_with_levels(request):
+    data = []
+
+    for course in Course.objects.prefetch_related('levels').all():
+        data.append({
+            'course_id': course.id,
+            'course_title': course.title,
+            'levels': [
+                {
+                    'level_id': level.id,
+                    'level_title': level.title,
+                    'level_description': level.description,
+                    'order': level.order
+                } for level in course.levels.all()
+            ]
+        })
+
+    return Response({'courses': data})
 
 
 class GuideUploadAPI(APIView):
