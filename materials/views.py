@@ -75,6 +75,28 @@ def courses_with_levels(request):
     return Response({'courses': data})
 
 
+@api_view(['GET'])
+def level_guides(request, level_id):
+    try:
+        level = Level.objects.get(pk=level_id)
+        guides = level.guides.all().order_by('order')
+
+        data = {
+            'level_title': level.title,
+            'guides': [
+                {
+                    'id': guide.id,
+                    'title': guide.title,
+                    'order': guide.order
+                } for guide in guides
+            ]
+        }
+
+        return Response(data)
+    except Level.DoesNotExist:
+        return Response({'error': 'Level not found'}, status=404)
+
+
 class GuideUploadAPI(APIView):
     permission_classes = [IsAuthenticated]
 
