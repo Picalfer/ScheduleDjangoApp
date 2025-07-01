@@ -21,15 +21,27 @@ class TeacherPaymentInline(admin.TabularInline):  # или admin.StackedInline
         return False  # Запрещаем добавлять выплаты через inline
 
 
+class OpenSlotsInline(admin.StackedInline):  # Или TabularInline для компактного вида
+    model = OpenSlots
+    extra = 0  # Не показывать пустые формы для новых слотов
+    max_num = 1  # Максимум 1 объект на преподавателя
+    fields = ('weekly_open_slots',)
+    can_delete = True  # Разрешить удаление слотов
+
+    def has_add_permission(self, request, obj=None):
+        # Запретить создание новых слотов (только через редактирование)
+        return False
+
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
-    inlines = [TeacherPaymentInline]
-    list_display = ('id', 'get_full_name', 'user', 'zoom_link', 'google_meet_link')
+    inlines = [TeacherPaymentInline, OpenSlotsInline]  # Добавили OpenSlotsInline
+    list_display = ('id', 'get_full_name', 'user', 'zoom_link', 'has_open_slots')
 
-    def get_full_name(self, obj):
-        return obj.user.get_full_name()
+    def has_open_slots(self, obj):
+        return bool(obj.open_slots)  # Показывает, есть ли у преподавателя слоты
 
-    get_full_name.short_description = 'ФИО'
+    has_open_slots.boolean = True
+    has_open_slots.short_description = 'Есть слоты?'
 
 
 @admin.register(TeacherPayment)
