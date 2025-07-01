@@ -32,16 +32,11 @@ class OpenSlotsInline(admin.StackedInline):  # Или TabularInline для ко�
         # Запретить создание новых слотов (только через редактирование)
         return False
 
+
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
     inlines = [TeacherPaymentInline, OpenSlotsInline]  # Добавили OpenSlotsInline
-    list_display = ('id', 'get_full_name', 'user', 'zoom_link', 'has_open_slots')
-
-    def has_open_slots(self, obj):
-        return bool(obj.open_slots)  # Показывает, есть ли у преподавателя слоты
-
-    has_open_slots.boolean = True
-    has_open_slots.short_description = 'Есть слоты?'
+    list_display = ('id', 'get_full_name', 'user', 'zoom_link', 'open_slots__weekly_open_slots')
 
 
 @admin.register(TeacherPayment)
