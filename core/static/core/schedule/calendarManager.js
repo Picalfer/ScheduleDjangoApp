@@ -277,7 +277,7 @@ export class CalendarManager {
             // Объединяем реальные и фейковые уроки
             this.lessonManager.lessons = [...lessons, ...fakeLessons];
 
-            this.openSlots = await repository.getOpenSlots(effectiveUserId);
+            this.openSlots = await repository.getOpenSlots(effectiveTeacherId);
             this.generateTimeSlots();
             this.updateCalendar();
             this.updateScheduleDisplay();

@@ -63,7 +63,7 @@
 }
 
 .previous-theme-hint, .previous-homework-hint, .previous-comment-hint {
-    color: #424242;
+    color: var(--text-secondary);
     font-size: 0.9em;
 }
 

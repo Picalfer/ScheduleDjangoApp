@@ -1,10 +1,13 @@
-import os
-import zipfile
-
-from django.conf import settings
 from django.shortcuts import get_object_or_404, render
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from transliterate import translit
 
-from .models import Course, Level, Guide
+from materials.models import Guide, Level
+from .models import Course
 
 
 def hub(request):
@@ -36,13 +39,6 @@ def level_guides(request, level_id):
 def view_guide(request, guide_id):
     guide = get_object_or_404(Guide, id=guide_id)
 
-    # Базовый URL для ресурсов
-    assets_url = f"{settings.MEDIA_URL}guides/assets/{guide.id}/"
-
-    if guide.assets and not os.path.exists(os.path.join(settings.MEDIA_ROOT, 'guides/assets', str(guide.id))):
-        with zipfile.ZipFile(guide.assets.path, 'r') as zip_ref:
-            zip_ref.extractall(os.path.join(settings.MEDIA_ROOT, 'guides/assets', str(guide.id)))
-
     try:
         with open(guide.html_file.path, 'r', encoding='utf-8') as f:
             html_content = f.read()
@@ -50,14 +46,105 @@ def view_guide(request, guide_id):
         with open(guide.html_file.path, 'r', encoding='cp1251') as f:
             html_content = f.read()
 
-    # Универсальная замена путей
-    # html_content = html_content.replace('src="images/', f'src="{assets_url}images/') \
-    #    .replace('href="style.css', f'href="{assets_url}style.css')
-
-    html_content = html_content.replace('src="images/', f'src="{assets_url}images/')
-
+    # Автоматически подставится правильный путь к ассетам
     return render(request, 'materials/guide_wrapper.html', {
         'content': html_content,
         'guide': guide,
-        'assets_url': assets_url
+        'assets_url': guide.assets_url()
     })
+
+
+@api_view(['GET'])
+def courses_with_levels(request):
+    data = []
+
+    for course in Course.objects.prefetch_related('levels').all():
+        data.append({
+            'course_id': course.id,
+            'course_title': course.title,
+            'levels': [
+                {
+                    'level_id': level.id,
+                    'level_title': level.title,
+                    'level_description': level.description,
+                    'order': level.order
+                } for level in course.levels.all()
+            ]
+        })
+
+    return Response({'courses': data})
+
+
+@api_view(['GET'])
+def level_guides(request, level_id):
+    try:
+        level = Level.objects.get(pk=level_id)
+        guides = level.guides.all().order_by('order')
+
+        data = {
+            'level_title': level.title,
+            'guides': [
+                {
+                    'id': guide.id,
+                    'title': guide.title,
+                    'order': guide.order
+                } for guide in guides
+            ]
+        }
+
+        return Response(data)
+    except Level.DoesNotExist:
+        return Response({'error': 'Level not found'}, status=404)
+
+
+class GuideUploadAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Получаем данные из запроса
+        level_id = request.data.get('level_id')
+        title = request.data.get('title')
+        html_file = request.FILES.get('html_file')
+        assets_zip = request.FILES.get('assets_zip')
+        order = request.data.get('order', 0)
+
+        from rest_framework.exceptions import ValidationError
+
+        if not level_id:
+            raise ValidationError('level_id is required')
+
+        try:
+            level = Level.objects.get(pk=level_id)
+
+            # Создаём методичку
+            guide = Guide.objects.create(
+                level=level,
+                title=title,
+                order=order
+            )
+
+            # Сохраняем файлы
+            if html_file:
+                try:
+                    transliterated = translit(html_file.name, 'ru', reversed=True)
+                except:
+                    transliterated = html_file.name
+
+                guide.html_file.save(transliterated, html_file)
+
+            if assets_zip:
+                guide.assets.save(assets_zip.name, assets_zip)
+
+            return Response({
+                'status': 'success',
+                'guide_id': guide.id,
+                'html_path': guide.html_file.url if guide.html_file else None,
+                'assets_path': guide.assets.url if guide.assets else None
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            print(e)
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)

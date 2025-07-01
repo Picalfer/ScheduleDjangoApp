@@ -1,5 +1,8 @@
 /project_structure.py
 
+/erd.png
+/erd_detailed.png
+
 # Файлы IDE и редакторов
 .idea/
 .vscode/

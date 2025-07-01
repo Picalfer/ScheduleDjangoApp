@@ -62,7 +62,14 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'materials.apps.MaterialsConfig',
     'django_cleanup.apps.CleanupConfig',
+    'safedelete',
+    'phonenumber_field',
 ]
+
+if DEBUG:
+    INSTALLED_APPS += [
+        'django_extensions',
+    ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

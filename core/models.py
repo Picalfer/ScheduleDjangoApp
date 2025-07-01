@@ -5,6 +5,9 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils import timezone
+from phonenumber_field.modelfields import PhoneNumberField
+from safedelete import SOFT_DELETE, DELETED_VISIBLE_BY_PK
+from safedelete.models import SafeDeleteModel
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +31,9 @@ class Teacher(models.Model):
     def name(self):
         return f"{self.user.first_name} {self.user.last_name}".strip()
 
+    def get_full_name(self):
+        return self.user.get_full_name() or self.user.username
+
     def __str__(self):
         return self.user.get_full_name() or self.user.username
 
@@ -37,7 +43,8 @@ class Teacher(models.Model):
 
 
 class OpenSlots(models.Model):
-    teacher = models.OneToOneField(User, on_delete=models.CASCADE, related_name='open_slots')
+    teacher = models.OneToOneField(Teacher, on_delete=models.CASCADE,
+                                   related_name='open_slots')  # <- Меняем User на Teacher
     weekly_open_slots = models.JSONField(default=dict)
 
     class Meta:
@@ -45,10 +52,13 @@ class OpenSlots(models.Model):
         verbose_name_plural = 'Открытые часы'
 
     def __str__(self):
-        return f"Open slots for {self.teacher.username}"
+        return f"Open slots for {self.teacher.name}"
 
 
-class Client(models.Model):
+class Client(SafeDeleteModel):
+    _safedelete_policy = SOFT_DELETE
+    _safedelete_visibility = DELETED_VISIBLE_BY_PK
+
     name = models.CharField(max_length=100, verbose_name='Имя родителя')
     email = models.EmailField(blank=True, verbose_name='Email')
 
@@ -68,6 +78,8 @@ class Client(models.Model):
             return self.phone_numbers.filter(is_primary=True).first() or self.phone_numbers.first()
         except Exception:
             return None
+
+    primary_phone.fget.short_description = "Основной телефон"
 
     def add_lessons(self, amount, student, note=''):
         """Пополнение баланса с логированием"""
@@ -111,6 +123,13 @@ class Client(models.Model):
         ]
 
 
+class DeletedClient(Client):
+    class Meta:
+        proxy = True
+        verbose_name = "Удалённый клиент"
+        verbose_name_plural = "Корзина клиентов"
+
+
 class PhoneNumber(models.Model):
     client = models.ForeignKey(
         'Client',
@@ -118,9 +137,11 @@ class PhoneNumber(models.Model):
         related_name='phone_numbers',
         verbose_name='Клиент'
     )
-    number = models.CharField(
-        max_length=20,
-        verbose_name='Номер телефона'
+    number = PhoneNumberField(
+        verbose_name='Номер телефона',
+        help_text='В международном формате (+79161234567)',
+        region=None,
+        blank=False
     )
     note = models.CharField(
         max_length=100,
@@ -138,7 +159,7 @@ class PhoneNumber(models.Model):
         ordering = ['-is_primary', 'id']
 
     def __str__(self):
-        return f"{self.number} ({self.note})" if self.note else self.number
+        return f"{self.number} ({self.note})" if self.note else str(self.number)
 
 
 class Student(models.Model):
@@ -358,12 +379,21 @@ class Lesson(models.Model):
         null=True,
         verbose_name='Домашнее задание'
     )
-    cancel_reason = models.CharField(
-        max_length=255,
+    cancelled_by = models.CharField(
+        max_length=25,
         blank=True,
         null=True,
-        default=None,
-        verbose_name='Причина отмены урока'
+        choices=[('teacher', 'Преподаватель'), ('student', 'Ученик')],
+        verbose_name='Кто отменил урок'
+    )
+    is_custom_reason = models.BooleanField(
+        default=False,
+        verbose_name='Кастомная причина'
+    )
+    cancel_reason = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name='Текст причины отмены'
     )
     previous_topic = models.CharField(
         max_length=255,
@@ -386,11 +416,6 @@ class Lesson(models.Model):
 
     # Системные поля
     completed_at = models.DateTimeField(
-        blank=True,
-        null=True,
-        verbose_name='Фактическое время проведения'
-    )
-    canceled_at = models.DateTimeField(
         blank=True,
         null=True,
         verbose_name='Фактическое время проведения'

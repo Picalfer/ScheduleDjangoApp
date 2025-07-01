@@ -3,6 +3,7 @@ export class Modal {
         // Параметры по умолчанию
         this.options = {
             title: 'Модальное окно',
+            subTitle: '',
             content: '',
             footer: '',
             closeOnOutsideClick: true,
@@ -46,6 +47,15 @@ export class Modal {
         const title = document.createElement('h3');
         title.textContent = this.options.title;
 
+        let subTitle = null;
+        if (this.options.subTitle) {
+            subTitle = document.createElement('h4');
+            subTitle.textContent = this.options.subTitle;
+            subTitle.className = 'modal-subtitle';
+            // Добавляем специальный класс, когда есть подзаголовок
+            header.classList.add('has-subtitle');
+        }
+
         const closeBtn = document.createElement('span');
         closeBtn.className = 'close';
         closeBtn.innerHTML = '&times;';
@@ -57,7 +67,14 @@ export class Modal {
             elementsContainer.appendChild(element);
         });
 
-        header.append(title, elementsContainer, closeBtn);
+        // Добавляем subTitle только если он был создан
+        const headerElements = [title];
+        if (subTitle) {
+            headerElements.push(subTitle);
+        }
+        headerElements.push(elementsContainer, closeBtn);
+
+        header.append(...headerElements);
         return header;
     }
 

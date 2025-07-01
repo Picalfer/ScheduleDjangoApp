@@ -4,9 +4,11 @@ from django import forms
 from django.contrib import admin
 from django.utils import timezone
 from django_admin_inline_paginator.admin import TabularInlinePaginated
+from safedelete.admin import SafeDeleteAdmin
 
 from core.forms import LessonAdminForm
-from core.models import Teacher, Student, Lesson, OpenSlots, BalanceOperation, Client, PhoneNumber, TeacherPayment
+from core.models import Teacher, Student, Lesson, OpenSlots, BalanceOperation, Client, PhoneNumber, TeacherPayment, \
+    DeletedClient
 
 
 class TeacherPaymentInline(admin.TabularInline):  # или admin.StackedInline
@@ -56,6 +58,8 @@ class PhoneNumberInline(admin.TabularInline):
     model = PhoneNumber
     extra = 0
     fields = ('number', 'note', 'is_primary')
+    search_fields = ['number', 'note']
+    list_filter = ['is_primary']
     verbose_name = 'Номер телефона'
     verbose_name_plural = 'Номера телефонов'
 
@@ -74,18 +78,50 @@ class BalanceOperationInline(TabularInlinePaginated):
     fields = ('operation_type', 'amount', 'date', 'notes', 'balance_before', 'balance_after')
 
 
-@admin.register(Client)
-class ClientAdmin(admin.ModelAdmin):
-    list_display = ('name', 'balance', 'email', 'display_phones')
+class ClientAdminMixin:
+    list_display = ('name', 'students', 'teachers', 'balance', 'email', 'primary_phone')
     readonly_fields = ('balance',)
     search_fields = ('name', 'email', 'phone_numbers__number')
     inlines = [PhoneNumberInline, StudentInline, BalanceOperationInline]
 
-    def display_phones(self, obj):
-        phones = obj.phone_numbers.all()
-        return ", ".join(str(phone) for phone in phones)
+    def get_queryset(self, request):
+        return Client.objects.prefetch_related('students__teacher').all()
 
-    display_phones.short_description = 'Телефоны'
+    def students(self, obj):
+        students = obj.students.all()
+        return ", ".join(str(student.name) for student in students)
+
+    students.short_description = 'Ученики'
+
+    def teachers(self, obj):
+        students = obj.students.all()
+        teachers = {str(student.teacher) for student in students if student.teacher}
+        return ", ".join(teachers)
+
+    teachers.short_description = 'Учителя'
+
+
+@admin.register(Client)
+class ClientAdmin(ClientAdminMixin, SafeDeleteAdmin):
+    pass
+
+
+@admin.register(DeletedClient)
+class DeletedClientAdmin(ClientAdminMixin, SafeDeleteAdmin):
+    list_display = ('name', 'students', 'teachers', 'balance', 'email', 'primary_phone', 'deleted')
+    readonly_fields = ('balance', 'deleted')
+    actions = ['undelete_selected']
+
+    def get_queryset(self, request):
+        # Только удалённые объекты
+        return Client.deleted_objects.prefetch_related('students__teacher').all()
+
+    def undelete_selected(self, request, queryset):
+        for obj in queryset:
+            obj.undelete()
+        self.message_user(request, "Выбранные клиенты восстановены.")
+
+    undelete_selected.short_description = "Восстановить выбранных"
 
 
 @admin.register(Student)
@@ -115,8 +151,8 @@ class OpenSlotsAdmin(admin.ModelAdmin):
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
     form = LessonAdminForm
-    list_display = ('date', 'status', 'lesson_type', 'platform', 'teacher', 'time', 'student', 'course')
-    list_filter = ('lesson_type', 'status', 'date')
+    list_display = ('id', 'date', 'status', 'lesson_type', 'platform', 'teacher', 'time', 'student', 'course')
+    list_filter = ('lesson_type', 'status', 'date', 'platform', 'teacher', 'course')
     search_fields = ['student__name']
 
     def get_fields(self, request, obj=None):

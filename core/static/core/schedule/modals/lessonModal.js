@@ -1,7 +1,7 @@
 import {Modal} from './modal.js';
-import {calendarManager, repository} from "../app.js";
-import * as utils from '../utils.js';
+import {calendarManager, repository, scheduleState} from "../app.js";
 import {showNotification} from '../utils.js';
+import {CancelLessonModal} from "./cancelLessonModal.js";
 
 export class LessonModal extends Modal {
     constructor() {
@@ -112,7 +112,6 @@ export class LessonModal extends Modal {
         `;
     }
 
-    // Остальные методы остаются без изменений
     initElements() {
         this.lessonId = null;
         this.lessonData = null;
@@ -139,25 +138,45 @@ export class LessonModal extends Modal {
         this.previousCommentHint = this.modalElement.querySelector('.previous-comment-hint');
         this.previousCommentText = this.modalElement.querySelector('#previous_comment_text');
 
+        // Элементы для отмененного урока
+        this.cancelReasonGroup = document.createElement('div');
+        this.cancelReasonGroup.className = 'form-group';
+        this.cancelReasonGroup.innerHTML = `
+            <label>По чьей причине отменен урок</label>
+            <input type="text" id="cancelled-by" readonly>
+        `;
+
+        this.cancelDetailsGroup = document.createElement('div');
+        this.cancelDetailsGroup.className = 'form-group';
+        this.cancelDetailsGroup.innerHTML = `
+            <label>Причина отмены урока</label>
+            <input type="text" id="cancel-reason" readonly>
+        `;
+
         const [adminLessonButton, adminClientButton] = this.modalElement.querySelectorAll('.admin-link');
         this.adminLessonButton = adminLessonButton;
         this.adminClientButton = adminClientButton;
     }
 
     open(lessonData) {
-        console.log(lessonData)
-
+        console.log(lessonData);
         this.lessonId = lessonData.id;
         this.lessonData = lessonData;
 
         this.setLessonData(lessonData);
-
         this.setFormState(lessonData);
         super.open();
     }
 
     setLessonData(lessonData) {
-        this.setPreviousData(lessonData)
+        this.setPreviousData(lessonData);
+
+        // Для отмененного урока сначала добавляем элементы в DOM
+        if (lessonData.status.toLowerCase() === 'canceled') {
+            this.setFormState(lessonData); // Добавляем поля для отмененного урока
+        }
+
+        // Затем устанавливаем значения
         if (userData.isAdmin) {
             this.adminLessonButton.href = `/admin/core/lesson/${lessonData.id}/change/`;
             this.adminLessonButton.style.display = 'inline-block';
@@ -169,7 +188,6 @@ export class LessonModal extends Modal {
                 this.adminClientButton.style.display = 'none';
             }
         } else {
-            // Скрываем все кнопки для не-админов
             this.adminLessonButton.style.display = 'none';
             this.adminClientButton.style.display = 'none';
         }
@@ -193,7 +211,6 @@ export class LessonModal extends Modal {
         };
 
         const [emoji, text] = types[lessonData.lesson_type] || ['📅', 'Урок'];
-
         this.lessonTypeElement.innerHTML = `${emoji} ${text}`;
 
         // Тип платформы
@@ -209,11 +226,9 @@ export class LessonModal extends Modal {
         };
 
         const platform = platforms[lessonData.platform];
-
         this.platformIcon.style.backgroundImage = platform.icon;
         this.platformName.textContent = platform.name;
 
-        // Настройка кнопки
         if (lessonData.conference_link) {
             this.conferenceBtn.disabled = false;
             this.conferenceBtn.onclick = () => window.open(lessonData.conference_link, '_blank');
@@ -223,13 +238,88 @@ export class LessonModal extends Modal {
             this.conferenceBtn.classList.add("disabled");
         }
 
-        // Ученик
         this.lessonStudentElement.textContent = `Ученик: ${lessonData.student_name || lessonData.student}`;
 
         // Заполняем поля формы
         this.modalElement.querySelector('#lesson-topic').value = lessonData.lesson_topic || '';
         this.modalElement.querySelector('#lesson-homework').value = lessonData.homework || '';
         this.modalElement.querySelector('#lesson-comment').value = lessonData.lesson_notes || '';
+
+        // Для отмененного урока заполняем дополнительные поля
+        if (lessonData.status.toLowerCase() === 'canceled') {
+            const cancelledByInput = this.modalElement.querySelector('#cancelled-by');
+            const cancelReasonInput = this.modalElement.querySelector('#cancel-reason');
+
+            if (cancelledByInput) {
+                cancelledByInput.value = lessonData.cancelled_by || 'Не указано';
+            }
+            if (cancelReasonInput) {
+                cancelReasonInput.value = lessonData.cancel_reason || 'Не указана';
+            }
+        }
+    }
+
+    setFormState(lessonData) {
+        const status = lessonData.status.toLowerCase();
+        const isCompletedOrCanceled = ['completed', 'canceled'].includes(status);
+        const fields = ['lesson-date', 'lesson-course', 'lesson-topic', 'lesson-homework', 'lesson-comment'];
+
+        // Блокировка полей
+        fields.forEach(id => {
+            const field = this.modalElement.querySelector(`#${id}`);
+            if (field) field.disabled = isCompletedOrCanceled;
+        });
+
+        // Блокировка кнопок
+        this.submitButton.disabled = isCompletedOrCanceled;
+        this.cancelButton.disabled = isCompletedOrCanceled;
+
+        // Добавляем класс типа урока
+        const modalContent = this.modalElement.querySelector('.modal-content');
+        modalContent.classList.remove('permanent', 'one-time', 'completed', 'canceled');
+        modalContent.classList.add(status);
+
+        // Обработка отмененного урока
+        if (status === 'canceled') {
+            // Удаляем стандартные поля (Тема, ДЗ, Комментарий)
+            const topicGroup = this.modalElement.querySelector('#lesson-topic').closest('.form-group');
+            const homeworkGroup = this.modalElement.querySelector('#lesson-homework').closest('.form-group');
+            const commentGroup = this.modalElement.querySelector('#lesson-comment').closest('.form-group');
+
+            // Находим элемент после которого будем вставлять (группа с курсом)
+            const courseGroup = this.modalElement.querySelector('#lesson-course').closest('.form-group');
+
+            // Вставляем новые поля после группы с курсом
+            if (courseGroup.nextSibling) {
+                this.form.insertBefore(this.cancelReasonGroup, courseGroup.nextSibling);
+                this.form.insertBefore(this.cancelDetailsGroup, courseGroup.nextSibling);
+            } else {
+                this.form.appendChild(this.cancelReasonGroup);
+                this.form.appendChild(this.cancelDetailsGroup);
+            }
+
+            // Скрываем стандартные поля (Тема, ДЗ, Комментарий)
+            topicGroup.style.display = 'none';
+            homeworkGroup.style.display = 'none';
+            commentGroup.style.display = 'none';
+        } else {
+            // Показываем стандартные поля
+            const topicGroup = this.modalElement.querySelector('#lesson-topic').closest('.form-group');
+            const homeworkGroup = this.modalElement.querySelector('#lesson-homework').closest('.form-group');
+            const commentGroup = this.modalElement.querySelector('#lesson-comment').closest('.form-group');
+
+            topicGroup.style.display = 'block';
+            homeworkGroup.style.display = 'block';
+            commentGroup.style.display = 'block';
+
+            // Удаляем поля для отмененного урока, если они есть
+            if (this.cancelReasonGroup.parentNode) {
+                this.form.removeChild(this.cancelReasonGroup);
+            }
+            if (this.cancelDetailsGroup.parentNode) {
+                this.form.removeChild(this.cancelDetailsGroup);
+            }
+        }
     }
 
     setPreviousData(lessonData) {
@@ -287,6 +377,13 @@ export class LessonModal extends Modal {
             }
         });
 
+        document.querySelectorAll('.form-group textarea').forEach(textarea => {
+            textarea.addEventListener('input', function () {
+                this.style.height = 'auto'; // Сбрасываем высоту
+                this.style.height = Math.min(this.scrollHeight, 200) + 'px'; // Устанавливаем новую высоту (не более 200px)
+            });
+        });
+
         function setupInsertButton(buttonId, textElementId, inputId, errorMessage) {
             const button = document.querySelector(buttonId);
             button.addEventListener('click', function () {
@@ -327,26 +424,6 @@ export class LessonModal extends Modal {
         );
     }
 
-    setFormState(lessonData) {
-        const isCompletedOrCanceled = ['completed', 'canceled'].includes(lessonData.status.toLowerCase());
-        const fields = ['lesson-date', 'lesson-course', 'lesson-topic', 'lesson-homework', 'lesson-comment'];
-
-        // Блокировка полей
-        fields.forEach(id => {
-            const field = this.modalElement.querySelector(`#${id}`);
-            if (field) field.disabled = isCompletedOrCanceled;
-        });
-
-        // Блокировка кнопок
-        this.submitButton.disabled = isCompletedOrCanceled;
-        this.cancelButton.disabled = isCompletedOrCanceled;
-
-        // Добавляем класс типа урока
-        const modalContent = this.modalElement.querySelector('.modal-content');
-        modalContent.classList.remove('permanent', 'one-time', 'completed', 'canceled');
-        modalContent.classList.add(lessonData.status.toLowerCase());
-    }
-
     async admitLesson() {
         const getValue = (id) => {
             const val = this.modalElement.querySelector(`#${id}`).value.trim();
@@ -383,7 +460,7 @@ export class LessonModal extends Modal {
                 );
             }
 
-            calendarManager.loadSchedule();
+            calendarManager.loadSchedule(scheduleState.teacherId, scheduleState.userId);
             this.close();
         } catch (error) {
             console.error("Ошибка при проведении урока:", error);
@@ -395,29 +472,55 @@ export class LessonModal extends Modal {
     }
 
     cancelLesson() {
-        utils.showConfirmationModal({
-            text: "Введите причину отмены:",
-            inputConfig: {
-                type: 'textarea',
-                placeholder: 'Минимум 5 символов',
-                required: true
-            },
-            onConfirm: async (reason) => {
+        const modal = new CancelLessonModal({
+            onConfirm: async ({cancelled_by, cancel_reason, is_custom_reason}) => {
+                const cancelData = {
+                    cancelled_by,
+                    cancel_reason,
+                    is_custom_reason
+                };
+
+                console.log('Отмена урока:', {
+                    lessonId: this.lessonId,
+                    ...cancelData,
+                    timestamp: new Date().toISOString()
+                });
+
                 try {
-                    await repository.cancelLesson(this.lessonId, reason);
+                    await repository.cancelLesson(this.lessonId, cancelData);
                     showNotification(`Урок отменен!`, "success");
-                    calendarManager.loadSchedule();
+                    calendarManager.loadSchedule(scheduleState.teacherId, scheduleState.userId);
                     this.close();
                 } catch (error) {
-                    console.error("Ошибка при отмене урока:", error);
+                    console.error("Ошибка при отмене урока:", {
+                        errorDetails: error,
+                        requestData: cancelData,
+                        timestamp: new Date().toISOString()
+                    });
+
                     showNotification(
                         error.message || "Произошла ошибка при отмене урока",
                         "error"
                     );
                 }
+            },
+            onCancel: () => {
+                console.log('Пользователь отменил выбор причины отмены урока', {
+                    lessonId: this.lessonId,
+                    timestamp: new Date().toISOString()
+                });
             }
         });
+
+        modal.open();
+
+        console.log('Открыто окно отмены урока для:', {
+            lessonId: this.lessonId,
+            lessonData: this.lessonData,
+            timestamp: new Date().toISOString()
+        });
     }
+
 
     validateForm() {
         let isValid = true;
