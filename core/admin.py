@@ -24,7 +24,7 @@ class TeacherPaymentInline(admin.TabularInline):  # или admin.StackedInline
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
     inlines = [TeacherPaymentInline]
-    list_display = ('id', 'get_full_name', 'user', 'zoom_link', 'google_meet_link')
+    list_display = ('id', 'get_full_name', 'user', 'zoom_link', 'google_meet_link', 'open_slots__weekly_open_slots')
 
     def get_full_name(self, obj):
         return obj.user.get_full_name()
