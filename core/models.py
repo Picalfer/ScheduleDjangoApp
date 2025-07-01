@@ -380,7 +380,7 @@ class Lesson(models.Model):
         verbose_name='Домашнее задание'
     )
     cancelled_by = models.CharField(
-        max_length=10,
+        max_length=25,
         blank=True,
         null=True,
         choices=[('teacher', 'Преподаватель'), ('student', 'Ученик')],
