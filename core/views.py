@@ -695,7 +695,7 @@ def calculate_workload_stats():
 
     for teacher in teachers:
         try:
-            open_slots = OpenSlots.objects.get(teacher=teacher.user).weekly_open_slots
+            open_slots = OpenSlots.objects.get(teacher=teacher).weekly_open_slots
             # Считаем количество доступных слотов
             available_slots = sum(len(slots) for day, slots in open_slots.items() if slots)
 
