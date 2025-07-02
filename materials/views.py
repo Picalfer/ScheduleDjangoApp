@@ -1,15 +1,3 @@
-from django.shortcuts import get_object_or_404, render
-from rest_framework import status
-from rest_framework.decorators import api_view
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from transliterate import translit
-
-from materials.models import Guide, Level
-from .models import Course
-
-
 def hub(request):
     courses = Course.objects.all()
     return render(request, "materials/hub.html", {"courses": courses})
@@ -54,10 +42,14 @@ def view_guide(request, guide_id):
     })
 
 
-@api_view(['GET'])
+from django.views.decorators.http import require_GET
+
+from materials.models import Course
+
+
+@require_GET
 def courses_with_levels(request):
     data = []
-
     for course in Course.objects.prefetch_related('levels').all():
         data.append({
             'course_id': course.id,
@@ -71,16 +63,15 @@ def courses_with_levels(request):
                 } for level in course.levels.all()
             ]
         })
+    return JsonResponse({'courses': data}, safe=False)
 
-    return Response({'courses': data})
 
-
-@api_view(['GET'])
-def level_guides(request, level_id):
+# Для API (возвращает JSON)
+@require_GET
+def api_level_guides(request, level_id):
     try:
         level = Level.objects.get(pk=level_id)
         guides = level.guides.all().order_by('order')
-
         data = {
             'level_title': level.title,
             'guides': [
@@ -91,10 +82,33 @@ def level_guides(request, level_id):
                 } for guide in guides
             ]
         }
-
-        return Response(data)
+        return JsonResponse(data)
     except Level.DoesNotExist:
-        return Response({'error': 'Level not found'}, status=404)
+        return JsonResponse({'error': 'Level not found'}, status=404)
+
+
+# Для HTML-отображения
+def level_guides(request, level_id):
+    level = get_object_or_404(Level, id=level_id)
+    guides = level.guides.all().order_by('order')
+
+    return render(request, 'materials/level_guides.html', {
+        'level': level,
+        'guides': guides,
+        'course': level.course
+    })
+
+
+from django.shortcuts import get_object_or_404, render
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from transliterate import translit
+
+from materials.models import Level, Guide
+
+from django.http import JsonResponse
 
 
 class GuideUploadAPI(APIView):

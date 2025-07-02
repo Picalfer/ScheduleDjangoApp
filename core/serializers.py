@@ -64,7 +64,7 @@ class LessonSerializer(serializers.ModelSerializer):
 
 
 class TeacherSerializer(serializers.ModelSerializer):
-    user_email = serializers.CharField(source='user.email', read_only=True)  # если нужно email
+    user_email = serializers.CharField(source='user.email', read_only=True)
 
     class Meta:
         model = Teacher
