@@ -100,70 +100,74 @@ def level_guides(request, level_id):
 
 
 from django.shortcuts import get_object_or_404, render
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from transliterate import translit
 
-from materials.models import Level, Guide
-
+from django.contrib.auth import authenticate
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from materials.models import Level, Guide
+from transliterate import translit
+import base64
 
 
-class GuideUploadAPI(APIView):
-    permission_classes = [IsAuthenticated]
+@csrf_exempt  # Отключаем CSRF (иначе будет 403)
+@require_POST
+def upload_guide(request):
+    # --- Авторизация ---
+    auth_header = request.META.get('HTTP_AUTHORIZATION')
 
-    def post(self, request):
+    if not auth_header or not auth_header.startswith('Basic '):
+        return JsonResponse({'error': 'Authentication required'}, status=403)
 
-        print("User:", request.user)
-        print("Is authenticated:", request.user.is_authenticated)
-        print("Headers:", request.headers)
+    try:
+        encoded = auth_header.split(' ')[1]
+        decoded = base64.b64decode(encoded).decode('utf-8')
+        username, password = decoded.split(':', 1)
+    except Exception as e:
+        return JsonResponse({'error': 'Invalid authentication format'}, status=403)
 
-        # Получаем данные из запроса
-        level_id = request.data.get('level_id')
-        title = request.data.get('title')
-        html_file = request.FILES.get('html_file')
-        assets_zip = request.FILES.get('assets_zip')
-        order = request.data.get('order', 0)
+    user = authenticate(username=username, password=password)
 
-        from rest_framework.exceptions import ValidationError
+    if not user:
+        return JsonResponse({'error': 'Invalid credentials'}, status=403)
 
-        if not level_id:
-            raise ValidationError('level_id is required')
+    # --- Данные запроса ---
+    level_id = request.POST.get('level_id')
+    title = request.POST.get('title')
+    html_file = request.FILES.get('html_file')
+    assets_zip = request.FILES.get('assets_zip')
+    order = request.POST.get('order', 0)
 
-        try:
-            level = Level.objects.get(pk=level_id)
+    if not level_id:
+        return JsonResponse({'error': 'level_id is required'}, status=400)
 
-            # Создаём методичку
-            guide = Guide.objects.create(
-                level=level,
-                title=title,
-                order=order
-            )
+    try:
+        level = Level.objects.get(pk=level_id)
 
-            # Сохраняем файлы
-            if html_file:
-                try:
-                    transliterated = translit(html_file.name, 'ru', reversed=True)
-                except:
-                    transliterated = html_file.name
+        guide = Guide.objects.create(
+            level=level,
+            title=title,
+            order=order
+        )
 
-                guide.html_file.save(transliterated, html_file)
+        if html_file:
+            try:
+                transliterated = translit(html_file.name, 'ru', reversed=True)
+            except:
+                transliterated = html_file.name
 
-            if assets_zip:
-                guide.assets.save(assets_zip.name, assets_zip)
+            guide.html_file.save(transliterated, html_file)
 
-            return Response({
-                'status': 'success',
-                'guide_id': guide.id,
-                'html_path': guide.html_file.url if guide.html_file else None,
-                'assets_path': guide.assets.url if guide.assets else None
-            }, status=status.HTTP_201_CREATED)
+        if assets_zip:
+            guide.assets.save(assets_zip.name, assets_zip)
 
-        except Exception as e:
-            print(e)
-            return Response({
-                'status': 'error',
-                'message': str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({
+            'status': 'success',
+            'guide_id': guide.id,
+            'html_path': guide.html_file.url if guide.html_file else None,
+            'assets_path': guide.assets.url if guide.assets else None
+        }, status=201)
+
+    except Exception as e:
+        print("Ошибка загрузки методички:", e)
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
