@@ -12,7 +12,7 @@ urlpatterns = [
     # API-версии
     path('api/level-guides/<int:level_id>/', views.api_level_guides, name='api_level_guides'),
     path('api/courses-with-levels/', views.courses_with_levels, name='courses-with-levels'),
-    path('api/upload-guide/', views.GuideUploadAPI.as_view(), name='upload-guide'),
+    path('api/upload-guide/', views.upload_guide, name='upload-guide'),
 
     # Остальные пути
     path('guide/<int:guide_id>/', views.view_guide, name='view_guide'),
