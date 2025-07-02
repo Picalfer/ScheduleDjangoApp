@@ -44,7 +44,7 @@ class Teacher(models.Model):
 
 class OpenSlots(models.Model):
     teacher = models.OneToOneField(Teacher, on_delete=models.CASCADE,
-                                   related_name='open_slots')
+                                   related_name='open_slots', null=True, blank=True)
     weekly_open_slots = models.JSONField(default=dict)
 
     class Meta:
