@@ -115,6 +115,11 @@ class GuideUploadAPI(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+
+        print("User:", request.user)
+        print("Is authenticated:", request.user.is_authenticated)
+        print("Headers:", request.headers)
+
         # Получаем данные из запроса
         level_id = request.data.get('level_id')
         title = request.data.get('title')
