@@ -101,19 +101,62 @@ def level_guides(request, level_id):
 
 from django.shortcuts import get_object_or_404, render
 
-from django.contrib.auth import authenticate
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.http import JsonResponse
 from materials.models import Level, Guide
 from transliterate import translit
-import base64
 
 
-@csrf_exempt  # Отключаем CSRF (иначе будет 403)
+@csrf_exempt
 @require_POST
 def upload_guide(request):
-    # --- Авторизация ---
+    # !!! Временно без авторизации
+
+    level_id = request.POST.get('level_id')
+    title = request.POST.get('title')
+    html_file = request.FILES.get('html_file')
+    assets_zip = request.FILES.get('assets_zip')
+    order = request.POST.get('order', 0)
+
+    if not level_id:
+        return JsonResponse({'error': 'level_id is required'}, status=400)
+
+    try:
+        level = Level.objects.get(pk=level_id)
+
+        guide = Guide.objects.create(
+            level=level,
+            title=title,
+            order=order
+        )
+
+        if html_file:
+            try:
+                transliterated = translit(html_file.name, 'ru', reversed=True)
+            except:
+                transliterated = html_file.name
+            guide.html_file.save(transliterated, html_file)
+
+        if assets_zip:
+            guide.assets.save(assets_zip.name, assets_zip)
+
+        return JsonResponse({
+            'status': 'success',
+            'guide_id': guide.id,
+            'html_path': guide.html_file.url if guide.html_file else None,
+            'assets_path': guide.assets.url if guide.assets else None
+        }, status=201)
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+
+"""
+@csrf_exempt
+@require_POST
+def upload_guide(request):
+    print("=== ВХОД В upload_guide ===")
     auth_header = request.META.get('HTTP_AUTHORIZATION')
 
     if not auth_header or not auth_header.startswith('Basic '):
@@ -170,4 +213,4 @@ def upload_guide(request):
 
     except Exception as e:
         print("Ошибка загрузки методички:", e)
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)"""
