@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'rest_framework',
     'django_admin_inline_paginator',
     'django.contrib.sessions',
     'django.contrib.messages',
