@@ -1,7 +1,8 @@
 from django.shortcuts import get_object_or_404, render
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from transliterate import translit
@@ -55,6 +56,7 @@ def view_guide(request, guide_id):
 
 
 @api_view(['GET'])
+@renderer_classes([JSONRenderer])
 def courses_with_levels(request):
     data = []
 
@@ -76,6 +78,7 @@ def courses_with_levels(request):
 
 
 @api_view(['GET'])
+@renderer_classes([JSONRenderer])
 def level_guides(request, level_id):
     try:
         level = Level.objects.get(pk=level_id)
