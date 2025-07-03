@@ -563,7 +563,7 @@ def low_balance_clients(request):
                 'id': client.id,
                 'name': client.name,
                 'balance': client.balance,
-                'phone': primary_phone.number if primary_phone else None,
+                'phone': str(primary_phone.number) if primary_phone else None,
                 'phone_note': primary_phone.note if primary_phone else None,
                 'children': children_data
             })
