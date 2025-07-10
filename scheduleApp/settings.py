@@ -42,6 +42,7 @@ ALLOWED_HOSTS = [
     '45.88.90.91',
     'localhost',  # Для локального тестирования (если нужно)
     '127.0.0.1',  # Для дебага
+    'test.schedule.kodamaclass.com'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
