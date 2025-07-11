@@ -135,3 +135,27 @@ document.addEventListener('keydown', function (event) {
         alert('Сохранение страницы запрещено.');
     }
 });*/
+document.addEventListener('DOMContentLoaded', function () {
+    // Находим все ссылки в основном контенте
+    const links = document.querySelectorAll('.guide-content a');
+    const navContainer = document.querySelector('.guide-nav');
+
+    // Очищаем существующие примеры
+    navContainer.innerHTML = '';
+
+    // Добавляем реальные ссылки
+    links.forEach(link => {
+        if (link.href && link.textContent.trim()) {
+            const navLink = document.createElement('a');
+            navLink.href = link.href;
+            navLink.className = 'nav-link';
+            navLink.textContent = link.textContent;
+            navContainer.appendChild(navLink);
+        }
+    });
+
+    // Если ссылок нет, показываем заглушку
+    if (navContainer.children.length === 0) {
+        navContainer.innerHTML = '<p class="no-links">Ссылки не найдены</p>';
+    }
+});
