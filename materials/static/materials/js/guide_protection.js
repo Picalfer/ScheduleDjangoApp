@@ -158,4 +158,170 @@ document.addEventListener('DOMContentLoaded', function () {
     if (navContainer.children.length === 0) {
         navContainer.innerHTML = '<p class="no-links">Ссылки не найдены</p>';
     }
+
+    try {
+        // 1. Проверяем существование основных элементов
+        const navContainer = document.querySelector('.guide-nav');
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        const modalOverlay = document.querySelector('.modal-overlay');
+
+        if (!navContainer) console.warn('Navigation container not found');
+        if (!modal) console.warn('Modal container not found');
+        if (!modalImg) console.warn('Modal image element not found');
+        if (!modalOverlay) console.warn('Modal overlay not found');
+
+        // 2. Обработка ссылок (если контейнер существует)
+        if (navContainer) {
+            const links = document.querySelectorAll('.guide-content a');
+            navContainer.innerHTML = '';
+
+            links.forEach(link => {
+                if (link.href && link.textContent.trim()) {
+                    const navLink = document.createElement('a');
+                    navLink.href = link.href;
+                    navLink.className = 'nav-link';
+                    navLink.textContent = link.textContent;
+                    navContainer.appendChild(navLink);
+                }
+            });
+
+            if (navContainer.children.length === 0) {
+                navContainer.innerHTML = '<p class="no-links">Ссылки не найдены</p>';
+            }
+        }
+
+        // 3. Обработка изображений
+        const images = document.querySelectorAll('.guide-content img');
+
+        if (images.length > 0) {
+            images.forEach(img => {
+                // Пропускаем если уже обработано
+                if (img.classList.contains('processed-img')) return;
+
+                // Создаем контейнер
+                const container = document.createElement('div');
+                container.className = 'img-container';
+
+                // Оборачиваем изображение
+                img.parentNode.insertBefore(container, img);
+                container.appendChild(img);
+
+                // Добавляем лупу
+                const magnifier = document.createElement('div');
+                magnifier.className = 'img-magnifier';
+                container.appendChild(magnifier);
+
+                // Помечаем как обработанное
+                img.classList.add('processed-img');
+
+                // Обработчик клика
+                container.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (modal && modalImg) {
+                        openModal(img.src, modal, modalImg);
+                    }
+                });
+            });
+        }
+
+        // 4. Функции модального окна (если элементы существуют)
+        if (modal && modalImg && modalOverlay) {
+            // Закрытие по клику
+            modalOverlay.addEventListener('click', () => closeModal(modal));
+            modalImg.addEventListener('click', () => closeModal(modal));
+
+            // Закрытие по ESC
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && modal.style.display === 'flex') {
+                    closeModal(modal);
+                }
+            });
+        }
+
+        // Функция открытия модалки
+        function openModal(src, modalElement, imgElement) {
+            modalElement.style.display = 'flex';
+            imgElement.src = src;
+            document.body.style.overflow = 'hidden';
+
+            setTimeout(() => {
+                imgElement.style.maxHeight = `${window.innerHeight * 0.9}px`;
+            }, 10);
+        }
+
+        // Функция закрытия модалки
+        function closeModal(modalElement) {
+            modalElement.classList.add('closing');
+            setTimeout(() => {
+                modalElement.style.display = 'none';
+                modalElement.classList.remove('closing');
+                document.body.style.overflow = '';
+            }, 200);
+        }
+
+        const guideContent = document.querySelector('.guide-content');
+        const guideToc = document.querySelector('.guide-toc');
+
+        if (!guideContent || !guideToc) return;
+
+        // Находим все значимые заголовки (адаптировано под вашу структуру Word->HTML)
+        const headings = guideContent.querySelectorAll(`
+        span[style*="font-size:18pt"], 
+            span[style*="font-size:16pt"] 
+    `);
+
+        if (headings.length === 0) {
+            guideToc.innerHTML = '<p>Оглавление не найдено</p>';
+            return;
+        }
+
+        let tocHtml = '<ul class="toc-list">';
+        let currentLevel = 0;
+
+        headings.forEach(heading => {
+            // Создаем уникальный ID для якоря
+            if (!heading.id) {
+                heading.id = 'section-' + Math.random().toString(36).substr(2, 6);
+            }
+
+            const text = heading.textContent.trim();
+            if (!text) return;
+
+            // Определяем уровень вложенности
+            const isMainHeader = heading.matches(`
+            h2, 
+            p[style*="font-size:18pt"], 
+            p[style*="font-weight:700"]
+        `);
+
+            const level = isMainHeader ? 1 : 2;
+
+            // Добавляем пункт в оглавление
+            tocHtml += `
+            <li class="toc-item level-${level}">
+                <a href="#${heading.id}" class="toc-link">${text}</a>
+            </li>
+        `;
+        });
+
+        tocHtml += '</ul>';
+        guideToc.innerHTML = tocHtml;
+
+        // Плавная прокрутка с отступом
+        guideToc.addEventListener('click', function (e) {
+            if (e.target.classList.contains('toc-link')) {
+                e.preventDefault();
+                const target = document.querySelector(e.target.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 20,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error in guide script:', error);
+    }
 });

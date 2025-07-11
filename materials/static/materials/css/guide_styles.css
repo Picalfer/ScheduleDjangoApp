@@ -43,18 +43,18 @@ a {
 
 /* Дополнительные стили для защиты */
 .protected-text {
-    color: #333; /* Цвет текста */
-    font-family: Arial, sans-serif; /* Шрифт */
-    line-height: 1.5; /* Межстрочный интервал */
+    color: #333;
+    font-family: Arial, sans-serif;
+    line-height: 1.5;
 }
 
 body {
     margin: auto;
     background-color: #f9f3ff !important;
     user-select: none;
-    -webkit-user-select: none; /* Для Safari */
-    -moz-user-select: none; /* Для Firefox */
-    -ms-user-select: none; /* Для старых версий IE/Edge */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .doc-content {
@@ -336,4 +336,189 @@ html {
     100% {
         background-color: transparent;
     }
+}
+
+.img-magnifier {
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.7);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+    z-index: 10;
+    border: 2px solid rgba(103, 58, 183, 0.2);
+}
+
+/* Плюсик (всегда остаётся плюсом) */
+.img-magnifier::before,
+.img-magnifier::after {
+    content: '';
+    position: absolute;
+    background: #673ab7;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.img-magnifier::before {
+    width: 20px;
+    height: 2px;
+    /* Горизонтальная палочка */
+}
+
+.img-magnifier::after {
+    width: 2px;
+    height: 20px;
+    /* Вертикальная палочка */
+}
+
+/* Эффекты при наведении - просто увеличиваем и делаем ярче */
+.img-container:hover .img-magnifier {
+    opacity: 0.4;
+    transform: translate(-50%, -50%) scale(1);
+    border-color: rgba(103, 58, 183, 0.4);
+    background: rgba(255, 255, 255, 0.98);
+}
+
+/* Анимация палочек - легкое "дыхание" */
+.img-container:hover .img-magnifier::before {
+    width: 28px;
+    height: 5px;
+}
+
+.img-container:hover .img-magnifier::after {
+    height: 28px;
+    width: 5px;
+}
+
+/* Эффект при клике - легкое сжатие */
+.img-container:active .img-magnifier {
+    transform: translate(-50%, -50%) scale(0.92);
+}
+
+.img-container:active .img-magnifier::before,
+.img-container:active .img-magnifier::after {
+    background: #5e35b1;
+}
+
+/* Стили модального окна */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    position: relative;
+    z-index: 1001;
+    max-width: 90%;
+    max-height: 90%;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content img {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    cursor: zoom-out;
+}
+
+/* Анимация появления */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Анимация закрытия */
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.modal.closing {
+    animation: fadeOut 0.2s ease forwards;
+}
+
+/* Стили оглавления */
+/* Оглавление в правом сайдбаре */
+.guide-toc {
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.toc-item {
+    margin-bottom: 6px;
+    position: relative;
+}
+
+.toc-item.level-1 {
+    font-weight: 600;
+    margin-top: 12px;
+}
+
+.toc-item.level-2 {
+    font-weight: 400;
+    padding-left: 12px;
+    font-size: 0.9em;
+}
+
+.toc-link {
+    color: #5e35b1;
+    text-decoration: none;
+    display: block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.toc-link:hover {
+    background-color: #f3e5f5;
+}
+
+.toc-link.active {
+    background-color: #673ab7;
+    color: white;
 }

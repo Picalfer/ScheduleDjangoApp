@@ -34,12 +34,18 @@
         <div class="sidebar-inner">
             <h3>Содержание</h3>
             <div class="guide-toc">
-                <!-- Сюда можно добавить автоматически генерируемое оглавление -->
-                <a href="#header1" class="toc-link">1. Введение</a>
-                <a href="#header2" class="toc-link">2. Основная часть</a>
+                <!-- Динамически -->
             </div>
         </div>
     </aside>
+
+    <div id="imageModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Увеличенное изображение">
+        </div>
+    </div>
+
 </div>
 
 <script src="{% static 'materials/js/guide_protection.js' %}"></script>
