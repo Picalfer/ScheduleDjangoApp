@@ -1,4 +1,8 @@
 /* Защитные стили */
+* {
+    box-sizing: border-box;
+}
+
 body {
     display: flex;
     flex-direction: column;
@@ -124,6 +128,7 @@ span:has(img) {
 .guide-main {
     flex: 1;
     padding: 20px;
+    overflow: hidden;
 }
 
 .guide-nav, .guide-toc {
@@ -154,16 +159,6 @@ span:has(img) {
     border-bottom: 1px solid #dee2e6;
 }
 
-/* Адаптация для мобильных устройств */
-@media (max-width: 992px) {
-    .sidebar {
-        display: none;
-    }
-
-    .guide-main {
-        padding: 15px;
-    }
-}
 
 /* Основные улучшения (добавляем к вашему текущему CSS) */
 
@@ -301,23 +296,10 @@ body {
 }
 
 .guide-main::after {
-    bottom: -50px;
+    bottom: 100px;
     right: -50px;
 }
 
-/* Адаптивность - улучшаем мобильный вид */
-@media (max-width: 992px) {
-    .guide-content {
-        width: 85% !important;
-        margin: 20px auto !important;
-        padding: 30px !important;
-    }
-
-    .kodama-label {
-        font-size: 0.8rem;
-        padding: 0 15px !important;
-    }
-}
 
 /* Плавная прокрутка */
 html {
@@ -521,4 +503,38 @@ html {
 .toc-link.active {
     background-color: #673ab7;
     color: white;
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 992px) {
+    .sidebar {
+        display: none;
+    }
+
+    .guide-main {
+        padding: 15px;
+        margin: 30px auto;
+    }
+
+    body {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    html {
+
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .guide-content {
+        width: 95% !important;
+        margin: 20px auto !important;
+        padding: 30px !important;
+    }
+
+    .kodama-label {
+        font-size: 0.8rem;
+        padding: 0 15px !important;
+    }
 }

@@ -315,7 +315,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const target = document.querySelector(e.target.getAttribute('href'));
                 if (target) {
                     window.scrollTo({
-                        top: target.offsetTop - 20,
+                        top: target.offsetTop + 50,
                         behavior: 'smooth'
                     });
                 }
