@@ -7,13 +7,57 @@
         <link rel="icon" href="{{ guide.level.course.cover.url }}" type="image/png">
     {% endif %}
     <link rel="stylesheet" href="{% static 'materials/css/guide_styles.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-light.min.css">
     <base href="{{ guide.assets_url }}" target="_blank">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-{% autoescape off %}
-    {{ content }}
-{% endautoescape %}
+<div class="page-wrapper">
+    <aside class="sidebar left-sidebar">
+        <div class="sidebar-inner">
+            <h3>Ссылки на материалы</h3>
+            <nav class="guide-nav">
+                <!-- динамически-->
+            </nav>
+        </div>
+    </aside>
+
+    <main class="guide-main">
+        {% autoescape off %}
+            <div class="guide-content">
+                <div class="kodama-label"><p>Kodama</p></div>
+                {{ content }}
+            </div>
+        {% endautoescape %}
+    </main>
+
+    <aside class="sidebar right-sidebar">
+        <div class="sidebar-inner">
+            <h3>Содержание</h3>
+            <div class="guide-toc">
+                <!-- Динамически -->
+            </div>
+        </div>
+    </aside>
+
+    <div id="imageModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Увеличенное изображение">
+        </div>
+    </div>
+
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/python.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/python.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/html.min.js"></script>
+<script>hljs.highlightAll();</script>
+
 <script src="{% static 'materials/js/guide_protection.js' %}"></script>
 </body>
 </html>

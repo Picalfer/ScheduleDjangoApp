@@ -1,5 +1,5 @@
 import os
-import re
+import zipfile
 
 from django.db import models
 from django.utils.text import slugify
@@ -71,34 +71,48 @@ class Guide(models.Model):
     level = models.ForeignKey(Level, on_delete=models.CASCADE, related_name='guides')
     title = models.CharField("Название", max_length=200)
     html_file = models.FileField("HTML файл", upload_to=guide_upload_path, max_length=255, null=True, blank=True)
-    assets = models.FileField("Ресурсы (zip)", upload_to=guide_upload_path, max_length=255, null=True, blank=True)
+    assets = models.FileField("Ресурсы (zip с изображениями)", upload_to=guide_upload_path, max_length=255, null=True,
+                              blank=True)
     order = models.PositiveIntegerField("Порядок", default=0)
 
     def unpack_assets(self):
-        """Распаковывает архив с ресурсами и удаляет его"""
-        import zipfile
-        import os
-
         if not self.assets:
             return
 
+        import tempfile
+        import shutil
+
         target_dir = os.path.dirname(self.html_file.path) if self.html_file else os.path.dirname(self.assets.path)
-        self._cached_assets_path = target_dir  # 💡 сохраняем для delete
+        self._cached_assets_path = target_dir  # сохраняем для delete
 
         try:
-            with zipfile.ZipFile(self.assets.path, 'r') as zip_ref:
-                zip_ref.extractall(target_dir)
-            print(f"Архив успешно распакован в {target_dir}")
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                # Распаковываем архив во временную папку
+                with zipfile.ZipFile(self.assets.path, 'r') as zip_ref:
+                    zip_ref.extractall(tmp_dir)
 
+                # Создаем папку images в целевой директории
+                images_dir = os.path.join(target_dir, 'images')
+                if os.path.exists(images_dir):
+                    shutil.rmtree(images_dir)
+                os.makedirs(images_dir)
+
+                # Перемещаем все файлы из временной папки в images
+                for item in os.listdir(tmp_dir):
+                    src_path = os.path.join(tmp_dir, item)
+                    dst_path = os.path.join(images_dir, item)
+                    shutil.move(src_path, dst_path)
+
+            # Удаляем архив после успешной распаковки
             os.remove(self.assets.path)
-            print(f"Архив {self.assets.path} удалён")
+            print(f"Архив успешно распакован в {images_dir} и удалён.")
 
-            # Обновляем поле assets в модели (очищаем)
+            # Обновляем поле assets (очищаем)
             self.assets = None
             self.save(update_fields=['assets'])
 
         except Exception as e:
-            print(f"Ошибка: {e}")
+            print(f"Ошибка распаковки архива: {e}")
 
     def assets_url(self):
         """Возвращает URL папки с ресурсами"""
@@ -115,27 +129,9 @@ class Guide(models.Model):
 
         super().save(*args, **kwargs)
 
-        if self.html_file:
-            self.clean_google_redirects()
-
         # Распаковываем архив, если он есть и изменился
         if self.assets and self.assets != old_assets:
             self.unpack_assets()
-
-    def clean_google_redirects(self):
-        """Удаляет google-редиректы из ссылок в HTML."""
-        with open(self.html_file.path, 'r+', encoding='utf-8') as f:
-            content = f.read()
-
-            cleaned_content = re.sub(
-                r'https?://www\.google\.com/url\?q=([^&]+)&[^"]+',
-                lambda m: m.group(1),
-                content
-            )
-
-            f.seek(0)
-            f.write(cleaned_content)
-            f.truncate()
 
     class Meta:
         ordering = ['order']

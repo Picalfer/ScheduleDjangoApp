@@ -135,3 +135,266 @@ document.addEventListener('keydown', function (event) {
         alert('Сохранение страницы запрещено.');
     }
 });*/
+document.addEventListener('DOMContentLoaded', function () {
+    // Находим все ссылки в основном контенте
+    const links = document.querySelectorAll('.guide-content a');
+    const navContainer = document.querySelector('.guide-nav');
+
+    // Очищаем существующие примеры
+    navContainer.innerHTML = '';
+
+    // Добавляем реальные ссылки
+    links.forEach(link => {
+        if (link.href && link.textContent.trim()) {
+            const navLink = document.createElement('a');
+            navLink.href = link.href;
+            navLink.className = 'nav-link';
+            navLink.textContent = link.textContent;
+            navContainer.appendChild(navLink);
+        }
+    });
+
+    // Если ссылок нет, показываем заглушку
+    if (navContainer.children.length === 0) {
+        navContainer.innerHTML = '<p class="no-links">Ссылки не найдены</p>';
+    }
+
+    try {
+        // 1. Проверяем существование основных элементов
+        const navContainer = document.querySelector('.guide-nav');
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        const modalOverlay = document.querySelector('.modal-overlay');
+
+        if (!navContainer) console.warn('Navigation container not found');
+        if (!modal) console.warn('Modal container not found');
+        if (!modalImg) console.warn('Modal image element not found');
+        if (!modalOverlay) console.warn('Modal overlay not found');
+
+        // 2. Обработка ссылок (если контейнер существует)
+        if (navContainer) {
+            const links = document.querySelectorAll('.guide-content a');
+            navContainer.innerHTML = '';
+
+            links.forEach(link => {
+                if (link.href && link.textContent.trim()) {
+                    const navLink = document.createElement('a');
+                    navLink.href = link.href;
+                    navLink.className = 'nav-link';
+                    navLink.textContent = link.textContent;
+                    navContainer.appendChild(navLink);
+                }
+            });
+
+            if (navContainer.children.length === 0) {
+                navContainer.innerHTML = '<p class="no-links">Ссылки не найдены</p>';
+            }
+        }
+
+        // 3. Обработка изображений
+        const images = document.querySelectorAll('.guide-content img');
+
+        if (images.length > 0) {
+            images.forEach(img => {
+                // Пропускаем если уже обработано
+                if (img.classList.contains('processed-img')) return;
+
+                // Создаем контейнер
+                const container = document.createElement('div');
+                container.className = 'img-container';
+
+                // Оборачиваем изображение
+                img.parentNode.insertBefore(container, img);
+                container.appendChild(img);
+
+                // Добавляем лупу
+                const magnifier = document.createElement('div');
+                magnifier.className = 'img-magnifier';
+                container.appendChild(magnifier);
+
+                // Помечаем как обработанное
+                img.classList.add('processed-img');
+
+                // Обработчик клика
+                container.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (modal && modalImg) {
+                        openModal(img.src, modal, modalImg);
+                    }
+                });
+            });
+        }
+
+        // 4. Функции модального окна (если элементы существуют)
+        if (modal && modalImg && modalOverlay) {
+            // Закрытие по клику
+            modalOverlay.addEventListener('click', () => closeModal(modal));
+            modalImg.addEventListener('click', () => closeModal(modal));
+
+            // Закрытие по ESC
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && modal.style.display === 'flex') {
+                    closeModal(modal);
+                }
+            });
+        }
+
+        // Функция открытия модалки
+        function openModal(src, modalElement, imgElement) {
+            modalElement.style.display = 'flex';
+            imgElement.src = src;
+            document.body.style.overflow = 'hidden';
+
+            setTimeout(() => {
+                imgElement.style.maxHeight = `${window.innerHeight * 0.9}px`;
+            }, 10);
+        }
+
+        // Функция закрытия модалки
+        function closeModal(modalElement) {
+            modalElement.classList.add('closing');
+            setTimeout(() => {
+                modalElement.style.display = 'none';
+                modalElement.classList.remove('closing');
+                document.body.style.overflow = '';
+            }, 200);
+        }
+
+        const guideContent = document.querySelector('.guide-content');
+        const guideToc = document.querySelector('.guide-toc');
+
+        if (!guideContent || !guideToc) return;
+
+        // Находим все значимые заголовки (адаптировано под вашу структуру Word->HTML)
+        const headings = guideContent.querySelectorAll(`
+        span[style*="font-size:18pt"], 
+            span[style*="font-size:16pt"] 
+    `);
+
+        if (headings.length === 0) {
+            guideToc.innerHTML = '<p>Оглавление не найдено</p>';
+            return;
+        }
+
+        let tocHtml = '<ul class="toc-list">';
+        let currentLevel = 0;
+
+        headings.forEach(heading => {
+            // Создаем уникальный ID для якоря
+            if (!heading.id) {
+                heading.id = 'section-' + Math.random().toString(36).substr(2, 6);
+            }
+
+            const text = heading.textContent.trim();
+            if (!text) return;
+
+            // Определяем уровень вложенности
+            const isMainHeader = heading.matches(`
+            h2, 
+            p[style*="font-size:18pt"], 
+            p[style*="font-weight:700"]
+        `);
+
+            const level = isMainHeader ? 1 : 2;
+
+            // Добавляем пункт в оглавление
+            tocHtml += `
+            <li class="toc-item level-${level}">
+                <a href="#${heading.id}" class="toc-link">${text}</a>
+            </li>
+        `;
+        });
+
+        tocHtml += '</ul>';
+        guideToc.innerHTML = tocHtml;
+
+        // Плавная прокрутка с отступом
+        guideToc.addEventListener('click', function (e) {
+            if (e.target.classList.contains('toc-link')) {
+                e.preventDefault();
+                const target = document.querySelector(e.target.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop + 50,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error in guide script:', error);
+    }
+
+    document.querySelectorAll(".code-block").forEach(block => {
+        // 1. Собираем строки кода
+        const lines = Array.from(block.querySelectorAll("code")).map(c => c.textContent);
+        const fullText = lines.join("\n");
+
+        // 2. Подсвечиваем весь код одной строкой
+        const result = hljs.highlightAuto(fullText);
+        const highlightedLines = result.value.split('\n');
+
+        // 3. Очищаем и пересобираем блок с подсветкой
+        block.innerHTML = "";
+        highlightedLines.forEach(lineHtml => {
+            const lineDiv = document.createElement("div");
+            lineDiv.classList.add("line");
+
+            const codeTag = document.createElement("code");
+            codeTag.className = "hljs";
+            codeTag.innerHTML = lineHtml || "\u200b"; // пустая строка
+
+            lineDiv.appendChild(codeTag);
+            block.appendChild(lineDiv);
+        });
+
+        // 4. Добавляем кнопку копирования
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn';
+        btn.title = 'Копировать код';
+        btn.textContent = 'Копировать';
+        block.appendChild(btn);
+
+        // 5. Обработчик копирования
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+
+            const lines = Array.from(block.querySelectorAll('.line')).map(line => {
+                const style = window.getComputedStyle(line);
+                const textIndent = parseIndent(style.textIndent);
+                const marginLeft = parseIndent(style.marginLeft);
+                const totalIndent = textIndent + marginLeft;
+                const tabCount = Math.round(totalIndent / 36);
+                const indent = '\t'.repeat(tabCount > 0 ? tabCount : 0);
+
+                return indent + line.textContent.replace(/^\d+\s/gm, '').trimEnd();
+            });
+
+            const code = lines.filter(line => line.trim() !== '').join('\n');
+
+            navigator.clipboard.writeText(code)
+                .then(() => {
+                    btn.classList.add('copied');
+                    btn.textContent = 'Скопировано!';
+                    setTimeout(() => {
+                        btn.classList.remove('copied');
+                        btn.textContent = 'Копировать';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Ошибка:', err);
+                    btn.textContent = 'Ошибка';
+                    btn.style.backgroundColor = '#dc3545';
+                    setTimeout(() => {
+                        btn.textContent = 'Копировать';
+                        btn.style.backgroundColor = '';
+                    }, 2000);
+                });
+        });
+    });
+
+    // 💡 Вспомогательная функция
+    function parseIndent(value) {
+        return parseFloat(value) || 0;
+    }
+});
