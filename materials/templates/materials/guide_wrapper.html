@@ -7,6 +7,7 @@
         <link rel="icon" href="{{ guide.level.course.cover.url }}" type="image/png">
     {% endif %}
     <link rel="stylesheet" href="{% static 'materials/css/guide_styles.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-light.min.css">
     <base href="{{ guide.assets_url }}" target="_blank">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
@@ -47,6 +48,15 @@
     </div>
 
 </div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/python.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/python.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/html.min.js"></script>
+<script>hljs.highlightAll();</script>
 
 <script src="{% static 'materials/js/guide_protection.js' %}"></script>
 </body>
