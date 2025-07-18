@@ -1,5 +1,4 @@
 import os
-import re
 import zipfile
 
 from django.db import models
@@ -130,27 +129,9 @@ class Guide(models.Model):
 
         super().save(*args, **kwargs)
 
-        if self.html_file:
-            self.clean_google_redirects()
-
         # Распаковываем архив, если он есть и изменился
         if self.assets and self.assets != old_assets:
             self.unpack_assets()
-
-    def clean_google_redirects(self):
-        """Удаляет google-редиректы из ссылок в HTML."""
-        with open(self.html_file.path, 'r+', encoding='utf-8') as f:
-            content = f.read()
-
-            cleaned_content = re.sub(
-                r'https?://www\.google\.com/url\?q=([^&]+)&[^"]+',
-                lambda m: m.group(1),
-                content
-            )
-
-            f.seek(0)
-            f.write(cleaned_content)
-            f.truncate()
 
     class Meta:
         ordering = ['order']
