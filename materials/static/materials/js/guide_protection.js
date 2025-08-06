@@ -325,7 +325,9 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('Error in guide script:', error);
     }
 
-    document.querySelectorAll(".code-block").forEach(block => {
+    document.querySelectorAll(".code-container").forEach(container => {
+        const block = container.querySelector(".code-block");
+
         // 1. Собираем строки кода
         const lines = Array.from(block.querySelectorAll("code")).map(c => c.textContent);
         const fullText = lines.join("\n");
@@ -348,14 +350,14 @@ document.addEventListener('DOMContentLoaded', function () {
             block.appendChild(lineDiv);
         });
 
-        // 4. Добавляем кнопку копирования
+        // 4. Добавляем кнопку копирования в контейнер (не в блок кода)
         const btn = document.createElement('button');
         btn.className = 'copy-btn';
-        btn.title = 'Копировать код';
-        btn.textContent = 'Копировать';
-        block.appendChild(btn);
+        btn.title = '';
+        btn.textContent = '';
+        container.appendChild(btn); // Добавляем в контейнер, а не в блок
 
-        // 5. Обработчик копирования
+        // 5. Обработчик копирования (остаётся без изменений)
         btn.addEventListener('click', function (e) {
             e.stopPropagation();
 
@@ -375,25 +377,25 @@ document.addEventListener('DOMContentLoaded', function () {
             navigator.clipboard.writeText(code)
                 .then(() => {
                     btn.classList.add('copied');
-                    btn.textContent = 'Скопировано!';
+                    btn.textContent = '';
                     setTimeout(() => {
                         btn.classList.remove('copied');
-                        btn.textContent = 'Копировать';
+                        btn.textContent = '';
                     }, 2000);
                 })
                 .catch(err => {
                     console.error('Ошибка:', err);
-                    btn.textContent = 'Ошибка';
+                    btn.textContent = '';
                     btn.style.backgroundColor = '#dc3545';
                     setTimeout(() => {
-                        btn.textContent = 'Копировать';
+                        btn.textContent = '';
                         btn.style.backgroundColor = '';
                     }, 2000);
                 });
         });
     });
 
-    // 💡 Вспомогательная функция
+// 💡 Вспомогательная функция (без изменений)
     function parseIndent(value) {
         return parseFloat(value) || 0;
     }

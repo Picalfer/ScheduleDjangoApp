@@ -540,11 +540,23 @@ html {
     }
 }
 
-/* Базовые стили кнопки */
+.code-container {
+    position: relative;
+    overflow: auto;
+}
+
+.code-block {
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    font-family: monospace;
+    overflow-x: auto;
+}
+
 .copy-btn {
     position: absolute;
     right: 8px;
-    top: 8px;
+    top: 18px;
     width: 30px;
     height: 30px;
     background: #495057 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>') no-repeat center;
@@ -555,27 +567,15 @@ html {
     opacity: 0;
     transition: all 0.2s ease;
     z-index: 1;
-    transform: translateY(-5px);
-    text-indent: -9999px;
-    overflow: hidden;
 }
 
-/* Эффекты при наведении */
+.code-container:hover .copy-btn {
+    opacity: 0.7;
+}
+
 .copy-btn:hover {
+    opacity: 1 !important;
     background-color: #5a6268;
-    transform: translateY(0) scale(1.05);
-}
-
-/* Эффект при нажатии */
-.copy-btn:active {
-    background-color: #3a4047;
-    transform: translateY(0) scale(0.95);
-}
-
-/* Показываем кнопку при наведении на блок кода */
-.code-block:hover .copy-btn {
-    opacity: 1;
-    transform: translateY(0);
 }
 
 /* Для мобильных устройств */
@@ -628,10 +628,7 @@ html {
 /* Блок кода с относительным позиционированием */
 .code-block {
     position: relative;
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
     margin: 12px 0;
-
     background: #f8f9fa;
     border: 1px solid #dee2e6;
     border-radius: 6px;
@@ -640,12 +637,9 @@ html {
     counter-reset: line;
     padding: 8px 0;
     overflow-x: auto;
-
-
     user-select: auto;
     -webkit-user-select: text;
 }
-
 
 /* Каждая строка */
 .code-block .line {
@@ -676,8 +670,11 @@ html {
     line-height: 1.5;
 }
 
+.line {
+    width: 100%;
+    min-width: fit-content;
+}
 
 .hljs {
     background-color: transparent !important;
 }
-
