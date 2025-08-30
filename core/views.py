@@ -31,7 +31,7 @@ from rest_framework import generics, filters
 from rest_framework.permissions import IsAuthenticated
 
 from .forms import ProfileForm
-from .forms import RegisterForm, LoginForm
+from .forms import LoginForm
 from .models import Student
 from .models import OpenSlots, UserSettings
 from .serializers import LessonSerializer, TeacherSerializer, StudentSerializer, TeacherPaymentSerializer
@@ -366,18 +366,6 @@ def update_user_settings(request):
         return JsonResponse({'status': 'success'})
 
     return JsonResponse({'status': 'error', 'message': 'Недопустимый метод запроса'}, status=400)
-
-
-def register(request):
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('home')
-    else:
-        form = RegisterForm()
-    return render(request, 'registration/register.html', {'form': form})
 
 
 def user_login(request):

@@ -7,7 +7,6 @@ from .views import get_open_slots, update_open_slots, weekly_payments, generate_
 
 urlpatterns = [
     path('', views.home, name='home'),
-    path('register/', views.register, name='register'),
     path('login/', views.user_login, name='login'),
     path('logout/', views.user_logout, name='logout'),
     path('profile/', views.profile, name='profile'),
