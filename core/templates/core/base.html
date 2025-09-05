@@ -4,6 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- В секции head -->
+    <meta name="theme-color" content="#0f3460">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Kodama School">
+    <link rel="manifest" href="{% static 'core/manifest.json' %}">
+    <link rel="apple-touch-icon" href="{% static 'core/images/icons/icon-152x152.png' %}">
+
+    <!-- Для iOS -->
+    <link rel="apple-touch-startup-image" href="{% static 'core/images/splash/iphone5_splash.png' %}"
+          media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)">
+    <link rel="apple-touch-startup-image" href="{% static 'core/images/splash/iphone6_splash.png' %}"
+          media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)">
+    <link rel="apple-touch-startup-image" href="{% static 'core/images/splash/iphoneplus_splash.png' %}"
+          media="(device-width: 621px) and (device-height: 1104px) and (-webkit-device-pixel-ratio: 3)">
+    <link rel="apple-touch-startup-image" href="{% static 'core/images/splash/iphonex_splash.png' %}"
+          media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)">
+    <link rel="apple-touch-startup-image" href="{% static 'core/images/splash/ipad_splash.png' %}"
+          media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)">
+
     <title>{% block title %}Расписание{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'core/css/base.css' %}">
     <!-- Favicon -->
@@ -20,6 +41,7 @@
 <header>
     <div class="header-content">
         <div class="user-info">
+            <button id="install-button" style="display: none;">📲 Установить приложение</button>
             {% if user.is_authenticated %}
                 <p id="teacher-name">{{ user.first_name }} {{ user.last_name }}</p>
                 {% if user.is_staff %}
@@ -51,6 +73,7 @@
         {% block content %}{% endblock %}
     </div>
 </main>
+<script src="{% static 'core/pwa.js' %}"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>
