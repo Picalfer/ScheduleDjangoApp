@@ -29,4 +29,7 @@ urlpatterns = [
     path('api/clients/low-balance-count/', low_balance_clients_count, name='low_balance_clients_count'),
     path('api/payments-count/', payments_count, name='payments_count'),
     path('stats/', StatsDashboardView.as_view(), name='stats_dashboard'),
+    path('users/create/', views.create_user, name='create_user'),
+    path('users/create/success/', views.create_user_success, name='create_user_success'),
+    path('users/', views.user_management, name='user_management'),
 ]

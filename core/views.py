@@ -1,6 +1,7 @@
 import json
 import logging
 
+from django.contrib.auth.models import User, Group
 from django.db import transaction
 
 from .constants import EXCLUDED_TEACHERS_IDS
@@ -14,6 +15,9 @@ from django.utils import timezone
 from datetime import timedelta
 from .models import Client, Teacher, Lesson, BalanceOperation, TeacherPayment
 
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib import messages
+from .permissions import is_administrator
 from django.db.models import Exists, OuterRef
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
@@ -736,3 +740,130 @@ def get_workload_status(percent):
     elif percent > 60:
         return "warning"
     return "success"
+
+
+@user_passes_test(is_administrator)
+def user_management(request):
+    """Страница управления пользователями"""
+    users = User.objects.all()
+    return render(request, 'admin/user_management.html', {'users': users})
+
+
+@user_passes_test(is_administrator)
+def create_user(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        password = request.POST.get('password')
+        role = request.POST.get('role')
+
+        # Валидация
+        errors = {}
+
+        if not username:
+            errors['username'] = 'Логин обязателен'
+        elif User.objects.filter(username=username).exists():
+            errors['username'] = 'Логин уже существует'
+
+        if not first_name:
+            errors['first_name'] = 'Имя обязательно'
+
+        if not last_name:
+            errors['last_name'] = 'Фамилия обязательна'
+
+        if not password:
+            errors['password'] = 'Пароль обязателен'
+        elif len(password) < 6:
+            errors['password'] = 'Пароль должен быть не менее 6 символов'
+
+        if not role:
+            errors['role'] = 'Роль обязательна'
+
+        if errors:
+            return render(request, 'admin/create_user.html', {
+                'errors': errors,
+                'form_data': request.POST
+            })
+
+        try:
+            # Создаем пользователя
+            user = User.objects.create_user(
+                username=username,
+                password=password,
+                first_name=first_name,
+                last_name=last_name
+            )
+
+            # Назначаем группу
+            group_name = ''
+            if role == 'teacher':
+                group_name = 'Преподаватели'
+                # Создаем Teacher и OpenSlots
+                teacher = Teacher.objects.create(user=user)
+                OpenSlots.objects.create(
+                    teacher=teacher,
+                    weekly_open_slots={
+                        "monday": [], "tuesday": [], "wednesday": [],
+                        "thursday": [], "friday": [], "saturday": [], "sunday": []
+                    }
+                )
+            elif role == 'manager':
+                group_name = 'Менеджеры'
+            elif role == 'student':
+                group_name = 'Студенты'
+
+            if group_name:
+                group = Group.objects.get(name=group_name)
+                user.groups.add(group)
+
+            # Сохраняем данные в сессии для страницы успеха
+            request.session['new_user_data'] = {
+                'username': username,
+                'password': password,
+                'first_name': first_name,
+                'last_name': last_name,
+                'role': group_name
+            }
+
+            return redirect('create_user_success')
+
+        except Exception as e:
+            # УДАЛЯЕМ пользователя если создание не завершилось успешно
+            if User.objects.filter(username=username).exists():
+                User.objects.filter(username=username).delete()
+
+            messages.error(request, f'Ошибка при создании пользователя: {str(e)}')
+            return render(request, 'admin/create_user.html', {
+                'errors': {'general': 'Ошибка при создании пользователя'},
+                'form_data': request.POST
+            })
+
+    return render(request, 'admin/create_user.html')
+
+
+@user_passes_test(is_administrator)
+def create_user_success(request):
+    user_data = request.session.get('new_user_data')
+    if not user_data:
+        return redirect('create_user')
+
+    # Очищаем сессию после использования
+    if 'new_user_data' in request.session:
+        del request.session['new_user_data']
+
+    # Формируем текст для копирования
+    site_url = request.build_absolute_uri('/')[:-1]
+    copy_text = f"""Данные для входа в систему Kodama:
+
+Логин: {user_data['username']}
+Пароль: {user_data['password']}
+Ссылка для входа: {site_url}
+
+После первого входа рекомендуется сменить пароль."""
+
+    return render(request, 'admin/create_user_success.html', {
+        'user_data': user_data,
+        'copy_text': copy_text,
+        'site_url': site_url
+    })

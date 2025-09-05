@@ -3,15 +3,27 @@ import {calendarManager, repository, scheduleState} from '../app.js';
 
 export class TeachersModal extends Modal {
     constructor(options = {}) {
+        const footer = TeachersModal.generateStaticFooter();
         super({
             title: 'Список учителей',
             modalClass: 'teachers-modal',
+            footer: footer,
             ...options
         });
 
         this.initTeachersContent();
         this.setupTeachersEvents();
     }
+
+    // Статический метод для генерации футера
+    static generateStaticFooter() {
+        return `
+        <button class="styled-button" onclick="window.location.href='/users/'">
+            Управление пользователями
+        </button>
+    `;
+    }
+
 
     async initTeachersContent() {
         try {
