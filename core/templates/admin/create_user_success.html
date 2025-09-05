@@ -1,0 +1,146 @@
+{% extends '../core/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'core/css/create_user.css' %}">
+    <style>
+        .success-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .success-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            text-align: center;
+        }
+
+        .success-card h2 {
+            color: white;
+        }
+
+        .success-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #4CAF50;
+        }
+
+        .new-user-info {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: left;
+        }
+
+        .info-item {
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .info-value {
+            color: white;
+            font-family: monospace;
+        }
+
+        .copy-section {
+            width: 100%;
+        }
+
+        .copy-btn {
+            background: rgba(100, 100, 255, 0.2);
+            color: #6464FF;
+            border: 1px solid rgba(100, 100, 255, 0.3);
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: rgba(100, 100, 255, 0.3);
+        }
+
+        .copy-notification {
+            color: #4CAF50;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin: auto;
+            margin-top: 2rem;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="success-container">
+        <div class="success-card">
+            <div class="success-icon">✅</div>
+            <h2>Пользователь успешно создан!</h2>
+
+            <div class="new-user-info">
+                <div class="info-item">
+                    <span class="info-label">Логин:</span>
+                    <span class="info-value">{{ user_data.username }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Пароль:</span>
+                    <span class="info-value">{{ user_data.password }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Имя:</span>
+                    <span class="info-value">{{ user_data.first_name }} {{ user_data.last_name }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Роль:</span>
+                    <span class="info-value">{{ user_data.role }}</span>
+                </div>
+            </div>
+
+            <div class="actions">
+
+                <a href="{% url 'create_user' %}" class="btn btn-primary">Создать ещё</a>
+                <a href="{% url 'user_management' %}" class="btn btn-secondary">Вернуться к списку</a>
+
+                <div class="copy-section">
+                    <button class="copy-btn" onclick="copyToClipboard()">📋 Скопировать для отправки</button>
+                    <div class="copy-notification" id="copy-notification">Текст скопирован в буфер обмена!</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard() {
+            const text = `{{ copy_text|escapejs }}`;
+
+            navigator.clipboard.writeText(text).then(() => {
+                const notification = document.getElementById('copy-notification');
+                notification.style.display = 'block';
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+            }).catch(err => {
+                alert('Не удалось скопировать текст: ' + err);
+            });
+        }
+    </script>
+{% endblock %}

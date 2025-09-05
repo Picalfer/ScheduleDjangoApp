@@ -7,7 +7,6 @@ from .views import get_open_slots, update_open_slots, weekly_payments, generate_
 
 urlpatterns = [
     path('', views.home, name='home'),
-    path('register/', views.register, name='register'),
     path('login/', views.user_login, name='login'),
     path('logout/', views.user_logout, name='logout'),
     path('profile/', views.profile, name='profile'),
@@ -30,4 +29,7 @@ urlpatterns = [
     path('api/clients/low-balance-count/', low_balance_clients_count, name='low_balance_clients_count'),
     path('api/payments-count/', payments_count, name='payments_count'),
     path('stats/', StatsDashboardView.as_view(), name='stats_dashboard'),
+    path('users/create/', views.create_user, name='create_user'),
+    path('users/create/success/', views.create_user_success, name='create_user_success'),
+    path('users/', views.user_management, name='user_management'),
 ]

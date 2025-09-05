@@ -1,0 +1,133 @@
+main {
+    padding: 2rem;
+    display: block;
+    color: black;
+    background-color: rgba(0, 0, 0, 0.52);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.page-title {
+    color: white;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.create-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    transition: all 0.3s ease;
+    margin-bottom: 2rem;
+}
+
+.create-btn:hover {
+    background: rgba(76, 175, 80, 0.3);
+    border-color: rgba(76, 175, 80, 0.5);
+    transform: translateY(-1px);
+}
+
+.users-table {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    border-collapse: collapse;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.users-table th {
+    background: rgba(255, 255, 255, 0.12);
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: white;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.users-table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.users-table tr:last-child td {
+    border-bottom: none;
+}
+
+.users-table tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin: 0.1rem;
+}
+
+.badge-secondary {
+    background: rgba(100, 100, 255, 0.2);
+    color: #6464FF;
+    border: 1px solid rgba(100, 100, 255, 0.3);
+}
+
+.badge-success {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.badge-danger {
+    background: rgba(244, 67, 54, 0.2);
+    color: #F44336;
+    border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.6;
+}
+
+.empty-state p {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .users-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .container {
+        margin: 1rem auto;
+        padding: 0 0.5rem;
+    }
+}

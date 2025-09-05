@@ -1,0 +1,58 @@
+{% extends '../core/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'core/css/user_management.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="page-title">Управление пользователями</h1>
+
+        <a href="{% url 'create_user' %}" class="create-btn">
+            <span>+</span> Создать пользователя
+        </a>
+
+        {% if users %}
+            <table class="users-table">
+                <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Имя</th>
+                    <th>Email</th>
+                    <th>Роли</th>
+                    <th>Статус</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.get_full_name|default:"Не указано" }}</td>
+                        <td>{{ user.email|default:"Не указан" }}</td>
+                        <td>
+                            {% for group in user.groups.all %}
+                                <span class="badge badge-secondary">{{ group.name }}</span>
+                            {% empty %}
+                                <span style="color: rgba(255,255,255,0.5);">Нет ролей</span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% if user.is_active %}
+                                <span class="badge badge-success">Активен</span>
+                            {% else %}
+                                <span class="badge badge-danger">Неактивен</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">
+                <i>👥</i>
+                <p>Пользователи не найдены</p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
