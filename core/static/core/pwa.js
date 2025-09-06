@@ -1,7 +1,7 @@
 // static/core/js/pwa.js
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
-        navigator.serviceWorker.register('/static/core/js/service-worker.js')
+        navigator.serviceWorker.register('/sw.js')  // ← Изменили путь
             .then(function (registration) {
                 console.log('ServiceWorker registration successful');
             })
@@ -10,6 +10,8 @@ if ('serviceWorker' in navigator) {
             });
     });
 }
+
+// Остальной код без изменений...
 
 // Показываем кнопку "Установить"
 let deferredPrompt;

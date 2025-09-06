@@ -32,4 +32,5 @@ urlpatterns = [
     path('users/create/', views.create_user, name='create_user'),
     path('users/create/success/', views.create_user_success, name='create_user_success'),
     path('users/', views.user_management, name='user_management'),
+    path('sw.js', views.service_worker, name='service_worker'),
 ]

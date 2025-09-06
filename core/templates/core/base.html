@@ -7,11 +7,11 @@
 
     <!-- В секции head -->
     <meta name="theme-color" content="#0f3460">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Kodama School">
     <link rel="manifest" href="{% static 'core/manifest.json' %}">
-    <link rel="apple-touch-icon" href="{% static 'core/images/icons/icon-152x152.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'core/images/icons/152.png' %}">
 
     <!-- Для iOS -->
     <link rel="apple-touch-startup-image" href="{% static 'core/images/splash/iphone5_splash.png' %}"
@@ -36,12 +36,43 @@
     <link rel="stylesheet" href="{% static 'core/css/mobile.css' %}" media="screen and (max-width: 768px)">
     <link rel="stylesheet" href="{% static 'core/css/mobile-land.css' %}"
           media="screen and (min-width: 450px) and (max-width: 950px) and (orientation: landscape)">
+    <style>
+        .install-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            border-radius: 25px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .install-btn:hover {
+            background: rgba(76, 175, 80, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .install-icon {
+            margin-right: 8px;
+            font-size: 1.2em;
+        }
+    </style>
 </head>
 <body>
+
 <header>
     <div class="header-content">
         <div class="user-info">
-            <button id="install-button" style="display: none;">📲 Установить приложение</button>
+            <button id="install-button" class="install-btn" style="display: none;">
+                <span class="install-icon">📲</span>
+                Установить приложение
+            </button>
             {% if user.is_authenticated %}
                 <p id="teacher-name">{{ user.first_name }} {{ user.last_name }}</p>
                 {% if user.is_staff %}

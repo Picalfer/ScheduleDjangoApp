@@ -867,3 +867,7 @@ def create_user_success(request):
         'copy_text': copy_text,
         'site_url': site_url
     })
+
+
+def service_worker(request):
+    return render(request, 'core/service-worker.js', content_type='application/javascript')

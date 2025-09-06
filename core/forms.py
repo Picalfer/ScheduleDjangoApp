@@ -8,11 +8,19 @@ from core.widgets import ScheduleWidget
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-        label="Имя пользователя"
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'autocomplete': 'username',
+            'placeholder': 'Введите ваш логин'
+        }),
+        label="Логин"
     )
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'autocomplete': 'current-password',
+            'placeholder': 'Введите ваш пароль'
+        }),
         label="Пароль"
     )
 
