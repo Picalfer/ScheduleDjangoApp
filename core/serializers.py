@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from rest_framework import serializers
 
+from materials.models import Course
 from .models import Lesson, Teacher, Student, TeacherPayment
 from .models import OpenSlots
 
@@ -63,15 +64,30 @@ class LessonSerializer(serializers.ModelSerializer):
         }
 
 
+class CourseSerializer(serializers.ModelSerializer):
+    cover_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Course
+        fields = ['id', 'title', 'cover_url']
+
+    def get_cover_url(self, obj):
+        if obj.cover:
+            return obj.cover.url
+        return None
+
+
 class TeacherSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    courses = CourseSerializer(many=True, read_only=True)
     user_email = serializers.CharField(source='user.email', read_only=True)
 
     class Meta:
         model = Teacher
-        fields = ['id', 'user', 'name', 'user_email']
-        extra_kwargs = {
-            'user': {'read_only': True}  # если user не должен изменяться через этот API
-        }
+        fields = ['id', 'user', 'name', 'user_email', 'courses']
+
+    def get_name(self, obj):
+        return obj.name
 
 
 class StudentSerializer(serializers.ModelSerializer):
