@@ -229,7 +229,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'static/js', 'serviceworker.js')
 
-PWA_APP_NAME = 'Kodama Расписания'
+PWA_APP_NAME = 'Уроки'
 PWA_APP_DESCRIPTION = "Система управления расписанием в школе Kodama"
 PWA_APP_THEME_COLOR = '#1a56db'  # Синий цвет Kodama
 PWA_APP_BACKGROUND_COLOR = '#ffffff'  # Белый фон
@@ -242,14 +242,14 @@ PWA_APP_STATUS_BAR_COLOR = 'default'
 PWA_APP_ICONS = [
     {
         'src': '/static/core/images/icons/ic_launcher_160x160.png',
-        'sizes': '152x152',
+        'sizes': '160x160',
         'type': 'image/png',
     }
 ]
 PWA_APP_ICONS_APPLE = [
     {
         'src': '/static/core/images/icons/ic_launcher_160x160.png',
-        'sizes': '152x152',
+        'sizes': '160x160',
         'type': 'image/png',
     }
 ]
