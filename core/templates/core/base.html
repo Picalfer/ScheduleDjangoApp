@@ -4,38 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- В секции head -->
-    <meta name="theme-color" content="#0f3460">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Kodama School">
-    <link rel="manifest" href="{% static 'core/manifest.json' %}">
-    <link rel="apple-touch-icon" href="{% static 'core/images/icons/152.png' %}">
-
-    <!-- Для iOS -->
-    <link rel="apple-touch-startup-image" href="{% static 'core/images/icons/512.png' %}"
-          media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)">
-    <link rel="apple-touch-startup-image" href="{% static 'core/images/icons/512.png' %}"
-          media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)">
-    <link rel="apple-touch-startup-image" href="{% static 'core/images/icons/512.png' %}"
-          media="(device-width: 621px) and (device-height: 1104px) and (-webkit-device-pixel-ratio: 3)">
-    <link rel="apple-touch-startup-image" href="{% static 'core/images/icons/512.png' %}"
-          media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)">
-    <link rel="apple-touch-startup-image" href="{% static 'core/images/icons/512.png' %}"
-          media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)">
-
     <title>{% block title %}Расписание{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'core/css/base.css' %}">
+    {% block extra_css %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'core/css/mobile.css' %}" media="screen and (max-width: 768px)">
+    <link rel="stylesheet" href="{% static 'core/css/mobile-land.css' %}"
+          media="screen and (min-width: 450px) and (max-width: 950px) and (orientation: landscape)">
+
     <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'core/images/favicons/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'core/images/favicons/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'core/images/favicons/favicon-16x16.png' %}">
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'core/images/favicons/favicon.ico' %}">
-    {% block extra_css %}{% endblock %}
-    <link rel="stylesheet" href="{% static 'core/css/mobile.css' %}" media="screen and (max-width: 768px)">
-    <link rel="stylesheet" href="{% static 'core/css/mobile-land.css' %}"
-          media="screen and (min-width: 450px) and (max-width: 950px) and (orientation: landscape)">
+
     <style>
         .install-btn {
             position: fixed;
@@ -69,10 +50,6 @@
 <header>
     <div class="header-content">
         <div class="user-info">
-            <button id="install-button" class="install-btn" style="display: none;">
-                <span class="install-icon">📲</span>
-                Установить приложение
-            </button>
             {% if user.is_authenticated %}
                 <p id="teacher-name">{{ user.first_name }} {{ user.last_name }}</p>
                 {% if user.is_staff %}
