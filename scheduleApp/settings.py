@@ -24,6 +24,8 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
 else:
     # Настройки для разработки
+    PWA_APP_DEBUG_MODE = True
+
     CSRF_COOKIE_SECURE = False
     SESSION_COOKIE_SECURE = False
     SECURE_SSL_REDIRECT = False
@@ -65,6 +67,7 @@ INSTALLED_APPS = [
     'django_cleanup.apps.CleanupConfig',
     'safedelete',
     'phonenumber_field',
+    'pwa',
 ]
 
 if DEBUG:
@@ -223,3 +226,38 @@ REST_FRAMEWORK = {
 
 MEDIA_URL = '/media/'  # e.g. localhost:80/media/image.jpg
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'static/js', 'serviceworker.js')
+
+PWA_APP_NAME = 'Kodama Расписания'
+PWA_APP_DESCRIPTION = "Система управления расписанием в школе Kodama"
+PWA_APP_THEME_COLOR = '#1a56db'  # Синий цвет Kodama
+PWA_APP_BACKGROUND_COLOR = '#ffffff'  # Белый фон
+PWA_APP_DISPLAY = 'standalone'
+PWA_APP_SCOPE = '/'
+PWA_APP_ID = '/'
+PWA_APP_ORIENTATION = 'any'
+PWA_APP_START_URL = '/'
+PWA_APP_STATUS_BAR_COLOR = 'default'
+PWA_APP_ICONS = [
+    {
+        'src': '/static/core/images/icons/152.png',
+        'sizes': '152x152',
+        'type': 'image/png',
+    }
+]
+PWA_APP_ICONS_APPLE = [
+    {
+        'src': '/static/core/images/icons/152.png',
+        'sizes': '152x152',
+        'type': 'image/png',
+    }
+]
+PWA_APP_SPLASH_SCREEN = [
+    {
+        'src': '/static/core/images/icons/152.png',
+        'media': '(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)'
+    }
+]
+PWA_APP_DIR = 'ltr'
+PWA_APP_LANG = 'ru-RU'

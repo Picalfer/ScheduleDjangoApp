@@ -1,9 +1,15 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="ru">
+{% load pwa %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a56db">
+
+    {% progressive_web_app_meta %}
+    <link rel="manifest" href="manifest.json">
+
     <title>{% block title %}Расписание{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'core/css/base.css' %}">
     {% block extra_css %}{% endblock %}
@@ -16,34 +22,6 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'core/images/favicons/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'core/images/favicons/favicon-16x16.png' %}">
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'core/images/favicons/favicon.ico' %}">
-
-    <style>
-        .install-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(76, 175, 80, 0.2);
-            color: #4CAF50;
-            border: 1px solid rgba(76, 175, 80, 0.3);
-            border-radius: 25px;
-            padding: 12px 20px;
-            cursor: pointer;
-            font-weight: 600;
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
-
-        .install-btn:hover {
-            background: rgba(76, 175, 80, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .install-icon {
-            margin-right: 8px;
-            font-size: 1.2em;
-        }
-    </style>
 </head>
 <body>
 
@@ -81,7 +59,6 @@
         {% block content %}{% endblock %}
     </div>
 </main>
-<script src="{% static 'core/pwa.js' %}"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>
