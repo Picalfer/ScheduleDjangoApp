@@ -227,7 +227,7 @@ REST_FRAMEWORK = {
 MEDIA_URL = '/media/'  # e.g. localhost:80/media/image.jpg
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'static/js', 'serviceworker.js')
+# PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'static/js', 'serviceworker.js')
 
 PWA_APP_NAME = 'Kodama Расписания'
 PWA_APP_DESCRIPTION = "Система управления расписанием в школе Kodama"
