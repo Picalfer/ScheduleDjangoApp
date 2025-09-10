@@ -37,6 +37,7 @@ class OpenSlotsInline(admin.StackedInline):  # Или TabularInline для ко�
 class TeacherAdmin(admin.ModelAdmin):
     inlines = [TeacherPaymentInline, OpenSlotsInline]  # Добавили OpenSlotsInline
     list_display = ('id', 'get_full_name', 'user', 'zoom_link', 'open_slots__weekly_open_slots')
+    filter_horizontal = ['courses']
     search_fields = ('user__first_name__icontains', 'user__last_name__icontains')
 
 
