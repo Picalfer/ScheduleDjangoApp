@@ -247,8 +247,9 @@ class TeacherListCreate(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend]
 
     def get_queryset(self):
-        return Teacher.objects.select_related('user').prefetch_related('courses').all()
-
+        return Teacher.objects.select_related('user').prefetch_related('courses').filter(
+            user__is_active=True
+        )
 
 class StudentList(generics.ListAPIView):
     queryset = Student.objects.all()
