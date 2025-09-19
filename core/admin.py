@@ -37,6 +37,8 @@ class OpenSlotsInline(admin.StackedInline):  # Или TabularInline для ко�
 class TeacherAdmin(admin.ModelAdmin):
     inlines = [TeacherPaymentInline, OpenSlotsInline]  # Добавили OpenSlotsInline
     list_display = ('id', 'get_full_name', 'user', 'zoom_link', 'open_slots__weekly_open_slots')
+    filter_horizontal = ['courses']
+    search_fields = ('user__first_name__icontains', 'user__last_name__icontains')
 
 
 @admin.register(TeacherPayment)
@@ -75,6 +77,7 @@ class StudentInline(admin.TabularInline):
     model = Student
     extra = 0
     fields = ('name', 'teacher')
+    autocomplete_fields = ['teacher']
 
 
 class BalanceOperationInline(TabularInlinePaginated):
@@ -88,7 +91,7 @@ class BalanceOperationInline(TabularInlinePaginated):
 class ClientAdminMixin:
     list_display = ('name', 'students', 'teachers', 'balance', 'email', 'primary_phone')
     readonly_fields = ('balance',)
-    search_fields = ('name', 'email', 'phone_numbers__number')
+    search_fields = ('name__icontains', 'email__icontains', 'phone_numbers__number')
     inlines = [PhoneNumberInline, StudentInline, BalanceOperationInline]
 
     def get_queryset(self, request):
@@ -135,7 +138,7 @@ class DeletedClientAdmin(ClientAdminMixin, SafeDeleteAdmin):
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('name', 'client', 'teacher', 'family_balance')
     list_select_related = ('client', 'teacher')
-    search_fields = ('name', 'client__name')
+    search_fields = ('name__icontains', 'client__name__icontains')
 
 
 @admin.register(OpenSlots)
@@ -161,15 +164,14 @@ class LessonAdmin(admin.ModelAdmin):
     list_display = ('id', 'date', 'status', 'lesson_type', 'platform', 'teacher', 'time', 'student', 'course')
     list_filter = ('lesson_type', 'status', 'date', 'platform', 'teacher', 'course')
     search_fields = ['student__name']
+    autocomplete_fields = ['student', 'teacher']
 
     def get_fields(self, request, obj=None):
-        # Для создания нового урока (когда obj=None)
         if obj is None:
             return [
                 'student', 'teacher', 'course', 'platform',
                 'lesson_type', 'date', 'time', 'schedule',
             ]
-        # Для редактирования существующего урока
         return super().get_fields(request, obj)
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):

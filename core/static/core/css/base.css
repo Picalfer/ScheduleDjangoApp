@@ -144,8 +144,8 @@ li {
 .styled-button {
     background: linear-gradient(135deg, var(--primary-color), #818cf8);
     color: white;
+    padding: 8px 16px;
     border: 1px solid var(--border-color);
-    padding: 3px 5px;
     border-radius: 6px;
     transition: all 0.4s ease;
 }

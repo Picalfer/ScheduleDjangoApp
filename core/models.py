@@ -9,6 +9,8 @@ from phonenumber_field.modelfields import PhoneNumberField
 from safedelete import SOFT_DELETE, DELETED_VISIBLE_BY_PK
 from safedelete.models import SafeDeleteModel
 
+from materials.models import Course
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,6 +28,12 @@ class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     zoom_link = models.URLField(max_length=255, blank=True, null=True, verbose_name="Zoom ссылка")
     google_meet_link = models.URLField(max_length=255, blank=True, null=True, verbose_name="Google Meet ссылка")
+    courses = models.ManyToManyField(
+        Course,
+        blank=True,
+        verbose_name="Курсы",
+        related_name="teachers"
+    )
 
     @property
     def name(self):
@@ -33,6 +41,9 @@ class Teacher(models.Model):
 
     def get_full_name(self):
         return self.user.get_full_name() or self.user.username
+
+    def get_courses_display(self):
+        return ", ".join([course.title for course in self.courses.all()])
 
     def __str__(self):
         return self.user.get_full_name() or self.user.username

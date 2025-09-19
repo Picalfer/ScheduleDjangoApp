@@ -1,22 +1,30 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="ru">
+{% load pwa %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a56db">
+
+    {% progressive_web_app_meta %}
+    <link rel="manifest" href="manifest.json">
+
     <title>{% block title %}Расписание{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'core/css/base.css' %}">
+    {% block extra_css %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'core/css/mobile.css' %}" media="screen and (max-width: 768px)">
+    <link rel="stylesheet" href="{% static 'core/css/mobile-land.css' %}"
+          media="screen and (min-width: 450px) and (max-width: 950px) and (orientation: landscape)">
+
     <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'core/images/favicons/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'core/images/favicons/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'core/images/favicons/favicon-16x16.png' %}">
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'core/images/favicons/favicon.ico' %}">
-    {% block extra_css %}{% endblock %}
-    <link rel="stylesheet" href="{% static 'core/css/mobile.css' %}" media="screen and (max-width: 768px)">
-    <link rel="stylesheet" href="{% static 'core/css/mobile-land.css' %}"
-          media="screen and (min-width: 450px) and (max-width: 950px) and (orientation: landscape)">
 </head>
 <body>
+
 <header>
     <div class="header-content">
         <div class="user-info">
@@ -33,16 +41,15 @@
             {% endif %}
         </div>
         <nav>
-            <a href="{% url 'home' %}">Расписание</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'home' %}">Расписание</a>
+            {% endif %}
             {% if user.is_staff %}
                 <a href="{% url 'stats_dashboard' %}">Аналитика</a>
             {% endif %}
             {% if user.is_authenticated %}
                 <a href="{% url 'materials_hub' %}">Курсы</a>
                 <a href="{% url 'profile' %}">Профиль</a>
-            {% else %}
-                <a href="{% url 'login' %}">Войти</a>
-                <a href="{% url 'register' %}">Регистрация</a>
             {% endif %}
         </nav>
     </div>
