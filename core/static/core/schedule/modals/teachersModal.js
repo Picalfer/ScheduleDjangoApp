@@ -55,27 +55,45 @@ export class TeachersModal extends Modal {
             const displayInfo = teacher.name ||
                 `ID:${teacher.id} ${teacher.user_email || 'Без данных'}`;
 
+            // Формируем список курсов с иконками
+            const coursesHTML = teacher.courses && teacher.courses.length > 0
+                ? teacher.courses.map(course => {
+                    const icon = course.cover_url
+                        ? `<img src="${course.cover_url}" alt="${course.title}" class="course-icon">`
+                        : `<div class="course-icon-placeholder">${course.title.charAt(0)}</div>`;
+
+                    return `
+                    <div class="teacher-course-with-icon" title="${course.title}">
+                        ${icon}
+                        <span class="course-title">${course.title}</span>
+                    </div>
+                `;
+                }).join('')
+                : '<span class="teacher-course none">Нет курсов</span>';
+
             return `
-        <div class="teacher-item">
-          <div class="teacher-info">
-            <strong>${displayInfo}</strong>
-            ${teacher.education ? `<div class="teacher-education">${teacher.education}</div>` : ''}
-          </div>
-          <button class="submit-button teacher-schedule-btn" 
-                  data-teacher-id="${teacher.id}"
-                  data-user-id="${teacher.user}"
-                  data-teacher-name="${displayInfo}">
-            Расписание
-          </button>
-        </div>
-      `;
+                        <div class="teacher-item">
+                          <div class="teacher-info">
+                            <strong>${displayInfo}</strong>
+                            <div class="teacher-courses-grid">
+                                ${coursesHTML}
+                            </div>
+                          </div>
+                          <button class="submit-button teacher-schedule-btn" 
+                                  data-teacher-id="${teacher.id}"
+                                  data-user-id="${teacher.user}"
+                                  data-teacher-name="${displayInfo}">
+                            Расписание
+                          </button>
+                        </div>
+                      `;
         }).join('');
 
         this.updateContent(`
-      <div class="teachers-list">
-        ${teachersHTML}
-      </div>
-    `);
+          <div class="teachers-list">
+            ${teachersHTML}
+          </div>
+        `);
     }
 
     setupTeachersEvents() {
