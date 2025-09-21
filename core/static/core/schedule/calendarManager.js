@@ -203,14 +203,14 @@ export class CalendarManager {
         this.displayLessons();
     }
 
-    nextWeek() {
-        this.weekManager.currentWeekOffset++;
+    prevWeek() {
+        this.weekManager.currentWeekOffset--;
         this.updateCalendar();
         this.updateScheduleDisplay();
     }
 
-    prevWeek() {
-        this.weekManager.currentWeekOffset--;
+    nextWeek() {
+        this.weekManager.currentWeekOffset++;
         this.updateCalendar();
         this.updateScheduleDisplay();
     }
