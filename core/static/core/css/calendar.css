@@ -287,15 +287,84 @@
     position: relative;
 }
 
-/* Линия текущего часа во всех днях */
-.hour.current-hour-line {
+/* Стили для множественных уроков */
+.lesson.multiple {
     position: relative;
+    border-left: 3px solid #ff6b6b;
+    background: rgba(255, 107, 107, 0.1) !important;
+    margin-bottom: 2px;
+    cursor: pointer;
+    padding: 3px 6px;
+    transition: all 0.2s ease;
 }
 
-/*
-!* Подсветка текущего часа *!
-.current-hour {
-    background-color: rgba(var(--primary-color-rgb), 0.2) !important;
-    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.5);
-    position: relative;
-}*/
+.lesson.multiple:hover {
+    z-index: 1000 !important;
+    background: rgba(255, 107, 107, 0.2) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.multiple-lesson-content {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    align-items: flex-start;
+    gap: 2px;
+    height: 100%;
+    font-size: 11px;
+}
+
+.lesson.multiple .lesson-icon {
+    font-size: 12px;
+}
+
+.lesson.multiple .student-name {
+    flex: 1;
+    white-space: wrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+}
+
+.lesson-count {
+    background: #ff6b6b;
+    color: white;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 8px;
+    padding: 1px 5px;
+    font-size: 9px;
+    font-weight: bold;
+    margin-left: auto;
+}
+
+/* Упрощенные badges для множественных уроков */
+.lesson.multiple .balance-badge,
+.lesson.multiple .unreliable-badge {
+    display: none;
+}
+
+.lesson.multiple:hover .balance-badge,
+.lesson.multiple:hover .unreliable-badge {
+    display: flex;
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 8px;
+    padding: 1px 3px;
+}
+
+.lesson.multiple:hover .unreliable-badge {
+    top: 45px;
+}
+
+.hour.has-conflict {
+    background: rgba(255, 107, 107, 0.05) !important;
+    border: 1px dashed #ff6b6b !important;
+}
+
+.hour.has-conflict:hover {
+    background: rgba(255, 107, 107, 0.1) !important;
+    border: 1px solid #ff6b6b !important;
+}
