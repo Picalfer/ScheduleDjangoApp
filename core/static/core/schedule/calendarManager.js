@@ -172,9 +172,12 @@ export class CalendarManager {
             date.toISOString().split('T')[0]
         );
 
+        // Создаем объект для группировки уроков по ячейкам времени
+        const lessonsByTimeSlot = {};
+
+        // Сначала группируем все уроки
         this.lessonManager.lessons.forEach(lesson => {
             try {
-                // Для всех уроков (и разовых, и постоянных) проверяем точное совпадение даты
                 if (!currentWeekDates.includes(lesson.date)) {
                     return;
                 }
@@ -183,17 +186,84 @@ export class CalendarManager {
                 const dayOfWeek = this.weekManager.getDayOfWeek(lessonDate);
                 const hour = parseInt(lesson.time.split(':')[0]);
 
-                const dayElement = document.getElementById(dayOfWeek);
-                if (!dayElement) return;
+                // Создаем ключ для группировки (день + время)
+                const timeSlotKey = `${dayOfWeek}_${hour}`;
 
-                const hourElement = dayElement.children[hour - this.startHour];
-                if (hourElement) {
-                    hourElement.innerHTML = this.lessonManager.createLessonHTML(lesson);
+                if (!lessonsByTimeSlot[timeSlotKey]) {
+                    lessonsByTimeSlot[timeSlotKey] = [];
                 }
+                lessonsByTimeSlot[timeSlotKey].push(lesson);
+
             } catch (error) {
                 console.error('Ошибка:', error);
             }
         });
+
+        // Теперь рендерим сгруппированные уроки
+        Object.entries(lessonsByTimeSlot).forEach(([timeSlotKey, lessons]) => {
+            try {
+                const [dayOfWeek, hour] = timeSlotKey.split('_');
+                const numericHour = parseInt(hour);
+
+                const dayElement = document.getElementById(dayOfWeek);
+                if (!dayElement) return;
+
+                const hourElement = dayElement.children[numericHour - this.startHour];
+                if (!hourElement) return;
+
+                // Очищаем ячейку перед рендерингом
+                hourElement.innerHTML = '';
+
+                if (lessons.length === 1) {
+                    // Один урок - обычный рендеринг
+                    hourElement.innerHTML = this.lessonManager.createLessonHTML(lessons[0]);
+                } else {
+                    // Несколько уроков - специальный рендеринг
+                    lessons.forEach((lesson, index) => {
+                        hourElement.innerHTML += this.lessonManager.createLessonHTML(
+                            lesson,
+                            true,  // isMultiple = true
+                            index,
+                            lessons.length
+                        );
+                    });
+
+                    // Добавляем класс для стилизации конфликтных ячеек
+                    hourElement.classList.add('has-conflict');
+
+                    // Добавляем тултип с информацией о конфликте
+                    hourElement.title = `Конфликт расписания: ${lessons.length} урока в одно время`;
+                }
+
+            } catch (error) {
+                console.error('Ошибка рендеринга ячейки:', error);
+            }
+        });
+
+        // Показываем предупреждение о конфликтах
+        this.showScheduleConflicts(lessonsByTimeSlot);
+    }
+
+    showScheduleConflicts(lessonsByTimeSlot) {
+        const conflicts = Object.entries(lessonsByTimeSlot)
+            .filter(([_, lessons]) => lessons.length > 1)
+            .map(([timeSlotKey, lessons]) => {
+                const [dayOfWeek, hour] = timeSlotKey.split('_');
+                return {
+                    day: dayOfWeek,
+                    hour: parseInt(hour),
+                    count: lessons.length,
+                    lessons: lessons
+                };
+            });
+
+        if (conflicts.length > 0) {
+            const conflictMessage = `Обнаружено ${conflicts.length} конфликт(ов) в расписании`;
+            showNotification(conflictMessage, "error", 5000);
+
+            // Логируем конфликты для отладки
+            console.log('Конфликты расписания:', conflicts);
+        }
     }
 
     updateScheduleDisplay() {
@@ -203,14 +273,14 @@ export class CalendarManager {
         this.displayLessons();
     }
 
-    nextWeek() {
-        this.weekManager.currentWeekOffset++;
+    prevWeek() {
+        this.weekManager.currentWeekOffset--;
         this.updateCalendar();
         this.updateScheduleDisplay();
     }
 
-    prevWeek() {
-        this.weekManager.currentWeekOffset--;
+    nextWeek() {
+        this.weekManager.currentWeekOffset++;
         this.updateCalendar();
         this.updateScheduleDisplay();
     }
@@ -241,7 +311,7 @@ export class CalendarManager {
             const effectiveUserId = userId || await this.getMyId();
 
             const response = await repository.getLessons(effectiveTeacherId, queryStartDate, queryEndDate);
-            console.log(`Lessons for teacher ${teacherId} (search by teacher id): `, response);
+            console.log(`Lessons for teacher ${teacherId}: `, response);
 
             let lessons = [];
             if (response && typeof response === 'object' && Array.isArray(response.results)) {
@@ -252,30 +322,38 @@ export class CalendarManager {
                 console.warn('Unexpected response format, initializing empty lessons');
                 this.lessons = [];
             }
-            // Генерируем фейковые уроки для регулярных занятий
+
             const fakeLessons = [];
             const today = new Date();
             const endDateGeneration = new Date();
-            const futureDays = 30
-            // Генерируем фейковые уроки на n дней вперед
+            const futureDays = 30;
             endDateGeneration.setDate(today.getDate() + futureDays);
 
             lessons.forEach(lesson => {
-                if (lesson.lesson_type === 'recurring' && lesson.schedule && lesson.schedule.length > 0 && lesson.status === 'scheduled') {
-                    const generatedLessons = this.lessonManager.generateFutureLessons(lesson, endDateGeneration);
-                    fakeLessons.push(...generatedLessons);
+                if (lesson.lesson_type === 'recurring' &&
+                    lesson.schedule &&
+                    lesson.schedule.length > 0 &&
+                    lesson.status === 'scheduled') {
 
-                    // Фильтруем фейки, которые совпадают с оригиналом по дате/времени
-                    const filteredGenerated = generatedLessons.filter(fake =>
-                        fake.date !== lesson.date || fake.time !== lesson.time
+                    const generatedLessons = this.lessonManager.generateFutureLessons(lesson, endDateGeneration);
+
+                    const uniqueFakeLessons = generatedLessons.filter((fake, index, self) =>
+                            index === self.findIndex(f =>
+                                f.date === fake.date &&
+                                f.time === fake.time
+                            )
                     );
 
-                    fakeLessons.push(...filteredGenerated);
+                    fakeLessons.push(...uniqueFakeLessons);
                 }
             });
 
-            // Объединяем реальные и фейковые уроки
             this.lessonManager.lessons = [...lessons, ...fakeLessons];
+            /*
+                        const duplicateCount = this.lessonManager.lessons.length - new Set(this.lessonManager.lessons.map(l =>
+                            `${l.id}-${l.date}-${l.time}`
+                        )).size;
+                        console.log('Дубликатов найдено:', duplicateCount);*/
 
             this.openSlots = await repository.getOpenSlots(effectiveTeacherId);
             this.generateTimeSlots();

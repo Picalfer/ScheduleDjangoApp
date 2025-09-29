@@ -115,42 +115,55 @@
     filter: grayscale(30%);
 }
 
-.lesson.completed::after, .lesson.cancelled::after, .lesson.future::after {
+.lesson.completed::after,
+.lesson.cancelled::after,
+.lesson.future::after {
     position: absolute;
-    bottom: 10px;
-    right: 10px;
+    bottom: 5px;
+    left: 5px;
     font-weight: bold;
     font-size: 0.8em;
     background: var(--bg);
     padding: 2px 8px;
     border-radius: 12px;
     border: 1px solid #e0e0e0;
+    white-space: nowrap; /* Запрет переноса строк */
+    overflow: hidden; /* Скрываем выходящий текст */
+    text-overflow: ellipsis; /* ... если не помещается */
+    max-width: calc(100% - 10px); /* Не шире ячейки */
 }
 
 .lesson.completed::after {
-    content: "✓ Проведён";
+    content: "✓";
     color: var(--success-color);
 }
 
+.lesson.completed:hover::after {
+    content: "✓ Проведён";
+}
+
 .lesson.cancelled::after {
-    content: "✕ Отменён";
+    content: "✕";
     color: var(--danger-color);
 }
 
+.lesson.cancelled:hover::after {
+    content: "✕ Отменён";
+}
+
 .lesson.future::after {
-    color: var(--text-primary);
+    content: "⏳";
+    color: #e65100;
+}
+
+.lesson.future:hover::after {
+    content: "⏳ Запланирован";
 }
 
 .lesson.future {
     border-left: 4px solid #ffd54f;
     background-color: rgba(255, 248, 225, 0.9);
     color: #ff8f00;
-}
-
-.lesson.future::after {
-    color: #e65100;
-    border: 1px solid #ffe082;
-    content: "⏳ Запланирован";
 }
 
 [data-theme="dark"] .hour .lesson.demo {
