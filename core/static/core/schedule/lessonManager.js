@@ -5,34 +5,49 @@ export class LessonManager {
     }
 
     generateFutureLessons(lesson, endDate) {
-        const generatedLessons = [];
-        const startDate = new Date(lesson.date);
+        const weekdayMapping = {
+            'monday': 1, 'tuesday': 2, 'wednesday': 3,
+            'thursday': 4, 'friday': 5, 'saturday': 6, 'sunday': 0
+        };
 
-        lesson.schedule.forEach(scheduleDay => {
-            let currentDate = new Date(startDate);
+        const fakeLessons = [];
+        const originalDate = new Date(lesson.date + 'T' + lesson.time);
+        originalDate.setSeconds(0, 0);
+
+        function formatTime(date) {
+            return date.toTimeString().slice(0, 8);
+        }
+
+        lesson.schedule.forEach(scheduleItem => {
+            const targetWeekday = weekdayMapping[scheduleItem.day.toLowerCase()];
+            const [hours, minutes] = scheduleItem.time.split(':').map(Number);
+
+            // Начинаем генерировать со времени на час позже оригинального урока
+            let currentDate = new Date(originalDate);
+            currentDate.setHours(currentDate.getHours() + 1);
 
             while (currentDate <= endDate) {
-                // Пропускаем оригинальную дату урока
-                if (currentDate.toDateString() === startDate.toDateString()) {
-                    currentDate.setDate(currentDate.getDate() + 7);
-                    continue;
+                if (currentDate.getDay() === targetWeekday) {
+                    const lessonDate = new Date(currentDate);
+                    lessonDate.setHours(hours, minutes, 0, 0);
+
+                    // Добавляем урок, если он в будущем
+                    if (lessonDate > originalDate) {
+                        fakeLessons.push({
+                            ...lesson,
+                            id: `fake_${lesson.id}_${lessonDate.getTime()}`,
+                            date: lessonDate.toISOString().split('T')[0],
+                            time: formatTime(lessonDate),
+                            is_future: true,
+                            original_lesson_id: lesson.id
+                        });
+                    }
                 }
-
-                const fakeLesson = {
-                    ...lesson,
-                    id: `fake_${lesson.id}_${currentDate.toISOString()}`,
-                    date: currentDate.toISOString().split('T')[0],
-                    is_future: true,
-                    is_reliable: false,
-                    original_lesson_id: lesson.id
-                };
-
-                generatedLessons.push(fakeLesson);
-                currentDate.setDate(currentDate.getDate() + 7);
+                currentDate.setDate(currentDate.getDate() + 1);
             }
         });
 
-        return generatedLessons;
+        return fakeLessons;
     }
 
     createLessonHTML(lesson, isMultiple = false, index = 0, total = 1) {
