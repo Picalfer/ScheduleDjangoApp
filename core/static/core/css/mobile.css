@@ -166,7 +166,7 @@ nav {
 /* ===== ОБЛАСТЬ РАСПИСАНИЯ ===== */
 .schedule-area {
     display: grid;
-    grid-template-columns: 60px 1fr;
+    grid-template-columns: 80px 1fr;
     min-width: min-content;
 }
 
