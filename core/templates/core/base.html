@@ -32,7 +32,7 @@
                 <p id="teacher-name">{{ user.first_name }} {{ user.last_name }}</p>
                 {% if user.is_staff %}
                     <p id="admin-label">(админ)</p>
-                    <a href="{% url 'admin:index' %}" class="admin-btn" title="Админка">
+                    <a href="{% url 'admin:index' %}" class="admin-btn">
                         ⚙️ Админ-панель
                     </a>
                 {% endif %}

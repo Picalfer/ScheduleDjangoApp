@@ -4,7 +4,7 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    gap: 5px;
+    gap: 0px;
 }
 
 .week-navigation {
@@ -137,7 +137,7 @@
     flex-direction: row;
     gap: 5px;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 #open-windows-controls {
@@ -192,5 +192,71 @@
 
 .nav-button:hover {
     background-color: var(--bg);
+    border-color: var(--text-secondary);
+}
+
+#week-info-left {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap; /* Разрешаем перенос, но ограничиваем */
+    max-height: 100px; /* Высота 2 строк (42px кнопка + 5px gap) × 2 */
+    overflow-y: auto; /* Вертикальный скролл если больше 2 строк */
+    overflow-x: hidden; /* Горизонтальный скролл не нужен */
+    scrollbar-width: none; /* Скрываем скроллбар */
+    -ms-overflow-style: none;
+    align-content: flex-start; /* Выравниваем строки по верху */
+    flex-shrink: 2;
+}
+
+/* Скрываем скроллбар */
+#week-info-left::-webkit-scrollbar {
+    display: none;
+}
+
+/* Убираем стандартные отступы у скролла */
+#week-info-left {
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 0; /* Минимальные отступы */
+}
+
+/* Кнопки остаются как есть */
+.button-wrapper {
+    flex-shrink: 0;
+}
+
+.icon-button {
+    display: flex;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--header-bg), var(--bg));
+    cursor: pointer;
+    transition: all 0.2s ease;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3em;
+    color: var(--primary-color);
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.1),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.styled-button {
+    background: linear-gradient(135deg, var(--primary-color), #818cf8);
+    color: white;
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    transition: all 0.4s ease;
+}
+
+.styled-button:hover {
+    background: linear-gradient(135deg, var(--primary-hover), #4649dc);
     border-color: var(--text-secondary);
 }
