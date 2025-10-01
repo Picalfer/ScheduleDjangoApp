@@ -19,7 +19,7 @@
     display: flex;
     background-color: var(--header-bg);
     border-bottom: 1px solid var(--border-color);
-    padding-right: var(--scrollbar-size);
+    padding-right: 0;
     color: var(--text-primary);
     position: sticky;
     top: 0;
@@ -60,7 +60,7 @@
 
 #schedule {
     display: flex;
-    scrollbar-gutter: stable;
+    scrollbar-gutter: initial;
     overflow-y: auto;
     flex: 1;
     width: 100%;
