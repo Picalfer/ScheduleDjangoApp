@@ -119,7 +119,7 @@ nav {
 
 /* ===== ЗАГОЛОВКИ ТАБЛИЦЫ ===== */
 #headers {
-    display: grid;
+    /*display: grid;*/
     grid-template-columns: 60px repeat(7, minmax(80px, 1fr));
     position: sticky;
     top: 0;
