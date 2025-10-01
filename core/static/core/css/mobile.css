@@ -15,12 +15,7 @@ header {
     top: 0;
     left: 0;
     z-index: 101;
-}
-
-#week-info-left {
-    flex-shrink: 0;
-    max-width: 22%;
-    flex-wrap: wrap;
+    max-height: 13vh;
 }
 
 #week-nav-left {
@@ -45,7 +40,7 @@ nav {
 }
 
 .week-navigation {
-    width: 90%;
+    width: 95%;
     align-items: start;
 }
 
@@ -53,9 +48,42 @@ nav {
     width: min-content;
 }
 
+.week-navigation h2 {
+    font-size: 1rem;
+    max-height: 100%;
+    overflow: auto;
+}
+
 .admin-btn {
-    padding: 2px 4px;
-    text-align: center;
+    text-indent: -9999px; /* Сдвигаем текст за экран */
+    overflow: hidden;
+    white-space: nowrap;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 49px;
+    height: 42px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.3em;
+    color: var(--primary-color);
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.1),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--border-color);
+    text-decoration: none;
+    position: relative;
+}
+
+/* Показываем только иконку */
+.admin-btn::before {
+    content: "⚙️";
+    text-indent: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 /* ===== ОСНОВНАЯ ОБЛАСТЬ СКРОЛЛА ===== */
