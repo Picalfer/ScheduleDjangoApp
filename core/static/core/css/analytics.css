@@ -4,8 +4,17 @@ main {
     background-color: rgba(0, 0, 0, 0.52);
 }
 
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(187, 188, 246, 0.17);
+}
+
 .stats-container {
-    max-width: 1200px;
+    overflow-y: auto;
+    max-height: calc(100vh - 100px);
     margin: 0 auto;
     padding: 20px;
     color: black;
@@ -344,4 +353,13 @@ tr:hover {
 
 .workload-details span:last-child::before {
     content: "✅";
+}
+
+@media (max-width: 768px) {
+
+    .stats-container {
+        padding: 5px;
+        width: 96%;
+        overflow-x: hidden;
+    }
 }
