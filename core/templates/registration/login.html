@@ -3,10 +3,11 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/login.css' %}">
 {% endblock %}
 
 {% block content %}
-    <div style="color: white">
+    <div class="content" style="color: white">
         <h2>Вход</h2>
         <form method="post">
             {% csrf_token %}

@@ -19,3 +19,11 @@
     font-size: 2rem;
     margin: 0;
 }
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(187, 188, 246, 0.17);
+}

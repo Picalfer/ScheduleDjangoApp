@@ -1,4 +1,4 @@
-<div class="course-card">
+<div class="course-card" {% if course.cover %}style="--course-bg-image: url('{{ course.cover.url }}')"{% endif %}>
     <a href="{% url 'course_levels' course.id %}" class="card-link">
         {% if course.cover %}
             <div class="course-image">

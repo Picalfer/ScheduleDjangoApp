@@ -7,12 +7,12 @@ main {
 .course-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 0.5rem 1rem;
 }
 
 .course-header {
     text-align: center;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
 }
 
 .course-title {
@@ -30,11 +30,13 @@ main {
     line-height: 1.6;
 }
 
-/* Flexbox контейнер вместо Grid */
 .levels-flex-container {
+    overflow-y: auto;
+    max-height: calc(95vh - 100px - 150px);
     display: flex;
+    padding-top: 5px;
     flex-wrap: wrap;
-    justify-content: space-between; /* Центрируем элементы */
+    justify-content: space-between;
     gap: 1.5rem;
 }
 
@@ -90,11 +92,19 @@ main {
 }
 
 @media (max-width: 768px) {
+    .levels-flex-container {
+        align-items: center;
+        flex-direction: column;
+        flex-wrap: nowrap;
+    }
+
     .course-title {
         font-size: 2rem;
     }
 
     .level-card {
-        width: 100%; /* На мобильных - полная ширина */
+        width: 90%; /* На мобильных - полная ширина */
+        height: auto;
+        padding: 2rem;
     }
 }
