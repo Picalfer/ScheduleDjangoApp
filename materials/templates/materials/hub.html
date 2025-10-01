@@ -14,10 +14,6 @@
             <div class="header-text">
                 <h1>Все курсы</h1>
             </div>
-
-            {% if user.is_staff %}
-                <a href="{% url 'admin:materials_course_add' %}" class="add-course-btn">Добавить курс</a>
-            {% endif %}
         </div>
 
         <div class="courses-grid">

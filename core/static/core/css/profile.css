@@ -1,12 +1,15 @@
 main {
     text-align: center;
     color: #ffffff;
-    background-color: rgba(0, 0, 0, 0.52);
+}
+
+header {
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.09);
 }
 
 form {
     max-width: 400px;
-    margin: 0 auto;
+    margin: 0;
     padding: 30px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
@@ -85,4 +88,12 @@ h3 {
     height: 24px;
     vertical-align: middle;
     margin-right: 10px;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    height: 100%;
 }
