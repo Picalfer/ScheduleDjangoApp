@@ -1,6 +1,7 @@
-/* Стили для формы профиля */
 main {
     text-align: center;
+    color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.52);
 }
 
 form {

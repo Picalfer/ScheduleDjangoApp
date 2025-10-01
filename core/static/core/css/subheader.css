@@ -246,3 +246,17 @@
     overflow: hidden;
     flex-shrink: 0;
 }
+
+.styled-button {
+    background: linear-gradient(135deg, var(--primary-color), #818cf8);
+    color: white;
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    transition: all 0.4s ease;
+}
+
+.styled-button:hover {
+    background: linear-gradient(135deg, var(--primary-hover), #4649dc);
+    border-color: var(--text-secondary);
+}
