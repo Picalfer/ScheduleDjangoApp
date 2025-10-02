@@ -459,54 +459,48 @@ class Lesson(models.Model):
 
     def calculate_next_date_and_time(self):
         try:
-            weekday_mapping = {
-                'monday': 0, 'tuesday': 1, 'wednesday': 2,
-                'thursday': 3, 'friday': 4, 'saturday': 5, 'sunday': 6
-            }
-
             if not self.schedule:
+                logger.debug(f'Урок {self.id}: нет расписания для создания следующего урока')
                 return None, None
 
-            current_datetime = datetime.combine(self.date, self.time)  # Объединяем дату и время
-            current_date = current_datetime.date()
+            weekday_names = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 
-            for days_ahead in range(0, 7):
-                next_date = current_date + timedelta(days=days_ahead)
-                next_day_name = list(weekday_mapping.keys())[next_date.weekday()]
+            # Обработка даты и времени текущего урока
+            if isinstance(self.date, datetime):
+                lesson_date = self.date.date()
+                lesson_time = self.date.time()
+            else:
+                lesson_date = self.date
+                lesson_time = self.time
+
+            lesson_datetime = datetime.combine(lesson_date, lesson_time)
+            logger.debug(f'Урок {self.id}: поиск следующего урока от {lesson_date} {lesson_time}')
+
+            # Поиск следующего урока в ближайшие 7 дней
+            for days_ahead in range(0, 8):
+                next_date = lesson_date + timedelta(days=days_ahead)
+                next_day_name = weekday_names[next_date.weekday()]
 
                 for schedule_item in self.schedule:
-                    if schedule_item['day'] == next_day_name:
+                    if schedule_item['day'].lower() == next_day_name:
                         time_str = schedule_item['time']
                         hours, minutes = map(int, time_str.split(':'))
                         next_time = time(hours, minutes)
 
-                        # Если это текущий день, проверяем, есть ли время позже текущего
-                        if days_ahead == 0 and next_date == current_date:
-                            if next_time <= current_datetime.time():
-                                continue  # Пропускаем, если время уже прошло
+                        # Пропускаем уроки в тот же день, которые уже прошли
+                        if days_ahead == 0 and next_time <= lesson_datetime.time():
+                            logger.debug(f'Урок {self.id}: пропуск {next_date} {next_time} - время уже прошло')
+                            continue
 
+                        logger.debug(f'Урок {self.id}: найден следующий урок на {next_date} {next_time}')
                         return next_date, next_time
 
+            logger.debug(f'Урок {self.id}: не найдено подходящей даты в ближайшие 7 дней')
             return None, None
 
         except Exception as e:
             logger.error(f'Ошибка расчета даты для урока {self.id}: {str(e)}')
             return None, None
-
-    def save(self, *args, **kwargs):
-        if self.lesson_type == 'single' or self.lesson_type == 'demo':
-            self.schedule = []  # Очищаем расписание для разовых и вводных уроков
-        super().save(*args, **kwargs)
-
-    class Meta:
-        verbose_name = 'Урок'
-        verbose_name_plural = 'Уроки'
-        ordering = ['date', 'time']
-
-    def __str__(self):
-        if self.lesson_type == 'single' or self.lesson_type == 'single':
-            return f"{self.date} {self.time} - {self.course} ({self.get_status_display()})"
-        return f"Регулярный: {self.course} ({self.get_status_display()})"
 
 
 class TeacherPayment(models.Model):
