@@ -2,6 +2,7 @@ main {
     padding: 2rem;
     display: block;
     background-color: rgba(0, 0, 0, 0.52);
+    overflow-y: auto;
 }
 
 ::-webkit-scrollbar-track {
@@ -13,7 +14,6 @@ main {
 }
 
 .stats-container {
-    overflow-y: auto;
     max-height: calc(100vh - 100px);
     margin: 0 auto;
     padding: 20px;
