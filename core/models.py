@@ -494,7 +494,7 @@ class Lesson(models.Model):
             return None, None
 
     def save(self, *args, **kwargs):
-        if self.lesson_type == 'single' or self.lesson_type == 'single':
+        if self.lesson_type == 'single' or self.lesson_type == 'demo':
             self.schedule = []  # Очищаем расписание для разовых и вводных уроков
         super().save(*args, **kwargs)
 
