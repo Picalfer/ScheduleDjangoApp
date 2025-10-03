@@ -234,15 +234,21 @@ main {
     flex-wrap: wrap;
 }
 
+.btn-primary, .btn-secondary {
+    margin: 0;
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    line-height: 1.5;
+}
+
 .btn-primary {
     background: #007bff;
     color: white;
     border: none;
-    padding: 12px 24px;
-    border-radius: 6px;
     cursor: pointer;
-    font-size: 14px;
-    transition: background 0.3s ease;
 }
 
 .btn-primary:hover {
@@ -253,11 +259,6 @@ main {
     background: rgba(255, 255, 255, 0.1);
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 12px 24px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-size: 14px;
-    transition: all 0.3s ease;
 }
 
 .btn-secondary:hover {

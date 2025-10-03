@@ -61,9 +61,9 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(() => {
             const element = document.querySelector('#teaching-tab .loading-state');
             if (element) {
-                element.innerHTML = '<p>Данные о преподавании загружены</p>';
+                element.innerHTML = '<p>Всё еще пусто.</p>';
             }
-        }, 1000);
+        }, 7000);
     }
 
     function loadFinanceData() {
@@ -71,9 +71,9 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(() => {
             const element = document.querySelector('#finance-tab .loading-state');
             if (element) {
-                element.innerHTML = '<p>Финансовая статистика загружена</p>';
+                element.innerHTML = '<p>Всё еще пусто.</p>';
             }
-        }, 1000);
+        }, 7000);
     }
 
     function loadActivityData() {
@@ -81,9 +81,9 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(() => {
             const element = document.querySelector('#activity-tab .loading-state');
             if (element) {
-                element.innerHTML = '<p>Логи активности загружены</p>';
+                element.innerHTML = '<p>Всё еще пусто.</p>';
             }
-        }, 1000);
+        }, 7000);
     }
 
     // Автоматически загружаем данные для активного таба при загрузке страницы

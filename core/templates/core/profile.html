@@ -67,7 +67,7 @@
                                     <label for="{{ form.email.id_for_label }}">Email</label>
                                     {{ form.email }}
                                 </div>
-                                <div class="form-group">
+                                {% comment %}<div class="form-group">
                                     <label for="phone">Телефон</label>
                                     <input type="tel" id="phone" name="phone"
                                            value="{{ request.user.teacher.phone|default:'' }}"
@@ -78,7 +78,7 @@
                                     <input type="text" id="telegram" name="telegram"
                                            value="{{ request.user.teacher.telegram|default:'' }}"
                                            placeholder="@username">
-                                </div>
+                                </div>{% endcomment %}
                             </div>
 
                             <div class="form-section">
@@ -107,11 +107,11 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group">
+                                {% comment %}<div class="form-group">
                                     <label for="about">О себе</label>
                                     <textarea id="about" name="about" rows="4"
                                               placeholder="Краткая информация о себе для администраторов">{{ request.user.teacher.about|default:'' }}</textarea>
-                                </div>
+                                </div>{% endcomment %}
                             </div>
                         </div>
 
@@ -127,7 +127,7 @@
                 <div class="tab-pane" id="teaching-tab">
                     <div class="teaching-content">
                         <!-- Блок будет заполняться через AJAX/JavaScript -->
-                        <div class="loading-state">Загрузка данных...</div>
+                        <div class="loading-state">Пока здесь пусто.</div>
                     </div>
                 </div>
 
@@ -135,7 +135,7 @@
                 <div class="tab-pane" id="finance-tab">
                     <div class="finance-content">
                         <!-- Блок будет заполняться через AJAX/JavaScript -->
-                        <div class="loading-state">Загрузка данных...</div>
+                        <div class="loading-state">Пока здесь пусто.</div>
                     </div>
                 </div>
 
@@ -143,7 +143,7 @@
                 <div class="tab-pane" id="activity-tab">
                     <div class="activity-content">
                         <!-- Блок будет заполняться через AJAX/JavaScript -->
-                        <div class="loading-state">Загрузка данных...</div>
+                        <div class="loading-state">Пока здесь пусто.</div>
                     </div>
                 </div>
             </div>
