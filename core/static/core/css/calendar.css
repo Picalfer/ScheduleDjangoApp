@@ -178,6 +178,7 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
+    z-index: 100;
 }
 
 #confirm-change {
