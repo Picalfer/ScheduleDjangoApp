@@ -103,6 +103,7 @@ main {
     padding: 15px 20px;
     background: none;
     border: none;
+    border-bottom: 2px solid transparent;
     color: #aaa;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -179,6 +180,14 @@ main {
     color: white;
     font-size: 14px;
     transition: border-color 0.3s ease;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder,
+.link-field input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    opacity: 1;
 }
 
 .form-group input:focus,
