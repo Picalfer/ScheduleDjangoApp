@@ -104,7 +104,7 @@ main {
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
-    color: #aaa;
+    color: #c6c5c5;
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 14px;
@@ -242,6 +242,7 @@ main {
     font-size: 14px;
     transition: all 0.3s ease;
     line-height: 1.5;
+    text-align: center;
 }
 
 .btn-primary {
