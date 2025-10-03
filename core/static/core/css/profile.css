@@ -1,68 +1,211 @@
-main {
-    text-align: center;
-    color: #ffffff;
-}
-
 header {
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.09);
 }
 
-form {
-    max-width: 400px;
-    margin: 0;
-    padding: 30px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
+
+::-webkit-scrollbar-track {
+    background: transparent;
 }
 
-form p {
+::-webkit-scrollbar-thumb {
+    background-color: rgba(187, 188, 246, 0.17);
+}
+
+main {
+    overflow-y: auto;
+}
+
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    color: #ffffff;
+}
+
+.profile-header {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+}
+
+.avatar-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.avatar-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-info h1 {
+    margin: 0 0 5px 0;
+    font-size: 28px;
+}
+
+.user-role {
+    color: #aaa;
+    font-size: 14px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.status-badge.active {
+    background: #28a745;
+    color: white;
+}
+
+.status-badge.inactive {
+    background: #dc3545;
+    color: white;
+}
+
+/* Навигация табами */
+.profile-tabs {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.tabs-navigation {
+    display: flex;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 15px 20px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #aaa;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.tab-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+.tab-btn.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-bottom: 2px solid #007bff;
+}
+
+.tabs-content {
+    padding: 30px;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+/* Форма */
+.profile-form {
+    width: 100%;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.form-section {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.form-section h3 {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+}
+
+.form-group {
     margin-bottom: 15px;
 }
 
-form label {
+.form-group label {
     display: block;
     margin-bottom: 5px;
-    font-weight: bold;
+    font-weight: 500;
+    color: #ddd;
 }
 
-form input[type="text"],
-form input[type="email"],
-form input[type="url"] {
+.form-group input,
+.form-group textarea,
+.form-group,
+.link-field input {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: none;
-    border-radius: 5px;
-    background: rgba(255, 255, 255, 0.2);
+    padding: 10px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
     color: white;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
 }
 
-form button {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
+.form-group input::placeholder,
+.form-group textarea::placeholder,
+.link-field input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    opacity: 1;
 }
 
-form button:hover {
-    background: #0056b3;
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus,
+.link-field input:focus {
+    outline: none;
+    border-color: #007bff;
 }
 
-a {
-    color: white;
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
 }
 
-h3 {
-    margin-bottom: 1rem;
-}
-
+/* Конференции */
 .conference-links {
     margin: 20px 0;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
 }
 
 .link-field {
@@ -70,30 +213,100 @@ h3 {
 }
 
 .link-field label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-.link-field input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #ddd;
 }
 
 .platform-icon {
-    width: 24px;
-    height: 24px;
-    vertical-align: middle;
-    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
 }
 
-.content {
+/* Кнопки */
+.form-actions {
     display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
+    gap: 15px;
     align-items: center;
-    height: 100%;
+    flex-wrap: wrap;
+}
+
+.btn-primary, .btn-secondary {
+    margin: 0;
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    line-height: 1.5;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-logout {
+    color: #ff6b6b;
+    text-decoration: none;
+    font-size: 14px;
+    margin-left: auto;
+}
+
+.btn-logout:hover {
+    color: #ff5252;
+}
+
+/* Состояние загрузки */
+.loading-state {
+    text-align: center;
+    padding: 40px;
+    color: #aaa;
+    font-style: italic;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .avatar-section {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .tabs-navigation {
+        flex-direction: column;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-logout {
+        margin-left: 0;
+        text-align: center;
+    }
 }

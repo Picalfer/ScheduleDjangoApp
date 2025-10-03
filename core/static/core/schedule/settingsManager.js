@@ -296,6 +296,7 @@ export class SettingsManager {
         // Добавляем или удаляем обработчики кликов
         if (this.isOpenWindowsMode) {
             this.addHourClickHandlers();
+            this.updateSelectedCount();
         } else {
             this.removeHourClickHandlers();
         }
@@ -356,6 +357,7 @@ export class SettingsManager {
 
             checkbox.addEventListener('change', () => {
                 hourElement.classList.toggle('open-window', checkbox.checked);
+                this.updateSelectedCount();
 
                 if (!this.openWindowStates[day]) {
                     this.openWindowStates[day] = [];
@@ -372,6 +374,7 @@ export class SettingsManager {
                 this.updateSelectedCount();
             });
         });
+        this.updateSelectedCount();
     }
 
     updateSelectedCount() {
@@ -383,17 +386,13 @@ export class SettingsManager {
             return;
         }
 
-        let selectedCount = 0;
-
-        for (const day in this.openWindowStates) {
-            for (const hour in this.openWindowStates[day]) {
-                if (this.openWindowStates[day][hour]) {
-                    selectedCount++;
-                }
-            }
-        }
+        // Считаем актуальное количество открытых окон из DOM
+        const openWindowElements = document.querySelectorAll('.hour.open-window');
+        const selectedCount = openWindowElements.length;
 
         countElement.textContent = selectedCount.toString();
         selectedCountPanel.style.display = selectedCount > 0 ? 'block' : 'none';
+
+        console.log(`Обновлен счетчик: ${selectedCount} открытых окон`);
     }
 }

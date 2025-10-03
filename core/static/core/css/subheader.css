@@ -209,17 +209,14 @@
     -ms-overflow-style: none;
     align-content: flex-start; /* Выравниваем строки по верху */
     flex-shrink: 2;
+    padding-top: 5px;
+    padding-right: 6px;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Скрываем скроллбар */
 #week-info-left::-webkit-scrollbar {
     display: none;
-}
-
-/* Убираем стандартные отступы у скролла */
-#week-info-left {
-    -webkit-overflow-scrolling: touch;
-    padding: 2px 0; /* Минимальные отступы */
 }
 
 /* Кнопки остаются как есть */
