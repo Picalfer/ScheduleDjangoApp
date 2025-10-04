@@ -1,8 +1,10 @@
 import json
 import logging
 
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User, Group
 from django.db import transaction
+from django.utils.decorators import method_decorator
 
 from .constants import EXCLUDED_TEACHERS_IDS
 from .services.payment_service import calculate_weekly_payments
@@ -10,7 +12,7 @@ from .services.payment_service import calculate_weekly_payments
 logger = logging.getLogger(__name__)
 
 from django.views.generic import TemplateView
-from django.db.models import Count, Sum, Avg, Q
+from django.db.models import Sum, Q
 from django.utils import timezone
 from datetime import timedelta
 from .models import Client, Teacher, Lesson, BalanceOperation, TeacherPayment
@@ -250,6 +252,7 @@ class TeacherListCreate(generics.ListCreateAPIView):
         return Teacher.objects.select_related('user').prefetch_related('courses').filter(
             user__is_active=True
         )
+
 
 class StudentList(generics.ListAPIView):
     queryset = Student.objects.all()
@@ -577,108 +580,38 @@ def low_balance_clients_count(request):
         return JsonResponse({'count': 0, 'error': str(e)}, status=500)
 
 
+@method_decorator(staff_member_required, name='dispatch')
 class StatsDashboardView(TemplateView):
     template_name = 'core/stats.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # 1. Клиентская статистика
-        context['client_stats'] = {
-            'total': Client.objects.count(),
-            'with_negative': Client.objects.filter(balance__lt=0).count(),
-            'low_balance': Client.objects.filter(balance__lte=2).count(),
-            'avg_balance': Client.objects.aggregate(avg=Avg('balance'))['avg'] or 0,
-        }
+        # Сумма всех пополнений в УРОКАХ
+        total_lessons_added = BalanceOperation.objects.filter(
+            operation_type='add'
+        ).aggregate(total=Sum('amount'))['total'] or 0
 
-        # 2. Статистика преподавателей
-        context['teacher_stats'] = {
-            'total': Teacher.objects.count(),
-            'active': Teacher.objects.annotate(
-                lesson_count=Count('lesson')
-            ).filter(lesson_count__gt=0).count(),
-            'unpaid_amount': TeacherPayment.objects.filter(
-                is_paid=False
-            ).aggregate(total=Sum('amount'))['total'] or 0
-        }
+        # Переводим уроки в деньги (1 урок = 1000 руб)
+        total_income = total_lessons_added * 1000
 
-        # 3. Статистика уроков
-        total_lessons = Lesson.objects.count()
-        context['lesson_stats'] = {
-            'total': total_lessons,
-            'completed': Lesson.objects.filter(status='completed').count(),
-            'canceled': Lesson.objects.filter(status='canceled').count(),
-            'cancel_rate': round(
-                Lesson.objects.filter(status='canceled').count() / total_lessons * 100,
-                2
-            ) if total_lessons > 0 else 0,
-            'by_platform': list(Lesson.objects.values('platform').annotate(
-                count=Count('id')
-            )),
-            'today': Lesson.objects.filter(date=timezone.now().date()).count()
-        }
-
-        # 4. Финансовая аналитика
         context['finance_stats'] = {
-            'monthly_income': BalanceOperation.objects.filter(
-                operation_type='add',
-                date__month=timezone.now().month
-            ).aggregate(total=Sum('amount'))['total'] or 0,
-            'teacher_payments': TeacherPayment.objects.aggregate(
-                total=Sum('amount')
-            )['total'] or 0
-        }
-
-        last_month = timezone.now() - timedelta(days=30)
-        two_months_ago = timezone.now() - timedelta(days=60)
-
-        # 5. Топ-5 преподавателей
-        context['top_teachers'] = Teacher.objects.annotate(
-            lesson_count=Count('lesson'),
-            student_count=Count('student')
-        ).order_by('-lesson_count')[:5]
-
-        # 6. Последние операции
-        context['recent_operations'] = BalanceOperation.objects.select_related(
-            'client', 'student'
-        ).order_by('-date')[:10]
-
-        workload_stats = calculate_workload_stats()
-        # В основном методе get_context_data добавляем:
-        context.update(workload_stats)
-
-        # Статистика преподавателей
-        teacher_count_month_ago = Teacher.objects.filter(
-            user__date_joined__lt=last_month,
-            user__date_joined__gte=two_months_ago
-        ).count()
-
-        teacher_count_this_month = Teacher.objects.filter(
-            user__date_joined__gte=last_month
-        ).count()
-
-        total_teachers = Teacher.objects.count()
-        active_teachers = Teacher.objects.annotate(
-            lesson_count=Count('lesson')
-        ).filter(lesson_count__gt=0).count()
-
-        context['teacher_stats'] = {
-            'total': total_teachers,
-            'new_this_month': teacher_count_this_month,
-            'growth_rate': round(
-                (teacher_count_this_month - teacher_count_month_ago) /
-                (teacher_count_month_ago or 1) * 100
-            ),
-            'growth_trend': 'positive' if teacher_count_this_month >= teacher_count_month_ago else 'negative',
-            'active': active_teachers,
-            'active_percent': round(active_teachers / total_teachers * 100) if total_teachers > 0 else 0,
-            'avg_workload': workload_stats['school_workload']  # Функция из предыдущего примера
+            'total_balance': total_income,
         }
 
         return context
 
 
-# Добавляем в get_context_data в StatsDashboardView
+@method_decorator(staff_member_required, name='dispatch')
+class FinanceDetailView(TemplateView):
+    template_name = 'core/finance_detailed.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Здесь будет полная финансовая аналитика
+        # с графиками, историей операций, отчетами и т.д.
+        return context
+
 
 def calculate_workload_stats():
     teachers = Teacher.objects.all()

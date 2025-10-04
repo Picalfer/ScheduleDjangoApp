@@ -7,145 +7,20 @@
 
 {% block content %}
     <div class="stats-container">
-        <!-- Заголовок -->
         <h1 class="stats-header">📊 Аналитика школы</h1>
         <div class="stats-updated">Обновлено: {% now "j F Y H:i" %}</div>
 
-        <!-- Основные метрики -->
-        <div class="stats-grid">
-            <!-- Клиенты -->
-            <div class="stat-card clients">
-                <h2>👥 Клиенты</h2>
-                <div class="stat-value">{{ client_stats.total }}</div>
-                <div class="stat-details">
-                    <span class="negative">🔴 {{ client_stats.with_negative }} с отрицательным балансом</span>
-                    <span>🟡 {{ client_stats.low_balance }} с низким балансом</span>
-                    <span>🟢 {{ client_stats.new_this_month }} новых за месяц</span>
-                </div>
-            </div>
-
-            <div class="stat-card teachers">
-                <h2>👨‍🏫 Преподаватели</h2>
-                <div class="stat-value">{{ teacher_stats.total }}</div>
-                <div class="stat-details">
-                    <div class="detail-row">
-                        <span class="detail-label">Новых за месяц:</span>
-                        <span class="detail-value positive">+{{ teacher_stats.new_this_month }}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Темп роста:</span>
-                        <span class="detail-value {{ teacher_stats.growth_trend }}">
-                {{ teacher_stats.growth_rate }}%
-                            {% if teacher_stats.growth_trend == 'positive' %}↑{% else %}↓{% endif %}
-            </span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Активных:</span>
-                        <span class="detail-value">{{ teacher_stats.active }} ({{ teacher_stats.active_percent }}%)</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Средняя нагрузка:</span>
-                        <span class="detail-value">{{ teacher_stats.avg_workload }}%</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Уроки -->
-            <div class="stat-card lessons">
-                <h2>📅 Уроки</h2>
-                <div class="stat-value">{{ lesson_stats.today }} сегодня</div>
-                <div class="stat-details">
-                    <span>✅ {{ lesson_stats.completed }} проведено</span>
-                    <span>❌ {{ lesson_stats.canceled }} отменено ({{ lesson_stats.cancel_rate }}%)</span>
-                    {% for platform in lesson_stats.by_platform %}
-                        <span>{{ platform.platform|title }}: {{ platform.count }}</span>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Финансы -->
+        <div class="finance-centered">
             <div class="stat-card finance">
-                <h2>💰 Финансы</h2>
-                <div class="stat-value">{{ finance_stats.monthly_income }} ₽</div>
-                <div class="stat-details">
-                    <span>Доход за месяц</span>
-                    <span class="negative">Не выплачено: {{ teacher_stats.unpaid_amount }} ₽</span>
-                </div>
-            </div>
-        </div>
+                <h2>💰 Финансы школы</h2>
 
-        <!-- Детальные таблицы -->
-        <div class="stats-tables">
-            <!-- Топ преподавателей -->
-            <div class="stats-table">
-                <h2>🏆 Топ преподавателей</h2>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Преподаватель</th>
-                        <th>Уроков</th>
-                        <th>Студентов</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for teacher in top_teachers %}
-                        <tr>
-                            <td>{{ teacher.name }}</td>
-                            <td>{{ teacher.lesson_count }}</td>
-                            <td>{{ teacher.student_count }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Последние операции -->
-            <div class="stats-table">
-                <h2>🔄 Последние операции</h2>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Дата</th>
-                        <th>Клиент</th>
-                        <th>Тип</th>
-                        <th>Сумма</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for op in recent_operations %}
-                        <tr>
-                            <td>{{ op.date|date:"d.m.Y" }}</td>
-                            <td>{{ op.client.name }}</td>
-                            <td>{{ op.get_operation_type_display }}</td>
-                            <td>{{ op.amount }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-
-        <div class="workload-section">
-            <h2>📊 Нагрузка школы: {{ school_workload }}%</h2>
-            <div class="recommendation urgent">
-                {{ recommendation }}
-            </div>
-
-            <div class="teacher-workload-carousel">
-                {% for teacher in teachers_workload %}
-                    <div class="teacher-card workload-{{ teacher.status }}">
-                        <h3>{{ teacher.teacher }}</h3>
-                        <div class="workload-bar">
-                            <div class="bar-fill" style="width: {{ teacher.workload_percent }}%"></div>
-                            <span>{{ teacher.workload_percent }}%</span>
-                        </div>
-                        <div class="workload-details">
-                            <span>Свободно: {{ teacher.available_slots }} слотов</span>
-                            <span>Занято: {{ teacher.scheduled_lessons }} уроков</span>
-                        </div>
+                <div class="finance-main">
+                    <div class="finance-balance">
+                        <div class="balance-label">Общий баланс школы</div>
+                        <div class="balance-value">{{ finance_stats.total_balance }} ₽</div>
+                        <div class="balance-subtitle">Всего заработано за всё время</div>
                     </div>
-                {% endfor %}
+                </div>
             </div>
         </div>
     </div>
