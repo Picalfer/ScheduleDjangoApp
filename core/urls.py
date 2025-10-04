@@ -3,7 +3,8 @@ from django.urls import path
 
 from . import views
 from .views import get_open_slots, update_open_slots, weekly_payments, generate_weekly_payments, mark_payment_as_paid, \
-    low_balance_clients, low_balance_clients_count, payments_count, StatsDashboardView
+    low_balance_clients, low_balance_clients_count, payments_count, StatsDashboardView, FinanceDetailView, \
+    SchoolExpenseCreateView
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -29,6 +30,8 @@ urlpatterns = [
     path('api/clients/low-balance-count/', low_balance_clients_count, name='low_balance_clients_count'),
     path('api/payments-count/', payments_count, name='payments_count'),
     path('stats/', StatsDashboardView.as_view(), name='stats_dashboard'),
+    path('finance/', FinanceDetailView.as_view(), name='finance_detailed'),
+    path('stats/add-expense/', SchoolExpenseCreateView.as_view(), name='add_school_expense'),
     path('users/create/', views.create_user, name='create_user'),
     path('users/create/success/', views.create_user_success, name='create_user_success'),
     path('users/', views.user_management, name='user_management'),
