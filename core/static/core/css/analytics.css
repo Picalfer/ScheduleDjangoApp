@@ -87,6 +87,78 @@ main {
     margin-top: 5px;
 }
 
+/* Добавляем эти стили в analytics.css */
+
+.finance-main {
+    margin-bottom: 15px;
+}
+
+.finance-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.finance-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.finance-row:last-child {
+    border-bottom: none;
+}
+
+.finance-label {
+    color: #546e7a;
+    font-size: 0.95em;
+}
+
+.finance-amount {
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+.finance-amount.positive {
+    color: #27ae60;
+}
+
+.finance-amount.negative {
+    color: #e74c3c;
+}
+
+/* Секция свободных денег */
+.free-money-section {
+    text-align: center;
+    margin: 20px 0;
+    padding: 15px;
+    background: linear-gradient(135deg, #e8f5e8, #d0f0d0);
+    border-radius: 8px;
+    border: 1px solid #a8e6a8;
+}
+
+.free-money-label {
+    font-size: 0.9em;
+    color: #27ae60;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.free-money-value {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #2e7d32;
+    margin: 5px 0;
+}
+
+.free-money-subtitle {
+    color: #388e3c;
+    font-size: 0.8em;
+}
+
 @media (max-width: 768px) {
     .stats-container {
         padding: 5px;

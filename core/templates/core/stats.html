@@ -15,10 +15,34 @@
                 <h2>💰 Финансы школы</h2>
 
                 <div class="finance-main">
+                    <!-- Основной баланс -->
                     <div class="finance-balance">
-                        <div class="balance-label">Общий баланс школы</div>
-                        <div class="balance-value">{{ finance_stats.total_balance }} ₽</div>
-                        <div class="balance-subtitle">Всего заработано за всё время</div>
+                        <div class="balance-label">Текущий баланс школы</div>
+                        <div class="balance-value">{{ finance_stats.current_balance }} ₽</div>
+                        <div class="balance-subtitle">Доходы - расходы</div>
+                    </div>
+
+                    <!-- Свободные деньги -->
+                    <div class="free-money-section">
+                        <div class="free-money-label">💎 Свободные деньги</div>
+                        <div class="free-money-value">{{ finance_stats.free_money }} ₽</div>
+                        <div class="free-money-subtitle">Можно вкладывать в развитие</div>
+                    </div>
+
+                    <!-- Детализация -->
+                    <div class="finance-details">
+                        <div class="finance-row">
+                            <span class="finance-label">Общая выручка:</span>
+                            <span class="finance-amount">{{ finance_stats.total_income }} ₽</span>
+                        </div>
+                        <div class="finance-row">
+                            <span class="finance-label">Выплачено преподавателям:</span>
+                            <span class="finance-amount negative">{{ finance_stats.total_expenses }} ₽</span>
+                        </div>
+                        <div class="finance-row">
+                            <span class="finance-label">Зарезервировано для выплат:</span>
+                            <span class="finance-amount warning">{{ finance_stats.reserved_money }} ₽</span>
+                        </div>
                     </div>
                 </div>
             </div>

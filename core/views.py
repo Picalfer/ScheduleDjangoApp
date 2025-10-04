@@ -587,16 +587,38 @@ class StatsDashboardView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Сумма всех пополнений в УРОКАХ
-        total_lessons_added = BalanceOperation.objects.filter(
-            operation_type='add'
-        ).aggregate(total=Sum('amount'))['total'] or 0
+        # 1. ОБЩИЕ ДОХОДЫ - исключая клиентов с исключенными преподавателями
+        excluded_clients = Client.objects.filter(
+            students__teacher__user__id__in=EXCLUDED_TEACHERS_IDS
+        ).distinct()
 
-        # Переводим уроки в деньги (1 урок = 1000 руб)
+        included_operations = BalanceOperation.objects.filter(
+            operation_type='add'
+        ).exclude(client__in=excluded_clients)
+
+        total_lessons_added = included_operations.aggregate(total=Sum('amount'))['total'] or 0
         total_income = total_lessons_added * 1000
 
+        # 2. ОБЩИЕ РАСХОДЫ - исключая выплаты исключенным преподавателям
+        included_payments = TeacherPayment.objects.exclude(
+            teacher__user__id__in=EXCLUDED_TEACHERS_IDS
+        )
+
+        total_expenses_result = included_payments.aggregate(total=Sum('amount'))
+        total_expenses = float(total_expenses_result['total'] or 0)
+
+        # 3. ТЕКУЩИЙ БАЛАНС ШКОЛЫ
+        current_balance = total_income - total_expenses
+
+        # 4. СВОБОДНЫЕ ДЕНЬГИ
+        free_money = current_balance / 2
+
         context['finance_stats'] = {
-            'total_balance': total_income,
+            'current_balance': int(current_balance),
+            'total_income': int(total_income),
+            'total_expenses': int(total_expenses),
+            'free_money': int(free_money),
+            'reserved_money': int(current_balance / 2),
         }
 
         return context
@@ -611,69 +633,6 @@ class FinanceDetailView(TemplateView):
         # Здесь будет полная финансовая аналитика
         # с графиками, историей операций, отчетами и т.д.
         return context
-
-
-def calculate_workload_stats():
-    teachers = Teacher.objects.all()
-    workload_data = []
-    total_slots = 0
-    total_lessons = 0
-
-    for teacher in teachers:
-        try:
-            open_slots = OpenSlots.objects.get(teacher=teacher).weekly_open_slots
-            # Считаем количество доступных слотов
-            available_slots = sum(len(slots) for day, slots in open_slots.items() if slots)
-
-            # Считаем запланированные уроки
-            scheduled_lessons = Lesson.objects.filter(
-                teacher=teacher,
-                status='scheduled',
-                date__gte=timezone.now().date(),
-                date__lte=timezone.now().date() + timedelta(days=7)
-            ).count()
-
-            # Расчет нагрузки
-            workload_percent = min(100,
-                                   round((scheduled_lessons / available_slots * 100)) if available_slots > 0 else 0)
-
-            workload_data.append({
-                'teacher': teacher.name,
-                'available_slots': available_slots,
-                'scheduled_lessons': scheduled_lessons,
-                'workload_percent': workload_percent,
-                'status': get_workload_status(workload_percent)
-            })
-
-            total_slots += available_slots
-            total_lessons += scheduled_lessons
-
-        except OpenSlots.DoesNotExist:
-            continue
-
-    # Общая нагрузка школы
-    school_workload = min(100, round((total_lessons / total_slots * 100)) if total_slots > 0 else 0)
-
-    # Рекомендации
-    recommendation = "Оптимальная нагрузка"
-    if school_workload > 85:
-        recommendation = "❗ Высокая нагрузка - требуется поиск новых преподавателей"
-    elif school_workload < 30:
-        recommendation = "⚠️ Низкая загрузка - можно набирать больше клиентов"
-
-    return {
-        'teachers_workload': sorted(workload_data, key=lambda x: x['workload_percent'], reverse=True),
-        'school_workload': school_workload,
-        'recommendation': recommendation
-    }
-
-
-def get_workload_status(percent):
-    if percent > 80:
-        return "danger"
-    elif percent > 60:
-        return "warning"
-    return "success"
 
 
 @user_passes_test(is_administrator)
