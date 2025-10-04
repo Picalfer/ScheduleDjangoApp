@@ -1,5 +1,6 @@
 import json
 import logging
+from decimal import Decimal
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User, Group
@@ -621,8 +622,11 @@ class StatsDashboardView(TemplateView):
         current_balance = total_income - total_expenses
 
         # 4. СВОБОДНЫЕ ДЕНЬГИ - берем из сохраненного баланса
-        free_money_balance = FreeMoneyBalance.objects.first()
-        free_money = float(free_money_balance.current_balance) if free_money_balance else 0
+        free_money_balance, _ = FreeMoneyBalance.objects.get_or_create(
+            id=1,
+            defaults={'current_balance': Decimal('0.00')}
+        )
+        free_money = float(free_money_balance.current_balance)
 
         # 5. ЗАРЕЗЕРВИРОВАННЫЕ ДЕНЬГИ
         reserved_money = current_balance - free_money

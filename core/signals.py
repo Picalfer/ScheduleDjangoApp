@@ -25,9 +25,10 @@ def update_free_money_on_income(sender, instance, created, **kwargs):
     try:
         if created and instance.operation_type == 'add':
             with transaction.atomic():
-                free_money_balance = FreeMoneyBalance.objects.first()
-                if not free_money_balance:
-                    free_money_balance = FreeMoneyBalance.objects.create(current_balance=0)
+                free_money_balance, _ = FreeMoneyBalance.objects.get_or_create(
+                    id=1,
+                    defaults={'current_balance': Decimal('0.00')}
+                )
 
                 income_in_rub = instance.amount * 1000
                 free_money_to_add = Decimal(income_in_rub) / Decimal(2)
