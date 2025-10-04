@@ -502,6 +502,15 @@ class Lesson(models.Model):
             logger.error(f'Ошибка расчета даты для урока {self.id}: {str(e)}')
             return None, None
 
+    def save(self, *args, **kwargs):
+        if self.lesson_type == 'single' or self.lesson_type == 'demo':
+            self.schedule = []  # Очищаем расписание для разовых и вводных уроков
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Урок'
+        verbose_name_plural = 'Уроки'
+
 
 class TeacherPayment(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='payments')
