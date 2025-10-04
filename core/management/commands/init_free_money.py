@@ -1,9 +1,11 @@
+# core/management/commands/init_free_money.py
 from decimal import Decimal
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from core.models import FreeMoneyBalance, BalanceOperation, SchoolExpense
+from core.constants import EXCLUDED_TEACHERS_IDS
+from core.models import FreeMoneyBalance, BalanceOperation, SchoolExpense, TeacherPayment, Client
 
 
 class Command(BaseCommand):
@@ -17,23 +19,30 @@ class Command(BaseCommand):
                 defaults={'current_balance': Decimal('0.00')}
             )
 
-            if created:
-                self.stdout.write('✅ Создан новый баланс свободных денег')
-            else:
-                self.stdout.write('ℹ️  Баланс свободных денег уже существует')
+            # Исключаем клиентов с исключенными преподавателями
+            excluded_clients = Client.objects.filter(
+                students__teacher__user__id__in=EXCLUDED_TEACHERS_IDS
+            ).distinct()
 
-            # Пересчитываем на основе всех исторических пополнений
-            total_income_operations = BalanceOperation.objects.filter(
+            # Доходы (только включенные операции)
+            included_operations = BalanceOperation.objects.filter(
                 operation_type='add'
+            ).exclude(client__in=excluded_clients)
+
+            total_income = sum(op.amount * 1000 for op in included_operations)
+
+            # Расходы (только включенные выплаты)
+            included_payments = TeacherPayment.objects.exclude(
+                teacher__user__id__in=EXCLUDED_TEACHERS_IDS
             )
+            teacher_expenses = sum(float(payment.amount) for payment in included_payments)
 
-            total_income = sum(op.amount * 1000 for op in total_income_operations)
-            theoretical_free_money = total_income / 2
+            school_expenses = sum(float(exp.amount) for exp in SchoolExpense.objects.all())
 
-            # Вычитаем все школьные расходы
-            total_school_expenses = sum(float(exp.amount) for exp in SchoolExpense.objects.all())
-
-            final_free_money = max(theoretical_free_money - total_school_expenses, 0)
+            # ПРАВИЛЬНЫЙ РАСЧЕТ (как в view)
+            school_money = total_income / 2
+            already_spent_from_school_money = teacher_expenses + school_expenses
+            final_free_money = max(school_money - already_spent_from_school_money, 0)
 
             free_money_balance.current_balance = Decimal(str(final_free_money))
             free_money_balance.save()
@@ -41,7 +50,10 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.SUCCESS(
                     f'✅ Баланс свободных денег инициализирован: {final_free_money} ₽\n'
-                    f'   На основе {total_income_operations.count()} операций пополнения\n'
-                    f'   и {SchoolExpense.objects.count()} школьных расходов'
+                    f'   Доходы: {total_income} ₽\n'
+                    f'   Деньги школы (50%): {school_money} ₽\n'
+                    f'   Уже потрачено из денег школы: {already_spent_from_school_money} ₽\n'
+                    f'   (выплаты преподавателям: {teacher_expenses} ₽)\n'
+                    f'   (школьные расходы: {school_expenses} ₽)'
                 )
             )
