@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'safedelete',
     'phonenumber_field',
     'pwa',
+    'django.contrib.humanize',
 ]
 
 if DEBUG:

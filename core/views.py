@@ -1,19 +1,23 @@
 import json
 import logging
+from decimal import Decimal
 
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User, Group
 from django.db import transaction
+from django.http import JsonResponse
+from django.utils.decorators import method_decorator
 
 from .constants import EXCLUDED_TEACHERS_IDS
 from .services.payment_service import calculate_weekly_payments
 
 logger = logging.getLogger(__name__)
 
-from django.views.generic import TemplateView
-from django.db.models import Count, Sum, Avg, Q
+from django.views.generic import TemplateView, CreateView
+from django.db.models import Sum, Q
 from django.utils import timezone
 from datetime import timedelta
-from .models import Client, Teacher, Lesson, BalanceOperation, TeacherPayment
+from .models import Client, Teacher, Lesson, BalanceOperation, TeacherPayment, SchoolExpense, FreeMoneyBalance
 
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
@@ -23,7 +27,6 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db.models import Prefetch
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
 from django.utils.timezone import now
@@ -250,6 +253,7 @@ class TeacherListCreate(generics.ListCreateAPIView):
         return Teacher.objects.select_related('user').prefetch_related('courses').filter(
             user__is_active=True
         )
+
 
 class StudentList(generics.ListAPIView):
     queryset = Student.objects.all()
@@ -577,170 +581,101 @@ def low_balance_clients_count(request):
         return JsonResponse({'count': 0, 'error': str(e)}, status=500)
 
 
+@method_decorator(staff_member_required, name='dispatch')
 class StatsDashboardView(TemplateView):
     template_name = 'core/stats.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # 1. Клиентская статистика
-        context['client_stats'] = {
-            'total': Client.objects.count(),
-            'with_negative': Client.objects.filter(balance__lt=0).count(),
-            'low_balance': Client.objects.filter(balance__lte=2).count(),
-            'avg_balance': Client.objects.aggregate(avg=Avg('balance'))['avg'] or 0,
-        }
+        EXCLUDED_TEACHERS_IDS = list(
+            User.objects.filter(
+                Q(first_name='Мария', last_name='Вакулина') |
+                Q(first_name='Артур', last_name='Кожемякин') |
+                Q(first_name='Тестовый', last_name='Препод')
+            ).values_list('id', flat=True)
+        )
 
-        # 2. Статистика преподавателей
-        context['teacher_stats'] = {
-            'total': Teacher.objects.count(),
-            'active': Teacher.objects.annotate(
-                lesson_count=Count('lesson')
-            ).filter(lesson_count__gt=0).count(),
-            'unpaid_amount': TeacherPayment.objects.filter(
-                is_paid=False
-            ).aggregate(total=Sum('amount'))['total'] or 0
-        }
+        # 1. ОБЩИЕ ДОХОДЫ
+        excluded_clients = Client.objects.filter(
+            students__teacher__user__id__in=EXCLUDED_TEACHERS_IDS
+        ).distinct()
 
-        # 3. Статистика уроков
-        total_lessons = Lesson.objects.count()
-        context['lesson_stats'] = {
-            'total': total_lessons,
-            'completed': Lesson.objects.filter(status='completed').count(),
-            'canceled': Lesson.objects.filter(status='canceled').count(),
-            'cancel_rate': round(
-                Lesson.objects.filter(status='canceled').count() / total_lessons * 100,
-                2
-            ) if total_lessons > 0 else 0,
-            'by_platform': list(Lesson.objects.values('platform').annotate(
-                count=Count('id')
-            )),
-            'today': Lesson.objects.filter(date=timezone.now().date()).count()
-        }
+        included_operations = BalanceOperation.objects.filter(
+            operation_type='add'
+        ).exclude(client__in=excluded_clients)
 
-        # 4. Финансовая аналитика
+        total_lessons_added = included_operations.aggregate(total=Sum('amount'))['total'] or 0
+        total_income = total_lessons_added * 1000
+
+        # 2. РАСХОДЫ
+        included_payments = TeacherPayment.objects.exclude(
+            teacher__user__id__in=EXCLUDED_TEACHERS_IDS
+        )
+        teacher_expenses = float(included_payments.aggregate(total=Sum('amount'))['total'] or 0)
+
+        school_expenses = float(SchoolExpense.objects.aggregate(total=Sum('amount'))['total'] or 0)
+
+        total_expenses = teacher_expenses + school_expenses
+
+        # 3. ТЕКУЩИЙ БАЛАНС
+        current_balance = total_income - total_expenses
+
+        # 4. СВОБОДНЫЕ ДЕНЬГИ - берем из сохраненного баланса
+        free_money_balance, _ = FreeMoneyBalance.objects.get_or_create(
+            id=1,
+            defaults={'current_balance': Decimal('0.00')}
+        )
+        free_money = float(free_money_balance.current_balance)
+
+        # 5. ЗАРЕЗЕРВИРОВАННЫЕ ДЕНЬГИ
+        reserved_money = current_balance - free_money
+
         context['finance_stats'] = {
-            'monthly_income': BalanceOperation.objects.filter(
-                operation_type='add',
-                date__month=timezone.now().month
-            ).aggregate(total=Sum('amount'))['total'] or 0,
-            'teacher_payments': TeacherPayment.objects.aggregate(
-                total=Sum('amount')
-            )['total'] or 0
-        }
-
-        last_month = timezone.now() - timedelta(days=30)
-        two_months_ago = timezone.now() - timedelta(days=60)
-
-        # 5. Топ-5 преподавателей
-        context['top_teachers'] = Teacher.objects.annotate(
-            lesson_count=Count('lesson'),
-            student_count=Count('student')
-        ).order_by('-lesson_count')[:5]
-
-        # 6. Последние операции
-        context['recent_operations'] = BalanceOperation.objects.select_related(
-            'client', 'student'
-        ).order_by('-date')[:10]
-
-        workload_stats = calculate_workload_stats()
-        # В основном методе get_context_data добавляем:
-        context.update(workload_stats)
-
-        # Статистика преподавателей
-        teacher_count_month_ago = Teacher.objects.filter(
-            user__date_joined__lt=last_month,
-            user__date_joined__gte=two_months_ago
-        ).count()
-
-        teacher_count_this_month = Teacher.objects.filter(
-            user__date_joined__gte=last_month
-        ).count()
-
-        total_teachers = Teacher.objects.count()
-        active_teachers = Teacher.objects.annotate(
-            lesson_count=Count('lesson')
-        ).filter(lesson_count__gt=0).count()
-
-        context['teacher_stats'] = {
-            'total': total_teachers,
-            'new_this_month': teacher_count_this_month,
-            'growth_rate': round(
-                (teacher_count_this_month - teacher_count_month_ago) /
-                (teacher_count_month_ago or 1) * 100
-            ),
-            'growth_trend': 'positive' if teacher_count_this_month >= teacher_count_month_ago else 'negative',
-            'active': active_teachers,
-            'active_percent': round(active_teachers / total_teachers * 100) if total_teachers > 0 else 0,
-            'avg_workload': workload_stats['school_workload']  # Функция из предыдущего примера
+            'current_balance': int(current_balance),
+            'total_income': int(total_income),
+            'total_expenses': int(total_expenses),
+            'teacher_expenses': int(teacher_expenses),
+            'school_expenses': int(school_expenses),
+            'free_money': int(free_money),
+            'reserved_money': int(reserved_money),
         }
 
         return context
 
 
-# Добавляем в get_context_data в StatsDashboardView
+@method_decorator(csrf_exempt, name='dispatch')
+class SchoolExpenseCreateView(CreateView):
+    model = SchoolExpense
+    fields = ['category', 'amount', 'description', 'expense_date']
 
-def calculate_workload_stats():
-    teachers = Teacher.objects.all()
-    workload_data = []
-    total_slots = 0
-    total_lessons = 0
-
-    for teacher in teachers:
-        try:
-            open_slots = OpenSlots.objects.get(teacher=teacher).weekly_open_slots
-            # Считаем количество доступных слотов
-            available_slots = sum(len(slots) for day, slots in open_slots.items() if slots)
-
-            # Считаем запланированные уроки
-            scheduled_lessons = Lesson.objects.filter(
-                teacher=teacher,
-                status='scheduled',
-                date__gte=timezone.now().date(),
-                date__lte=timezone.now().date() + timedelta(days=7)
-            ).count()
-
-            # Расчет нагрузки
-            workload_percent = min(100,
-                                   round((scheduled_lessons / available_slots * 100)) if available_slots > 0 else 0)
-
-            workload_data.append({
-                'teacher': teacher.name,
-                'available_slots': available_slots,
-                'scheduled_lessons': scheduled_lessons,
-                'workload_percent': workload_percent,
-                'status': get_workload_status(workload_percent)
+    def form_valid(self, form):
+        expense = form.save()
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'message': 'Расход успешно добавлен'
             })
+        return super().form_valid(form)
 
-            total_slots += available_slots
-            total_lessons += scheduled_lessons
-
-        except OpenSlots.DoesNotExist:
-            continue
-
-    # Общая нагрузка школы
-    school_workload = min(100, round((total_lessons / total_slots * 100)) if total_slots > 0 else 0)
-
-    # Рекомендации
-    recommendation = "Оптимальная нагрузка"
-    if school_workload > 85:
-        recommendation = "❗ Высокая нагрузка - требуется поиск новых преподавателей"
-    elif school_workload < 30:
-        recommendation = "⚠️ Низкая загрузка - можно набирать больше клиентов"
-
-    return {
-        'teachers_workload': sorted(workload_data, key=lambda x: x['workload_percent'], reverse=True),
-        'school_workload': school_workload,
-        'recommendation': recommendation
-    }
+    def form_invalid(self, form):
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'error': 'Пожалуйста, проверьте введенные данные'
+            })
+        return super().form_invalid(form)
 
 
-def get_workload_status(percent):
-    if percent > 80:
-        return "danger"
-    elif percent > 60:
-        return "warning"
-    return "success"
+@method_decorator(staff_member_required, name='dispatch')
+class FinanceDetailView(TemplateView):
+    template_name = 'core/finance_detailed.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Здесь будет полная финансовая аналитика
+        # с графиками, историей операций, отчетами и т.д.
+        return context
 
 
 @user_passes_test(is_administrator)

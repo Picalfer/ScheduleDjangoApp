@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timedelta, time
+from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -502,6 +503,15 @@ class Lesson(models.Model):
             logger.error(f'Ошибка расчета даты для урока {self.id}: {str(e)}')
             return None, None
 
+    def save(self, *args, **kwargs):
+        if self.lesson_type == 'single' or self.lesson_type == 'demo':
+            self.schedule = []  # Очищаем расписание для разовых и вводных уроков
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Урок'
+        verbose_name_plural = 'Уроки'
+
 
 class TeacherPayment(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='payments')
@@ -526,3 +536,66 @@ class TeacherPayment(models.Model):
 
     def __str__(self):
         return f"{self.teacher} - {self.week_start_date} ({self.amount} руб.)"
+
+
+class SchoolExpense(models.Model):
+    EXPENSE_CATEGORIES = [
+        ('advertising', 'Реклама'),
+        ('software', 'Софт/Подписки'),
+        ('taxes', 'Налоги'),
+        ('other', 'Другое'),
+    ]
+
+    category = models.CharField(
+        max_length=20,
+        choices=EXPENSE_CATEGORIES,
+        verbose_name='Категория расхода'
+    )
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name='Сумма'
+    )
+    description = models.CharField(
+        max_length=200,
+        verbose_name='Описание'
+    )
+    expense_date = models.DateField(
+        default=timezone.now,
+        verbose_name='Дата расхода'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Расход школы'
+        verbose_name_plural = 'Расходы школы'
+        ordering = ['-expense_date']
+
+    def __str__(self):
+        return f"{self.get_category_display()} - {self.amount} ₽ ({self.expense_date})"
+
+
+class FreeMoneyBalance(models.Model):
+    current_balance = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name='Текущий баланс'
+    )
+    last_updated = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Последнее обновление'
+    )
+
+    class Meta:
+        verbose_name = 'Баланс свободных денег'
+        verbose_name_plural = 'Баланс свободных денег'
+
+    def __str__(self):
+        return f"Свободные деньги: {self.current_balance} ₽"
+
+    def save(self, *args, **kwargs):
+        # Гарантируем что есть только одна запись
+        if not self.pk and FreeMoneyBalance.objects.exists():
+            raise ValidationError('Может существовать только один баланс свободных денег')
+        super().save(*args, **kwargs)
