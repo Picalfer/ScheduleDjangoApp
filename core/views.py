@@ -4,6 +4,7 @@ import logging
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User, Group
 from django.db import transaction
+from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 
 from .constants import EXCLUDED_TEACHERS_IDS
@@ -11,11 +12,11 @@ from .services.payment_service import calculate_weekly_payments
 
 logger = logging.getLogger(__name__)
 
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, CreateView
 from django.db.models import Sum, Q
 from django.utils import timezone
 from datetime import timedelta
-from .models import Client, Teacher, Lesson, BalanceOperation, TeacherPayment
+from .models import Client, Teacher, Lesson, BalanceOperation, TeacherPayment, SchoolExpense, FreeMoneyBalance
 
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
@@ -25,7 +26,6 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db.models import Prefetch
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
 from django.utils.timezone import now
@@ -587,7 +587,15 @@ class StatsDashboardView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # 1. ОБЩИЕ ДОХОДЫ - исключая клиентов с исключенными преподавателями
+        EXCLUDED_TEACHERS_IDS = list(
+            User.objects.filter(
+                Q(first_name='Мария', last_name='Вакулина') |
+                Q(first_name='Артур', last_name='Кожемякин') |
+                Q(first_name='Тестовый', last_name='Препод')
+            ).values_list('id', flat=True)
+        )
+
+        # 1. ОБЩИЕ ДОХОДЫ
         excluded_clients = Client.objects.filter(
             students__teacher__user__id__in=EXCLUDED_TEACHERS_IDS
         ).distinct()
@@ -599,29 +607,60 @@ class StatsDashboardView(TemplateView):
         total_lessons_added = included_operations.aggregate(total=Sum('amount'))['total'] or 0
         total_income = total_lessons_added * 1000
 
-        # 2. ОБЩИЕ РАСХОДЫ - исключая выплаты исключенным преподавателям
+        # 2. РАСХОДЫ
         included_payments = TeacherPayment.objects.exclude(
             teacher__user__id__in=EXCLUDED_TEACHERS_IDS
         )
+        teacher_expenses = float(included_payments.aggregate(total=Sum('amount'))['total'] or 0)
 
-        total_expenses_result = included_payments.aggregate(total=Sum('amount'))
-        total_expenses = float(total_expenses_result['total'] or 0)
+        school_expenses = float(SchoolExpense.objects.aggregate(total=Sum('amount'))['total'] or 0)
 
-        # 3. ТЕКУЩИЙ БАЛАНС ШКОЛЫ
+        total_expenses = teacher_expenses + school_expenses
+
+        # 3. ТЕКУЩИЙ БАЛАНС
         current_balance = total_income - total_expenses
 
-        # 4. СВОБОДНЫЕ ДЕНЬГИ
-        free_money = current_balance / 2
+        # 4. СВОБОДНЫЕ ДЕНЬГИ - берем из сохраненного баланса
+        free_money_balance = FreeMoneyBalance.objects.first()
+        free_money = float(free_money_balance.current_balance) if free_money_balance else 0
+
+        # 5. ЗАРЕЗЕРВИРОВАННЫЕ ДЕНЬГИ
+        reserved_money = current_balance - free_money
 
         context['finance_stats'] = {
             'current_balance': int(current_balance),
             'total_income': int(total_income),
             'total_expenses': int(total_expenses),
+            'teacher_expenses': int(teacher_expenses),
+            'school_expenses': int(school_expenses),
             'free_money': int(free_money),
-            'reserved_money': int(current_balance / 2),
+            'reserved_money': int(reserved_money),
         }
 
         return context
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class SchoolExpenseCreateView(CreateView):
+    model = SchoolExpense
+    fields = ['category', 'amount', 'description', 'expense_date']
+
+    def form_valid(self, form):
+        expense = form.save()
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'message': 'Расход успешно добавлен'
+            })
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'error': 'Пожалуйста, проверьте введенные данные'
+            })
+        return super().form_invalid(form)
 
 
 @method_decorator(staff_member_required, name='dispatch')
