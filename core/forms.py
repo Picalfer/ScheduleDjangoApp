@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 
-from core.models import Lesson
+from core.models import Lesson, FinanceEvent
 from core.widgets import ScheduleWidget
 
 
@@ -38,3 +38,9 @@ class LessonAdminForm(forms.ModelForm):
         widgets = {
             'schedule': ScheduleWidget(),
         }
+
+
+class FinanceEventForm(forms.ModelForm):
+    class Meta:
+        model = FinanceEvent
+        fields = ['event_type', 'amount']

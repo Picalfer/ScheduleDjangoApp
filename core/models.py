@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime, timedelta, time
-from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -575,27 +574,73 @@ class SchoolExpense(models.Model):
         return f"{self.get_category_display()} - {self.amount} ₽ ({self.expense_date})"
 
 
-class FreeMoneyBalance(models.Model):
-    current_balance = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        default=Decimal('0.00'),
-        verbose_name='Текущий баланс'
-    )
-    last_updated = models.DateTimeField(
-        auto_now=True,
-        verbose_name='Последнее обновление'
-    )
+from django.conf import settings
+from django.db import transaction
+from django.core.validators import MinValueValidator
+from decimal import Decimal
+from django.db import models
+from django.utils import timezone
+
+
+class FinanceEvent(models.Model):
+    EVENT_INCOME = 'INCOME'
+    EVENT_EXPENSE = 'EXPENSE'
+    EVENT_RESERVE = 'RESERVE'
+    EVENT_RELEASE = 'RELEASE'
+
+    EVENT_TYPES = [
+        (EVENT_INCOME, 'Доход'),
+        (EVENT_EXPENSE, 'Расход'),
+        (EVENT_RESERVE, 'Резервирование'),
+        (EVENT_RELEASE, 'Снятие резерва'),
+    ]
+
+    event_type = models.CharField(max_length=20, choices=EVENT_TYPES)
+    amount = models.DecimalField(max_digits=14, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))])
+    currency = models.CharField(max_length=3, default='RUB')
+    metadata = models.JSONField(default=dict, blank=True)
+    external_id = models.CharField(max_length=128, null=True, blank=True, unique=True,
+                                   help_text="Опциональный уникальный ключ от внешней системы для идемпотентности")
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                                   on_delete=models.SET_NULL, related_name='finance_events')
+    created_at = models.DateTimeField(default=timezone.now, db_index=True)
 
     class Meta:
-        verbose_name = 'Баланс свободных денег'
-        verbose_name_plural = 'Баланс свободных денег'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['created_at']),
+            models.Index(fields=['event_type']),
+        ]
 
     def __str__(self):
-        return f"Свободные деньги: {self.current_balance} ₽"
+        return f"{self.get_event_type_display()} {self.amount} {self.currency} at {self.created_at.isoformat()}"
 
     def save(self, *args, **kwargs):
-        # Гарантируем что есть только одна запись
-        if not self.pk and FreeMoneyBalance.objects.exists():
-            raise ValidationError('Может существовать только один баланс свободных денег')
+        if self.pk:
+            raise ValueError("FinanceEvent is immutable and cannot be updated once created.")
         super().save(*args, **kwargs)
+
+    @classmethod
+    def create_idempotent(cls, *, external_id=None, **kwargs):
+        if external_id:
+            with transaction.atomic():
+                obj, created = cls.objects.get_or_create(external_id=external_id, defaults=kwargs)
+                return obj, created
+        else:
+            obj = cls(**kwargs)
+            obj.save()
+            return obj, True
+
+
+class FinanceSnapshot(models.Model):
+    created_at = models.DateTimeField(default=timezone.now, db_index=True)
+    total_balance = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal('0.00'))
+    reserved_amount = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal('0.00'))
+    free_amount = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal('0.00'))
+    last_event_id = models.BigIntegerField(null=True, blank=True, db_index=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Snapshot @ {self.created_at.isoformat()} total={self.total_balance} reserved={self.reserved_amount}"
