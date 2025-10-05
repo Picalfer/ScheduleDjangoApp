@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.utils import timezone
 
-from core.constants import EXCLUDED_TEACHERS_IDS
+from core.constants import get_excluded_teacher_ids
 from core.models import Lesson, Teacher, TeacherPayment
 
 
@@ -20,7 +20,7 @@ def calculate_weekly_payments():
     )
 
     # Получаем всех учителей, кроме исключенных
-    teachers = Teacher.objects.exclude(user__id__in=EXCLUDED_TEACHERS_IDS)
+    teachers = Teacher.objects.exclude(user__id__in=get_excluded_teacher_ids())
 
     for teacher in teachers:
         teacher_lessons = completed_lessons.filter(teacher=teacher)

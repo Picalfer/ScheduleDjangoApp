@@ -5,7 +5,7 @@ from django.contrib.auth.models import User, Group
 from django.db import transaction
 from django.utils.decorators import method_decorator
 
-from .constants import EXCLUDED_TEACHERS_IDS
+from .constants import get_excluded_teacher_ids
 from .services.payment_service import calculate_weekly_payments
 
 logger = logging.getLogger(__name__)
@@ -516,7 +516,7 @@ def get_filtered_low_balance_clients_queryset():
             Student.objects.filter(
                 client_id=OuterRef('id'),
                 teacher__user__isnull=False
-            ).exclude(teacher__user__id__in=EXCLUDED_TEACHERS_IDS)
+            ).exclude(teacher__user__id__in=get_excluded_teacher_ids())
         )
     ).filter(has_valid_student=True)
 
@@ -547,7 +547,7 @@ def low_balance_clients(request):
                     'id': student.id,
                     'name': student.name,
                     'teacher': teacher_name,
-                    'is_excluded_teacher': teacher and teacher.user.id in EXCLUDED_TEACHERS_IDS,
+                    'is_excluded_teacher': teacher and teacher.user.id in get_excluded_teacher_ids(),
                     'notes': student.notes
                 })
 
