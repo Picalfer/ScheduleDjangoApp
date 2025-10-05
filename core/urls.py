@@ -33,4 +33,8 @@ urlpatterns = [
     path('users/create/', views.create_user, name='create_user'),
     path('users/create/success/', views.create_user_success, name='create_user_success'),
     path('users/', views.user_management, name='user_management'),
+    path('api/finance/balance/', views.finance_balance, name='finance_balance'),
+    path('api/finance/events/', views.finance_events, name='finance_events'),
+    path('api/finance/snapshots/', views.finance_snapshots, name='finance_snapshots'),
+    path('finance/events/create/', views.finance_event_create, name='finance_event_create'),
 ]

@@ -1,10 +1,8 @@
 import json
 import logging
 
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User, Group
 from django.db import transaction
-from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 
 from .constants import EXCLUDED_TEACHERS_IDS
@@ -12,11 +10,10 @@ from .services.payment_service import calculate_weekly_payments
 
 logger = logging.getLogger(__name__)
 
-from django.views.generic import TemplateView, CreateView
-from django.db.models import Sum, Q
-from django.utils import timezone
+from django.views.generic import CreateView
+from django.db.models import Q
 from datetime import timedelta
-from .models import Client, Teacher, Lesson, BalanceOperation, TeacherPayment, SchoolExpense
+from .models import Client, Teacher, Lesson, TeacherPayment, SchoolExpense
 
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
@@ -27,7 +24,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
-from django.shortcuts import render, redirect
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
@@ -580,65 +576,6 @@ def low_balance_clients_count(request):
         return JsonResponse({'count': 0, 'error': str(e)}, status=500)
 
 
-@method_decorator(staff_member_required, name='dispatch')
-class StatsDashboardView(TemplateView):
-    template_name = 'core/stats.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        # 1. ОБЩИЕ ДОХОДЫ (оставить)
-        excluded_clients = Client.objects.filter(
-            students__teacher__user__id__in=EXCLUDED_TEACHERS_IDS
-        ).distinct()
-
-        included_operations = BalanceOperation.objects.filter(
-            operation_type='add'
-        ).exclude(client__in=excluded_clients)
-
-        total_lessons_added = included_operations.aggregate(total=Sum('amount'))['total'] or 0
-        total_income = total_lessons_added * 1000
-
-        # 2. РАСХОДЫ (оставить)
-        included_payments = TeacherPayment.objects.exclude(
-            teacher__user__id__in=EXCLUDED_TEACHERS_IDS
-        )
-        teacher_expenses = float(included_payments.aggregate(total=Sum('amount'))['total'] or 0)
-
-        school_expenses = float(SchoolExpense.objects.aggregate(total=Sum('amount'))['total'] or 0)
-
-        total_expenses = teacher_expenses + school_expenses
-
-        # 3. ТЕКУЩИЙ БАЛАНС (оставить)
-        current_balance = total_income - total_expenses
-
-        # ❌❌❌ УДАЛИ ЭТОТ БЛОК ❌❌❌
-        # 4. СВОБОДНЫЕ ДЕНЬГИ - берем из сохраненного баланса
-        # free_money_balance, _ = FreeMoneyBalance.objects.get_or_create(...)
-        # free_money = float(free_money_balance.current_balance)
-
-        # ❌❌❌ УДАЛИ ЭТОТ БЛОК ❌❌❌
-        # 5. ЗАРЕЗЕРВИРОВАННЫЕ ДЕНЬГИ
-        # reserved_money = current_balance - free_money
-
-        # ВРЕМЕННО - считаем free_money по упрощенной формуле
-        free_money = total_income / 2 - school_expenses
-        reserved_money = current_balance - free_money
-
-        # Остальное оставить...
-        context['finance_stats'] = {
-            'current_balance': int(current_balance),
-            'total_income': int(total_income),
-            'total_expenses': int(total_expenses),
-            'teacher_expenses': int(teacher_expenses),
-            'school_expenses': int(school_expenses),
-            'free_money': int(free_money),
-            'reserved_money': int(reserved_money),
-        }
-
-        return context
-
-
 @method_decorator(csrf_exempt, name='dispatch')
 class SchoolExpenseCreateView(CreateView):
     model = SchoolExpense
@@ -786,4 +723,159 @@ def create_user_success(request):
         'user_data': user_data,
         'copy_text': copy_text,
         'site_url': site_url
+    })
+
+
+from django.utils.decorators import method_decorator
+from django.views.generic import TemplateView
+from django.contrib.admin.views.decorators import staff_member_required
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class StatsDashboardView(TemplateView):
+    template_name = 'core/stats.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Берём последний снапшот — это актуальное состояние школы
+        snapshot = FinanceSnapshot.objects.order_by('-created_at').first()
+
+        if not snapshot:
+            # если снапшотов ещё нет — пока заглушка
+            finance_stats = {
+                'current_balance': 0,
+                'total_income': 0,
+                'total_expenses': 0,
+                'teacher_expenses': 0,
+                'school_expenses': 0,
+                'free_money': 0,
+                'reserved_money': 0,
+            }
+        else:
+            finance_stats = {
+                # В твоей системе current_balance = total_balance
+                'current_balance': float(snapshot.total_balance),
+                # Общий доход — можно хранить отдельной логикой, но пока считаем так:
+                'total_income': float(snapshot.total_balance + snapshot.reserved_amount),
+                # Общие расходы — разница между доходом и балансом
+                'total_expenses': float(snapshot.reserved_amount),
+                # Если хочешь пока разделить вручную (позже привяжем к типам событий)
+                'teacher_expenses': float(snapshot.reserved_amount),
+                'school_expenses': 0,
+                'free_money': float(snapshot.free_amount),
+                'reserved_money': float(snapshot.reserved_amount),
+            }
+
+        context['finance_stats'] = finance_stats
+        return context
+
+
+from django.http import JsonResponse
+
+
+def finance_balance(request):
+    """Возвращает последний снапшот баланса."""
+    latest = FinanceSnapshot.objects.order_by('-created_at').first()
+    if not latest:
+        data = {
+            'total_balance': 0,
+            'reserved_amount': 0,
+            'free_amount': 0,
+        }
+    else:
+        data = {
+            'total_balance': latest.total_balance,
+            'reserved_amount': latest.reserved_amount,
+            'free_amount': latest.free_amount,
+            'created_at': latest.created_at,
+        }
+    return JsonResponse(data, safe=False)
+
+
+def finance_events(request):
+    """Возвращает список всех событий (ограничим 100 для удобства)."""
+    events = FinanceEvent.objects.order_by('-created_at')[:100]
+    data = [
+        {
+            'id': e.id,
+            'event_type': e.event_type,
+            'amount': e.amount,
+            'metadata': e.metadata,
+            'created_at': e.created_at,
+        }
+        for e in events
+    ]
+    return JsonResponse(data, safe=False)
+
+
+def finance_snapshots(request):
+    """Возвращает историю снапшотов (например, для графика)."""
+    snapshots = FinanceSnapshot.objects.order_by('-created_at')[:100]
+    data = [
+        {
+            'id': s.id,
+            'total_balance': s.total_balance,
+            'reserved_amount': s.reserved_amount,
+            'free_amount': s.free_amount,
+            'created_at': s.created_at,
+        }
+        for s in snapshots
+    ]
+    return JsonResponse(data, safe=False)
+
+
+from django.utils import timezone
+
+# views.py
+from django.shortcuts import render, redirect
+from .forms import FinanceEventForm
+from .models import FinanceSnapshot, FinanceEvent
+
+
+def finance_event_create(request):
+    """Простая отладочная страница для создания финансовых событий."""
+    if request.method == 'POST':
+        form = FinanceEventForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('finance_event_create')
+    else:
+        form = FinanceEventForm()
+
+    # Берём последние 2 снапшота для дельты
+    snapshots = list(FinanceSnapshot.objects.order_by('-created_at')[:2])
+    latest_snapshot = snapshots[0] if len(snapshots) > 0 else None
+    previous_snapshot = snapshots[1] if len(snapshots) > 1 else None
+
+    balance_stats = {}
+    if latest_snapshot:
+        total = float(latest_snapshot.total_balance)
+        reserved = float(latest_snapshot.reserved_amount)
+        free = float(latest_snapshot.free_amount)
+
+        if previous_snapshot:
+            delta_total = total - float(previous_snapshot.total_balance)
+            delta_reserved = reserved - float(previous_snapshot.reserved_amount)
+            delta_free = free - float(previous_snapshot.free_amount)
+        else:
+            delta_total = delta_reserved = delta_free = 0.0
+
+        balance_stats = {
+            'total_balance': total,
+            'reserved_amount': reserved,
+            'free_amount': free,
+            'delta': {
+                'total_balance': delta_total,
+                'total_balance_abs': abs(delta_total),
+                'reserved_amount': delta_reserved,
+                'reserved_amount_abs': abs(delta_reserved),
+                'free_amount': delta_free,
+                'free_amount_abs': abs(delta_free),
+            }
+        }
+
+    return render(request, 'finance_event_form.html', {
+        'form': form,
+        'balance_stats': balance_stats,
     })

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить финансовое событие</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 40px;
+        }
+
+        form {
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 6px;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 8px 12px;
+        }
+
+        .snapshot {
+            margin-top: 30px;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .delta-positive {
+            color: green;
+        }
+
+        .delta-negative {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<h1>Добавить финансовое событие</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Сохранить событие</button>
+</form>
+
+{% if balance_stats %}
+    <div class="snapshot">
+        <h2>Текущий баланс</h2>
+        <ul>
+            <li>
+                <b>Общий баланс:</b> {{ balance_stats.total_balance|floatformat:2 }}
+                {% if balance_stats.delta.total_balance > 0 %}
+                    <span class="delta-positive">↑{{ balance_stats.delta.total_balance|floatformat:2 }}</span>
+                {% elif balance_stats.delta.total_balance < 0 %}
+                    <span class="delta-negative">↓{{ balance_stats.delta.total_balance_abs|floatformat:2 }}</span>
+                {% endif %}
+            </li>
+            <li>
+                <b>Зарезервировано:</b> {{ balance_stats.reserved_amount|floatformat:2 }}
+                {% if balance_stats.delta.reserved_amount > 0 %}
+                    <span class="delta-positive">↑{{ balance_stats.delta.reserved_amount|floatformat:2 }}</span>
+                {% elif balance_stats.delta.reserved_amount < 0 %}
+                    <span class="delta-negative">↓{{ balance_stats.delta.reserved_amount_abs|floatformat:2 }}</span>
+                {% endif %}
+            </li>
+            <li>
+                <b>Свободно:</b> {{ balance_stats.free_amount|floatformat:2 }}
+                {% if balance_stats.delta.free_amount > 0 %}
+                    <span class="delta-positive">↑{{ balance_stats.delta.free_amount|floatformat:2 }}</span>
+                {% elif balance_stats.delta.free_amount < 0 %}
+                    <span class="delta-negative">↓{{ balance_stats.delta.free_amount_abs|floatformat:2 }}</span>
+                {% endif %}
+            </li>
+        </ul>
+    </div>
+{% endif %}
+
+</body>
+</html>
