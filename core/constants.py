@@ -6,7 +6,7 @@ def get_excluded_teacher_ids():
     return list(
         User.objects.filter(
             Q(first_name='Мария', last_name='Вакулина') |
-            Q(first_name='Боровик', last_name='Кожемякин') |
-            Q(first_name='Школьный', last_name='Преподаватель')
+            Q(first_name='Артур', last_name='Кожемякин') |
+            Q(first_name='Тестовый', last_name='Препод')
         ).values_list('id', flat=True)
     )
