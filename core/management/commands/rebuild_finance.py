@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from core.constants import EXCLUDED_TEACHERS_IDS
+from core.constants import get_excluded_teacher_ids
 from core.models import FinanceEvent, FinanceSnapshot, BalanceOperation, TeacherPayment, Client
 
 TEACHER_RATE_PER_LESSON = 500
@@ -37,7 +37,7 @@ class Command(BaseCommand):
 
         # Исключаем клиентов с исключёнными преподавателями
         excluded_clients = Client.objects.filter(
-            students__teacher__user__id__in=EXCLUDED_TEACHERS_IDS
+            students__teacher__user__id__in=get_excluded_teacher_ids()
         ).distinct()
 
         # Доходы (только включенные операции)
@@ -84,7 +84,7 @@ class Command(BaseCommand):
 
         for tp in TeacherPayment.objects.filter(is_paid=True):
             # Пропускаем выплаты для исключённых преподавателей
-            if tp.teacher.user.id in EXCLUDED_TEACHERS_IDS:
+            if tp.teacher.user.id in get_excluded_teacher_ids():
                 continue
 
             external_id_expense = f'bootstrap_teacherpayment_{tp.pk}_expense'
