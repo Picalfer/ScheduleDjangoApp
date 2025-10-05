@@ -662,17 +662,6 @@ class SchoolExpenseCreateView(CreateView):
         return super().form_invalid(form)
 
 
-@method_decorator(staff_member_required, name='dispatch')
-class FinanceDetailView(TemplateView):
-    template_name = 'core/finance_detailed.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Здесь будет полная финансовая аналитика
-        # с графиками, историей операций, отчетами и т.д.
-        return context
-
-
 @user_passes_test(is_administrator)
 def user_management(request):
     """Страница управления пользователями"""
