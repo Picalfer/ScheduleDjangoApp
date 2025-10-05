@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
-from .constants import EXCLUDED_TEACHERS_IDS
+from .constants import get_excluded_teacher_ids
 from .models import Lesson, FinanceEvent
 from .services.finance_service import FinanceService
 
@@ -55,7 +55,7 @@ def balance_operation_created(sender, instance: BalanceOperation, created, **kwa
     students = client.students.all()
     logger.info(f"Найдено {students.count()} студентов для клиента {client.name}")
 
-    logger.info(f"Список исключенных преподавателей: {EXCLUDED_TEACHERS_IDS}")
+    logger.info(f"Список исключенных преподавателей: {get_excluded_teacher_ids()}")
 
     # Для каждого студента проверяем, есть ли у него преподаватель и входит ли он в список исключений
     for student in students:
@@ -66,7 +66,7 @@ def balance_operation_created(sender, instance: BalanceOperation, created, **kwa
             logger.info(f"Студент {student.name} связан с преподавателем: {teacher.name} (ID: {teacher.pk})")
 
             # Проверка, входит ли преподаватель в список исключений
-            if teacher.user.id in EXCLUDED_TEACHERS_IDS:
+            if teacher.user.id in get_excluded_teacher_ids():
                 logger.info(f"Преподаватель {teacher.name} входит в список исключений. Пропускаем.")
                 continue  # Пропускаем создание события для этого преподавателя
 
@@ -90,7 +90,7 @@ def balance_operation_created(sender, instance: BalanceOperation, created, **kwa
             logger.info(f"У студента {student.name} нет преподавателя. Пропускаем.")
 
     # Добавляем проверку на исключение преподавателей для дохода школы
-    if not any(student.teacher and student.teacher.user.id in EXCLUDED_TEACHERS_IDS for student in students):
+    if not any(student.teacher and student.teacher.user.id in get_excluded_teacher_ids() for student in students):
         # 1️⃣ Доход школы
         income_amount = Decimal(instance.amount * PRICE_PER_LESSON)
         logger.info(f"Создание финансового события для дохода школы: {income_amount} (операция {instance.pk})")
