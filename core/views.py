@@ -588,14 +588,6 @@ class StatsDashboardView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        EXCLUDED_TEACHERS_IDS = list(
-            User.objects.filter(
-                Q(first_name='Мария', last_name='Вакулина') |
-                Q(first_name='Артур', last_name='Кожемякин') |
-                Q(first_name='Тестовый', last_name='Препод')
-            ).values_list('id', flat=True)
-        )
-
         # 1. ОБЩИЕ ДОХОДЫ
         excluded_clients = Client.objects.filter(
             students__teacher__user__id__in=EXCLUDED_TEACHERS_IDS
@@ -631,6 +623,17 @@ class StatsDashboardView(TemplateView):
         # 5. ЗАРЕЗЕРВИРОВАННЫЕ ДЕНЬГИ
         reserved_money = current_balance - free_money
 
+        # 6. ДЕТАЛЬНЫЕ ДАННЫЕ ДЛЯ ОТЛАДКИ
+        # Детали доходов
+        income_details = included_operations.select_related(
+            'client', 'student', 'student__teacher', 'student__teacher__user'
+        ).order_by('-date')[:50]  # Ограничим для производительности
+
+        # Детали выплат
+        payment_details = included_payments.select_related(
+            'teacher', 'teacher__user'
+        ).order_by('-payment_date')[:50]
+
         context['finance_stats'] = {
             'current_balance': int(current_balance),
             'total_income': int(total_income),
@@ -639,6 +642,12 @@ class StatsDashboardView(TemplateView):
             'school_expenses': int(school_expenses),
             'free_money': int(free_money),
             'reserved_money': int(reserved_money),
+        }
+
+        # Добавляем детальные данные
+        context['debug_data'] = {
+            'income_details': income_details,
+            'payment_details': payment_details,
         }
 
         return context

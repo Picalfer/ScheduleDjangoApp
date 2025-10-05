@@ -114,6 +114,91 @@
         </div>
     </div>
 
+    <!-- После основного контента, перед закрывающими тегами -->
+    <div style="margin-top: 150px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+        <h3>🔍 Детализация для проверки</h3>
+
+        <div style="margin-bottom: 20px;">
+            <h4>📊 Доходы ({{ debug_data.income_details|length }} операций):</h4>
+            <div style="max-height: 500px; overflow-y: auto; border: 1px solid #ddd; padding: 10px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                    <tr style="background: #e9ecef;">
+                        <th style="padding: 8px; border: 1px solid #ddd;">Дата</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Клиент</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Студент</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Преподаватель</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Уроков</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Сумма (₽)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for op in debug_data.income_details %}
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ op.date|date:"d.m.Y" }}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ op.client.name }}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ op.student.name|default:"-" }}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">
+                                {% if op.student and op.student.teacher %}
+                                    {{ op.student.teacher.user.first_name }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ op.amount }}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{% widthratio op.amount 1 1000 %}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div>
+            <h4>👨‍🏫 Выплаты преподавателям ({{ debug_data.payment_details|length }} выплат):</h4>
+            <div style="max-height: 500px; overflow-y: auto; border: 1px solid #ddd; padding: 10px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                    <tr style="background: #e9ecef;">
+                        <th style="padding: 8px; border: 1px solid #ddd;">Дата</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Преподаватель</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Период</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Уроков</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Сумма (₽)</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Статус</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for payment in debug_data.payment_details %}
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">
+                                {% if payment.payment_date %}
+                                    {{ payment.payment_date|date:"d.m.Y" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ payment.teacher.user.first_name }}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">
+                                {{ payment.week_start_date|date:"d.m" }} - {{ payment.week_end_date|date:"d.m.Y" }}
+                            </td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ payment.lessons_count }}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ payment.amount }}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">
+                                {% if payment.is_paid %}
+                                    ✅ Выплачено
+                                {% else %}
+                                    ⏳ Ожидает
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Уведомление -->
     <div id="expenseNotification" class="notification hidden"></div>
 {% endblock %}
