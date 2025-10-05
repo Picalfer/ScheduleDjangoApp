@@ -104,6 +104,29 @@ function handleModalClick(event) {
     }
 }
 
+// Функции для отладки
+function loadIncomeDetails() {
+    fetch('/stats/income-details/')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('debugDetails').innerHTML = data.html;
+        })
+        .catch(error => {
+            document.getElementById('debugDetails').innerHTML = '<p style="color: red;">Ошибка загрузки</p>';
+        });
+}
+
+function loadTeacherPayments() {
+    fetch('/stats/teacher-payments-details/')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('debugDetails').innerHTML = data.html;
+        })
+        .catch(error => {
+            document.getElementById('debugDetails').innerHTML = '<p style="color: red;">Ошибка загрузки</p>';
+        });
+}
+
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function () {
     const expenseForm = document.getElementById('expenseForm');
