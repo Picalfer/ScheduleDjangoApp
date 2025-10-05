@@ -3,7 +3,8 @@ from decimal import Decimal
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from core.models import FinanceEvent, FinanceSnapshot, BalanceOperation, TeacherPayment
+from core.constants import EXCLUDED_TEACHERS_IDS
+from core.models import FinanceEvent, FinanceSnapshot, BalanceOperation, TeacherPayment, Client
 
 TEACHER_RATE_PER_LESSON = 500
 PRICE_PER_LESSON = 1000
@@ -33,7 +34,18 @@ class Command(BaseCommand):
 
     def _process_balance_operations(self):
         self.stdout.write("📊 Обработка пополнений баланса...")
-        for bo in BalanceOperation.objects.filter(operation_type='add'):
+
+        # Исключаем клиентов с исключёнными преподавателями
+        excluded_clients = Client.objects.filter(
+            students__teacher__user__id__in=EXCLUDED_TEACHERS_IDS
+        ).distinct()
+
+        # Доходы (только включенные операции)
+        included_operations = BalanceOperation.objects.filter(
+            operation_type='add'
+        ).exclude(client__in=excluded_clients)
+
+        for bo in included_operations:
             lessons_count = Decimal(bo.amount)  # если amount = количество уроков
 
             income_amount = lessons_count * Decimal(PRICE_PER_LESSON)
@@ -71,6 +83,10 @@ class Command(BaseCommand):
         from core.models import FinanceSnapshot  # чтобы получить актуальные резервы
 
         for tp in TeacherPayment.objects.filter(is_paid=True):
+            # Пропускаем выплаты для исключённых преподавателей
+            if tp.teacher.user.id in EXCLUDED_TEACHERS_IDS:
+                continue
+
             external_id_expense = f'bootstrap_teacherpayment_{tp.pk}_expense'
             external_id_release = f'bootstrap_teacherpayment_{tp.pk}_release'
 

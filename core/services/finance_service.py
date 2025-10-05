@@ -1,4 +1,3 @@
-# services.py
 import logging
 from decimal import Decimal
 
@@ -15,7 +14,6 @@ class FinanceService:
         total_balance = last_snapshot.total_balance if last_snapshot else Decimal('0.00')
         reserved_amount = last_snapshot.reserved_amount if last_snapshot else Decimal('0.00')
         free_amount = last_snapshot.free_amount if last_snapshot else Decimal('0.00')
-
         logger.info(f"[Finance] Применяем событие #{event.id}: {event.get_event_type_display()} {event.amount}")
 
         if event.event_type == FinanceEvent.EVENT_INCOME:
