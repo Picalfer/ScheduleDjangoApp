@@ -1,4 +1,3 @@
-# core/management/commands/init_free_money.py
 from decimal import Decimal
 
 from django.core.management.base import BaseCommand
@@ -39,10 +38,13 @@ class Command(BaseCommand):
 
             school_expenses = sum(float(exp.amount) for exp in SchoolExpense.objects.all())
 
-            # ПРАВИЛЬНЫЙ РАСЧЕТ (как в view)
+            # ПРАВИЛЬНЫЙ РАСЧЕТ
+            # Деньги школы = 50% от доходов
             school_money = total_income / 2
-            already_spent_from_school_money = teacher_expenses + school_expenses
-            final_free_money = max(school_money - already_spent_from_school_money, 0)
+
+            # Из денег школы вычитаем ТОЛЬКО школьные расходы
+            # Выплаты преподавателям идут из другой половины!
+            final_free_money = max(school_money - school_expenses, 0)
 
             free_money_balance.current_balance = Decimal(str(final_free_money))
             free_money_balance.save()
@@ -52,8 +54,7 @@ class Command(BaseCommand):
                     f'✅ Баланс свободных денег инициализирован: {final_free_money} ₽\n'
                     f'   Доходы: {total_income} ₽\n'
                     f'   Деньги школы (50%): {school_money} ₽\n'
-                    f'   Уже потрачено из денег школы: {already_spent_from_school_money} ₽\n'
-                    f'   (выплаты преподавателям: {teacher_expenses} ₽)\n'
-                    f'   (школьные расходы: {school_expenses} ₽)'
+                    f'   Школьные расходы: {school_expenses} ₽\n'
+                    f'   (Выплаты преподавателям {teacher_expenses} ₽ НЕ вычитаются из свободных денег!)'
                 )
             )

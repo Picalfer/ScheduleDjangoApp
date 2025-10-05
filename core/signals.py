@@ -30,6 +30,7 @@ def update_free_money_on_income(sender, instance, created, **kwargs):
                     defaults={'current_balance': Decimal('0.00')}
                 )
 
+                # Добавляем 50% от пополнения к свободным деньгам
                 income_in_rub = instance.amount * 1000
                 free_money_to_add = Decimal(income_in_rub) / Decimal(2)
                 free_money_balance.current_balance += free_money_to_add
@@ -43,11 +44,12 @@ def update_free_money_on_expense(sender, instance, created, **kwargs):
     try:
         if created:
             with transaction.atomic():
-                free_money_balance = FreeMoneyBalance.objects.first()
-                if not free_money_balance:
-                    free_money_balance = FreeMoneyBalance.objects.create(current_balance=0)
+                free_money_balance, _ = FreeMoneyBalance.objects.get_or_create(
+                    id=1,
+                    defaults={'current_balance': Decimal('0.00')}
+                )
 
-                # Вычитаем расход из свободных денег (но не ниже 0)
+                # Вычитаем ТОЛЬКО школьные расходы из свободных денег
                 if free_money_balance.current_balance >= instance.amount:
                     free_money_balance.current_balance -= instance.amount
                 else:
