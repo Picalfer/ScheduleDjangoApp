@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime, timedelta, time
-from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -573,29 +572,3 @@ class SchoolExpense(models.Model):
 
     def __str__(self):
         return f"{self.get_category_display()} - {self.amount} ₽ ({self.expense_date})"
-
-
-class FreeMoneyBalance(models.Model):
-    current_balance = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        default=Decimal('0.00'),
-        verbose_name='Текущий баланс'
-    )
-    last_updated = models.DateTimeField(
-        auto_now=True,
-        verbose_name='Последнее обновление'
-    )
-
-    class Meta:
-        verbose_name = 'Баланс свободных денег'
-        verbose_name_plural = 'Баланс свободных денег'
-
-    def __str__(self):
-        return f"Свободные деньги: {self.current_balance} ₽"
-
-    def save(self, *args, **kwargs):
-        # Гарантируем что есть только одна запись
-        if not self.pk and FreeMoneyBalance.objects.exists():
-            raise ValidationError('Может существовать только один баланс свободных денег')
-        super().save(*args, **kwargs)

@@ -1,6 +1,5 @@
 import json
 import logging
-from decimal import Decimal
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User, Group
@@ -17,7 +16,7 @@ from django.views.generic import TemplateView, CreateView
 from django.db.models import Sum, Q
 from django.utils import timezone
 from datetime import timedelta
-from .models import Client, Teacher, Lesson, BalanceOperation, TeacherPayment, SchoolExpense, FreeMoneyBalance
+from .models import Client, Teacher, Lesson, BalanceOperation, TeacherPayment, SchoolExpense
 
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
@@ -588,7 +587,7 @@ class StatsDashboardView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # 1. ОБЩИЕ ДОХОДЫ
+        # 1. ОБЩИЕ ДОХОДЫ (оставить)
         excluded_clients = Client.objects.filter(
             students__teacher__user__id__in=EXCLUDED_TEACHERS_IDS
         ).distinct()
@@ -600,7 +599,7 @@ class StatsDashboardView(TemplateView):
         total_lessons_added = included_operations.aggregate(total=Sum('amount'))['total'] or 0
         total_income = total_lessons_added * 1000
 
-        # 2. РАСХОДЫ
+        # 2. РАСХОДЫ (оставить)
         included_payments = TeacherPayment.objects.exclude(
             teacher__user__id__in=EXCLUDED_TEACHERS_IDS
         )
@@ -610,30 +609,23 @@ class StatsDashboardView(TemplateView):
 
         total_expenses = teacher_expenses + school_expenses
 
-        # 3. ТЕКУЩИЙ БАЛАНС
+        # 3. ТЕКУЩИЙ БАЛАНС (оставить)
         current_balance = total_income - total_expenses
 
+        # ❌❌❌ УДАЛИ ЭТОТ БЛОК ❌❌❌
         # 4. СВОБОДНЫЕ ДЕНЬГИ - берем из сохраненного баланса
-        free_money_balance, _ = FreeMoneyBalance.objects.get_or_create(
-            id=1,
-            defaults={'current_balance': Decimal('0.00')}
-        )
-        free_money = float(free_money_balance.current_balance)
+        # free_money_balance, _ = FreeMoneyBalance.objects.get_or_create(...)
+        # free_money = float(free_money_balance.current_balance)
 
+        # ❌❌❌ УДАЛИ ЭТОТ БЛОК ❌❌❌
         # 5. ЗАРЕЗЕРВИРОВАННЫЕ ДЕНЬГИ
+        # reserved_money = current_balance - free_money
+
+        # ВРЕМЕННО - считаем free_money по упрощенной формуле
+        free_money = total_income / 2 - school_expenses
         reserved_money = current_balance - free_money
 
-        # 6. ДЕТАЛЬНЫЕ ДАННЫЕ ДЛЯ ОТЛАДКИ
-        # Детали доходов
-        income_details = included_operations.select_related(
-            'client', 'student', 'student__teacher', 'student__teacher__user'
-        ).order_by('-date')[:50]  # Ограничим для производительности
-
-        # Детали выплат
-        payment_details = included_payments.select_related(
-            'teacher', 'teacher__user'
-        ).order_by('-payment_date')[:50]
-
+        # Остальное оставить...
         context['finance_stats'] = {
             'current_balance': int(current_balance),
             'total_income': int(total_income),
@@ -642,12 +634,6 @@ class StatsDashboardView(TemplateView):
             'school_expenses': int(school_expenses),
             'free_money': int(free_money),
             'reserved_money': int(reserved_money),
-        }
-
-        # Добавляем детальные данные
-        context['debug_data'] = {
-            'income_details': income_details,
-            'payment_details': payment_details,
         }
 
         return context
