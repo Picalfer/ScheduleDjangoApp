@@ -1,42 +1,46 @@
 import json
 import logging
-
-from django.contrib.auth.models import User, Group
-from django.db import transaction
-from django.utils.decorators import method_decorator
-
-from .constants import get_excluded_teacher_ids
-from .services.payment_service import calculate_weekly_payments
-
-logger = logging.getLogger(__name__)
-
-from django.views.generic import CreateView
-from django.db.models import Q
 from datetime import timedelta
-from .models import Client, Teacher, Lesson, TeacherPayment, SchoolExpense
 
-from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
-from .permissions import is_administrator
-from django.db.models import Exists, OuterRef
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.models import User, Group
 from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.db.models import Exists, OuterRef
 from django.db.models import Prefetch
+from django.db.models import Q
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.shortcuts import render, redirect
+from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.http import require_http_methods
+from django.views.generic import CreateView
+from django.views.generic import TemplateView
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, filters
 from rest_framework.permissions import IsAuthenticated
 
-from .forms import ProfileForm
+from .constants import get_excluded_teacher_ids
+from .forms import FinanceEventForm
 from .forms import LoginForm
-from .models import Student
+from .forms import ProfileForm
+from .models import Client, Teacher, Lesson, TeacherPayment, SchoolExpense
+from .models import FinanceSnapshot
 from .models import OpenSlots, UserSettings
+from .models import Student
+from .permissions import is_administrator
 from .serializers import LessonSerializer, TeacherSerializer, StudentSerializer, TeacherPaymentSerializer
+from .services.payment_service import calculate_weekly_payments
+
+logger = logging.getLogger(__name__)
 
 
 @require_POST
@@ -428,6 +432,133 @@ def profile(request):
     return render(request, 'core/profile.html', {'form': form})
 
 
+@user_passes_test(is_administrator)
+def user_management(request):
+    """Страница управления пользователями"""
+    users = User.objects.all()
+    return render(request, 'admin/user_management.html', {'users': users})
+
+
+@user_passes_test(is_administrator)
+def create_user(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        password = request.POST.get('password')
+        role = request.POST.get('role')
+
+        # Валидация
+        errors = {}
+
+        if not username:
+            errors['username'] = 'Логин обязателен'
+        elif User.objects.filter(username=username).exists():
+            errors['username'] = 'Логин уже существует'
+
+        if not first_name:
+            errors['first_name'] = 'Имя обязательно'
+
+        if not last_name:
+            errors['last_name'] = 'Фамилия обязательна'
+
+        if not password:
+            errors['password'] = 'Пароль обязателен'
+        elif len(password) < 6:
+            errors['password'] = 'Пароль должен быть не менее 6 символов'
+
+        if not role:
+            errors['role'] = 'Роль обязательна'
+
+        if errors:
+            return render(request, 'admin/create_user.html', {
+                'errors': errors,
+                'form_data': request.POST
+            })
+
+        try:
+            # Создаем пользователя
+            user = User.objects.create_user(
+                username=username,
+                password=password,
+                first_name=first_name,
+                last_name=last_name
+            )
+
+            # Назначаем группу
+            group_name = ''
+            if role == 'teacher':
+                group_name = 'Преподаватели'
+                # Создаем Teacher и OpenSlots
+                teacher = Teacher.objects.create(user=user)
+                OpenSlots.objects.create(
+                    teacher=teacher,
+                    weekly_open_slots={
+                        "monday": [], "tuesday": [], "wednesday": [],
+                        "thursday": [], "friday": [], "saturday": [], "sunday": []
+                    }
+                )
+            elif role == 'manager':
+                group_name = 'Менеджеры'
+            elif role == 'student':
+                group_name = 'Студенты'
+
+            if group_name:
+                group = Group.objects.get(name=group_name)
+                user.groups.add(group)
+
+            # Сохраняем данные в сессии для страницы успеха
+            request.session['new_user_data'] = {
+                'username': username,
+                'password': password,
+                'first_name': first_name,
+                'last_name': last_name,
+                'role': group_name
+            }
+
+            return redirect('create_user_success')
+
+        except Exception as e:
+            # УДАЛЯЕМ пользователя если создание не завершилось успешно
+            if User.objects.filter(username=username).exists():
+                User.objects.filter(username=username).delete()
+
+            messages.error(request, f'Ошибка при создании пользователя: {str(e)}')
+            return render(request, 'admin/create_user.html', {
+                'errors': {'general': 'Ошибка при создании пользователя'},
+                'form_data': request.POST
+            })
+
+    return render(request, 'admin/create_user.html')
+
+
+@user_passes_test(is_administrator)
+def create_user_success(request):
+    user_data = request.session.get('new_user_data')
+    if not user_data:
+        return redirect('create_user')
+
+    # Очищаем сессию после использования
+    if 'new_user_data' in request.session:
+        del request.session['new_user_data']
+
+    # Формируем текст для копирования
+    site_url = request.build_absolute_uri('/')[:-1]
+    copy_text = f"""Данные для входа в систему Kodama:
+
+Логин: {user_data['username']}
+Пароль: {user_data['password']}
+Ссылка для входа: {site_url}
+
+После первого входа рекомендуется сменить пароль."""
+
+    return render(request, 'admin/create_user_success.html', {
+        'user_data': user_data,
+        'copy_text': copy_text,
+        'site_url': site_url
+    })
+
+
 class WeeklyPaymentsList(generics.ListAPIView):
     serializer_class = TeacherPaymentSerializer
 
@@ -599,138 +730,6 @@ class SchoolExpenseCreateView(CreateView):
         return super().form_invalid(form)
 
 
-@user_passes_test(is_administrator)
-def user_management(request):
-    """Страница управления пользователями"""
-    users = User.objects.all()
-    return render(request, 'admin/user_management.html', {'users': users})
-
-
-@user_passes_test(is_administrator)
-def create_user(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        password = request.POST.get('password')
-        role = request.POST.get('role')
-
-        # Валидация
-        errors = {}
-
-        if not username:
-            errors['username'] = 'Логин обязателен'
-        elif User.objects.filter(username=username).exists():
-            errors['username'] = 'Логин уже существует'
-
-        if not first_name:
-            errors['first_name'] = 'Имя обязательно'
-
-        if not last_name:
-            errors['last_name'] = 'Фамилия обязательна'
-
-        if not password:
-            errors['password'] = 'Пароль обязателен'
-        elif len(password) < 6:
-            errors['password'] = 'Пароль должен быть не менее 6 символов'
-
-        if not role:
-            errors['role'] = 'Роль обязательна'
-
-        if errors:
-            return render(request, 'admin/create_user.html', {
-                'errors': errors,
-                'form_data': request.POST
-            })
-
-        try:
-            # Создаем пользователя
-            user = User.objects.create_user(
-                username=username,
-                password=password,
-                first_name=first_name,
-                last_name=last_name
-            )
-
-            # Назначаем группу
-            group_name = ''
-            if role == 'teacher':
-                group_name = 'Преподаватели'
-                # Создаем Teacher и OpenSlots
-                teacher = Teacher.objects.create(user=user)
-                OpenSlots.objects.create(
-                    teacher=teacher,
-                    weekly_open_slots={
-                        "monday": [], "tuesday": [], "wednesday": [],
-                        "thursday": [], "friday": [], "saturday": [], "sunday": []
-                    }
-                )
-            elif role == 'manager':
-                group_name = 'Менеджеры'
-            elif role == 'student':
-                group_name = 'Студенты'
-
-            if group_name:
-                group = Group.objects.get(name=group_name)
-                user.groups.add(group)
-
-            # Сохраняем данные в сессии для страницы успеха
-            request.session['new_user_data'] = {
-                'username': username,
-                'password': password,
-                'first_name': first_name,
-                'last_name': last_name,
-                'role': group_name
-            }
-
-            return redirect('create_user_success')
-
-        except Exception as e:
-            # УДАЛЯЕМ пользователя если создание не завершилось успешно
-            if User.objects.filter(username=username).exists():
-                User.objects.filter(username=username).delete()
-
-            messages.error(request, f'Ошибка при создании пользователя: {str(e)}')
-            return render(request, 'admin/create_user.html', {
-                'errors': {'general': 'Ошибка при создании пользователя'},
-                'form_data': request.POST
-            })
-
-    return render(request, 'admin/create_user.html')
-
-
-@user_passes_test(is_administrator)
-def create_user_success(request):
-    user_data = request.session.get('new_user_data')
-    if not user_data:
-        return redirect('create_user')
-
-    # Очищаем сессию после использования
-    if 'new_user_data' in request.session:
-        del request.session['new_user_data']
-
-    # Формируем текст для копирования
-    site_url = request.build_absolute_uri('/')[:-1]
-    copy_text = f"""Данные для входа в систему Kodama:
-
-Логин: {user_data['username']}
-Пароль: {user_data['password']}
-Ссылка для входа: {site_url}
-
-После первого входа рекомендуется сменить пароль."""
-
-    return render(request, 'admin/create_user_success.html', {
-        'user_data': user_data,
-        'copy_text': copy_text,
-        'site_url': site_url
-    })
-
-
-from django.utils.decorators import method_decorator
-from django.views.generic import TemplateView
-from django.contrib.admin.views.decorators import staff_member_required
-
-
 @method_decorator(staff_member_required, name='dispatch')
 class StatsDashboardView(TemplateView):
     template_name = 'core/stats.html'
@@ -756,66 +755,6 @@ class StatsDashboardView(TemplateView):
 
         context['finance_stats'] = finance_stats
         return context
-
-
-from django.http import JsonResponse
-
-
-def finance_balance(request):
-    """Возвращает последний снапшот баланса."""
-    latest = FinanceSnapshot.objects.order_by('-created_at').first()
-    if not latest:
-        data = {
-            'total_balance': 0,
-            'reserved_amount': 0,
-            'free_amount': 0,
-        }
-    else:
-        data = {
-            'total_balance': latest.total_balance,
-            'reserved_amount': latest.reserved_amount,
-            'free_amount': latest.free_amount,
-            'created_at': latest.created_at,
-        }
-    return JsonResponse(data, safe=False)
-
-
-def finance_events(request):
-    """Возвращает список всех событий (ограничим 100 для удобства)."""
-    events = FinanceEvent.objects.order_by('-created_at')[:100]
-    data = [
-        {
-            'id': e.id,
-            'event_type': e.event_type,
-            'amount': e.amount,
-            'metadata': e.metadata,
-            'created_at': e.created_at,
-        }
-        for e in events
-    ]
-    return JsonResponse(data, safe=False)
-
-
-def finance_snapshots(request):
-    """Возвращает историю снапшотов (например, для графика)."""
-    snapshots = FinanceSnapshot.objects.order_by('-created_at')[:100]
-    data = [
-        {
-            'id': s.id,
-            'total_balance': s.total_balance,
-            'reserved_amount': s.reserved_amount,
-            'free_amount': s.free_amount,
-            'created_at': s.created_at,
-        }
-        for s in snapshots
-    ]
-    return JsonResponse(data, safe=False)
-
-
-from django.utils import timezone
-from django.shortcuts import render, redirect
-from .forms import FinanceEventForm
-from .models import FinanceSnapshot, FinanceEvent
 
 
 def finance_event_create(request):
