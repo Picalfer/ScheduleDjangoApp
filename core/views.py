@@ -826,8 +826,6 @@ def finance_snapshots(request):
 
 
 from django.utils import timezone
-
-# views.py
 from django.shortcuts import render, redirect
 from .forms import FinanceEventForm
 from .models import FinanceSnapshot, FinanceEvent
@@ -843,37 +841,12 @@ def finance_event_create(request):
     else:
         form = FinanceEventForm()
 
-    # Берём последние 2 снапшота для дельты
-    snapshots = list(FinanceSnapshot.objects.order_by('-created_at')[:2])
-    latest_snapshot = snapshots[0] if len(snapshots) > 0 else None
-    previous_snapshot = snapshots[1] if len(snapshots) > 1 else None
+    # Берём последние 3 снапшота
+    snapshots = list(FinanceSnapshot.objects.order_by('-created_at')[:3])
 
-    balance_stats = {}
-    if latest_snapshot:
-        total = float(latest_snapshot.total_balance)
-        reserved = float(latest_snapshot.reserved_amount)
-        free = float(latest_snapshot.free_amount)
-
-        if previous_snapshot:
-            delta_total = total - float(previous_snapshot.total_balance)
-            delta_reserved = reserved - float(previous_snapshot.reserved_amount)
-            delta_free = free - float(previous_snapshot.free_amount)
-        else:
-            delta_total = delta_reserved = delta_free = 0.0
-
-        balance_stats = {
-            'total_balance': total,
-            'reserved_amount': reserved,
-            'free_amount': free,
-            'delta': {
-                'total_balance': delta_total,
-                'total_balance_abs': abs(delta_total),
-                'reserved_amount': delta_reserved,
-                'reserved_amount_abs': abs(delta_reserved),
-                'free_amount': delta_free,
-                'free_amount_abs': abs(delta_free),
-            }
-        }
+    balance_stats = {
+        'snapshots': snapshots
+    }
 
     return render(request, 'finance_event_form.html', {
         'form': form,

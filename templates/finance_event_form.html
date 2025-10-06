@@ -6,43 +6,89 @@
     <style>
         body {
             font-family: sans-serif;
-            margin: 40px;
+            margin: 28px;
+            color: #222;
+            background: #fff;
+        }
+
+        h1 {
+            margin-bottom: 8px;
         }
 
         form {
-            max-width: 400px;
+            max-width: 560px;
             margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-top: 10px;
         }
 
         input, select, textarea {
             width: 100%;
-            padding: 6px;
+            padding: 8px;
             box-sizing: border-box;
+            margin-top: 6px;
         }
 
         button {
-            margin-top: 15px;
-            padding: 8px 12px;
+            margin-top: 12px;
+            padding: 8px 14px;
+            cursor: pointer;
         }
 
-        .snapshot {
-            margin-top: 30px;
-            background: #f5f5f5;
-            padding: 15px;
+        .snapshots-wrap {
+            margin-top: 28px;
+        }
+
+        .snapshot-card {
+            background: #fbfbfb;
+            border: 1px solid #e6e6e6;
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 14px;
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+        }
+
+        .snapshot-current {
+            border-color: #3c9d3c;
+            background: #f7fff7;
+        }
+
+        .snapshot-values {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .val {
+            min-width: 160px;
+            background: #fff;
+            padding: 8px;
             border-radius: 6px;
+            border: 1px solid #eee;
         }
 
-        .delta-positive {
-            color: green;
+        .val .label {
+            font-size: 12px;
+            color: #666;
         }
 
-        .delta-negative {
-            color: red;
+        .val .num {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .small {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .id-box {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #f0f6ff;
+            color: #123;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-right: 8px;
         }
     </style>
 </head>
@@ -55,37 +101,42 @@
     <button type="submit">Сохранить событие</button>
 </form>
 
-{% if balance_stats %}
-    <div class="snapshot">
-        <h2>Текущий баланс</h2>
-        <ul>
-            <li>
-                <b>Общий баланс:</b> {{ balance_stats.total_balance|floatformat:2 }}
-                {% if balance_stats.delta.total_balance > 0 %}
-                    <span class="delta-positive">↑{{ balance_stats.delta.total_balance|floatformat:2 }}</span>
-                {% elif balance_stats.delta.total_balance < 0 %}
-                    <span class="delta-negative">↓{{ balance_stats.delta.total_balance_abs|floatformat:2 }}</span>
-                {% endif %}
-            </li>
-            <li>
-                <b>Зарезервировано:</b> {{ balance_stats.reserved_amount|floatformat:2 }}
-                {% if balance_stats.delta.reserved_amount > 0 %}
-                    <span class="delta-positive">↑{{ balance_stats.delta.reserved_amount|floatformat:2 }}</span>
-                {% elif balance_stats.delta.reserved_amount < 0 %}
-                    <span class="delta-negative">↓{{ balance_stats.delta.reserved_amount_abs|floatformat:2 }}</span>
-                {% endif %}
-            </li>
-            <li>
-                <b>Свободно:</b> {{ balance_stats.free_amount|floatformat:2 }}
-                {% if balance_stats.delta.free_amount > 0 %}
-                    <span class="delta-positive">↑{{ balance_stats.delta.free_amount|floatformat:2 }}</span>
-                {% elif balance_stats.delta.free_amount < 0 %}
-                    <span class="delta-negative">↓{{ balance_stats.delta.free_amount_abs|floatformat:2 }}</span>
-                {% endif %}
-            </li>
-        </ul>
-    </div>
-{% endif %}
+<div class="snapshots-wrap">
+    {% if balance_stats.snapshots %}
+        {% for snap in balance_stats.snapshots %}
+            <div class="snapshot-card {% if forloop.first %}snapshot-current{% endif %}">
+                <div>
+                    <span class="id-box">#{{ snap.id }}</span>
+                    <strong>
+                        {% if forloop.first %}Текущий баланс{% else %}Снапшот{% endif %}
+                    </strong>
+                    <span class="small">— создан {{ snap.created_at|date:"d M Y H:i:s" }}</span>
+
+                    <div class="small" style="margin-top:6px;">
+                        last_event_id: <strong>{{ snap.last_event_id|default:"—" }}</strong>
+                    </div>
+                </div>
+
+                <div class="snapshot-values" style="margin-top:10px;">
+                    <div class="val">
+                        <div class="label">Общий баланс</div>
+                        <div class="num">{{ snap.total_balance|floatformat:2 }}</div>
+                    </div>
+                    <div class="val">
+                        <div class="label">Зарезервировано</div>
+                        <div class="num">{{ snap.reserved_amount|floatformat:2 }}</div>
+                    </div>
+                    <div class="val">
+                        <div class="label">Свободно</div>
+                        <div class="num">{{ snap.free_amount|floatformat:2 }}</div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="small">Снапшотов ещё нет.</div>
+    {% endif %}
+</div>
 
 </body>
 </html>
