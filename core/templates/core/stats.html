@@ -43,22 +43,6 @@
                     <!-- Детализация (скрыта по умолчанию) -->
                     <div id="financeDetails" class="finance-details hidden">
                         <div class="finance-row">
-                            <span class="finance-label">Общая выручка:</span>
-                            <span class="finance-amount">{{ finance_stats.total_income|intcomma }} ₽</span>
-                        </div>
-                        <div class="finance-row">
-                            <span class="finance-label">Выплаты преподавателям:</span>
-                            <span class="finance-amount negative">{{ finance_stats.teacher_expenses|intcomma }} ₽</span>
-                        </div>
-                        <div class="finance-row">
-                            <span class="finance-label">Расходы школы:</span>
-                            <span class="finance-amount negative">{{ finance_stats.school_expenses|intcomma }} ₽</span>
-                        </div>
-                        <div class="finance-row highlight">
-                            <span class="finance-label">Всего расходов:</span>
-                            <span class="finance-amount negative">{{ finance_stats.total_expenses|intcomma }} ₽</span>
-                        </div>
-                        <div class="finance-row">
                             <span class="finance-label">Зарезервировано для выплат:</span>
                             <span class="finance-amount warning">{{ finance_stats.reserved_money|intcomma }} ₽</span>
                         </div>

@@ -742,27 +742,14 @@ class StatsDashboardView(TemplateView):
         snapshot = FinanceSnapshot.objects.order_by('-created_at').first()
 
         if not snapshot:
-            # если снапшотов ещё нет — пока заглушка
             finance_stats = {
                 'current_balance': 0,
-                'total_income': 0,
-                'total_expenses': 0,
-                'teacher_expenses': 0,
-                'school_expenses': 0,
                 'free_money': 0,
                 'reserved_money': 0,
             }
         else:
             finance_stats = {
-                # В твоей системе current_balance = total_balance
                 'current_balance': float(snapshot.total_balance),
-                # Общий доход — можно хранить отдельной логикой, но пока считаем так:
-                'total_income': float(snapshot.total_balance + snapshot.reserved_amount),
-                # Общие расходы — разница между доходом и балансом
-                'total_expenses': float(snapshot.reserved_amount),
-                # Если хочешь пока разделить вручную (позже привяжем к типам событий)
-                'teacher_expenses': float(snapshot.reserved_amount),
-                'school_expenses': 0,
                 'free_money': float(snapshot.free_amount),
                 'reserved_money': float(snapshot.reserved_amount),
             }
