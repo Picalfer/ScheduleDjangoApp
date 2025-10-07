@@ -78,6 +78,10 @@ body {
     justify-content: center;
 }
 
+ul, ol {
+    margin-left: 30px;
+}
+
 
 /* Для всех скроллбаров на сайте */
 ::-webkit-scrollbar {
