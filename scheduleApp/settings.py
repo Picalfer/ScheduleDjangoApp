@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'phonenumber_field',
     'pwa',
     'django.contrib.humanize',
+    'finance.apps.FinanceConfig'
 ]
 
 if DEBUG:
@@ -108,18 +109,55 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'scheduleApp.wsgi.application'
 
+import logging
+
+
+# Цвета для терминала
+class ColorFormatter(logging.Formatter):
+    COLORS = {
+        'DEBUG': '\033[94m',  # Синий
+        'INFO': '\033[92m',  # Зелёный
+        'WARNING': '\033[93m',  # Жёлтый
+        'ERROR': '\033[91m',  # Красный
+        'CRITICAL': '\033[95m',  # Фиолетовый
+    }
+    RESET = '\033[0m'
+
+    def format(self, record):
+        log_color = self.COLORS.get(record.levelname, self.RESET)
+        record.asctime = self.formatTime(record, "%Y-%m-%d %H:%M:%S")
+        message = super().format(record)
+        return f"{log_color}{message}{self.RESET}"
+
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+
+    'formatters': {
+        'colored': {
+            '()': ColorFormatter,
+            'format': '[{levelname}] {asctime} {name}: {message}',
+            'style': '{',
+        },
+    },
+
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'colored',
         },
     },
+
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+
     'loggers': {
-        'core': {
+        'django': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': False,
         },
     },

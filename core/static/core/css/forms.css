@@ -25,6 +25,7 @@ form label {
     font-weight: bold;
 }
 
+
 form input[type="text"],
 form input[type="email"],
 form input[type="password"] {
@@ -34,7 +35,7 @@ form input[type="password"] {
     border: none;
     border-radius: 5px;
     background: rgba(255, 255, 255, 0.2);
-    color: white;
+    color: white !important;
 }
 
 form button {
@@ -66,6 +67,7 @@ form button:hover {
 .form-control::placeholder {
     color: rgba(255, 255, 255, 0.5) !important;
     opacity: 1 !important;
+    color: white;
 }
 
 /* Для разных браузеров */
@@ -93,6 +95,7 @@ form button:hover {
     border-color: rgba(255, 255, 255, 0.3) !important;
     box-shadow: none !important;
     background: rgba(255, 255, 255, 0.15);
+    color: white;
 }
 
 /* Для браузеров, которые игнорируют outline: none */
@@ -102,6 +105,7 @@ form button:hover {
     -webkit-text-fill-color: white !important;
     -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.1) inset !important;
     transition: background-color 5000s ease-in-out 0s;
+    color: white;
 }
 
 /* Дополнительно: стили для всей формы */
@@ -139,4 +143,28 @@ form button:hover {
 
 .btn-primary:hover {
     background: rgba(76, 175, 80, 0.3);
+}
+
+input {
+    color: white;
+    caret-color: white;
+}
+
+input,
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:not(:-webkit-autofill) {
+    -webkit-text-fill-color: white !important;
+    color: white !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.1) inset !important;
+    caret-color: white !important;
+    transition: background-color 0s, color 0s;
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.5) !important;
+    opacity: 1 !important; /* чтобы не было приглушения в Firefox */
 }

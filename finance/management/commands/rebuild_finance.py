@@ -4,7 +4,8 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from core.constants import get_excluded_teacher_ids
-from core.models import FinanceEvent, FinanceSnapshot, BalanceOperation, TeacherPayment, Client
+from core.models import BalanceOperation, TeacherPayment, Client
+from finance.models import FinanceEvent, FinanceSnapshot
 
 TEACHER_RATE_PER_LESSON = 500
 PRICE_PER_LESSON = 1000
@@ -80,7 +81,6 @@ class Command(BaseCommand):
 
     def _process_teacher_payments(self):
         self.stdout.write("👨‍🏫 Обработка выплат преподавателям...")
-        from core.models import FinanceSnapshot  # чтобы получить актуальные резервы
 
         for tp in TeacherPayment.objects.filter(is_paid=True):
             # Пропускаем выплаты для исключённых преподавателей

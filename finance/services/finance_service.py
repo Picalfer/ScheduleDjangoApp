@@ -1,7 +1,7 @@
 import logging
 from decimal import Decimal
 
-from core.models import FinanceEvent, FinanceSnapshot
+from finance.models import FinanceEvent, FinanceSnapshot
 
 logger = logging.getLogger(__name__)
 
