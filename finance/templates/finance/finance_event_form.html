@@ -1,14 +1,18 @@
+{% extends "core/base.html" %}
 {% load humanize %}
+{% load static %}
 
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Добавить финансовое событие</title>
+{% block title %}
+    Добавить финансовое событие
+{% endblock %}
+
+{% block extra_css %}
     <style>
-        body {
+
+        main {
+            margin: 0;
+            padding: 28px;
             font-family: sans-serif;
-            margin: 28px;
             color: #222;
             background: #fff;
         }
@@ -93,52 +97,51 @@
             margin-right: 8px;
         }
     </style>
-</head>
-<body>
-<h1>Добавить финансовое событие</h1>
+{% endblock %}
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Сохранить событие</button>
-</form>
+{% block content %}
+    <h1>Добавить финансовое событие</h1>
 
-<div class="snapshots-wrap">
-    {% if balance_stats.snapshots %}
-        {% for snap in balance_stats.snapshots %}
-            <div class="snapshot-card {% if forloop.first %}snapshot-current{% endif %}">
-                <div>
-                    <span class="id-box">#{{ snap.id }}</span>
-                    <strong>
-                        {% if forloop.first %}Текущий баланс{% else %}Снапшот{% endif %}
-                    </strong>
-                    <span class="small">— создан {{ snap.created_at|date:"d M Y H:i:s" }}</span>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Сохранить событие</button>
+    </form>
 
-                    <div class="small" style="margin-top:6px;">
-                        last_event_id: <strong>{{ snap.last_event_id|default:"—" }}</strong>
+    <div class="snapshots-wrap">
+        {% if balance_stats.snapshots %}
+            {% for snap in balance_stats.snapshots %}
+                <div class="snapshot-card {% if forloop.first %}snapshot-current{% endif %}">
+                    <div>
+                        <span class="id-box">#{{ snap.id }}</span>
+                        <strong>
+                            {% if forloop.first %}Текущий баланс{% else %}Снапшот{% endif %}
+                        </strong>
+                        <span class="small">— создан {{ snap.created_at|date:"d M Y H:i:s" }}</span>
+
+                        <div class="small" style="margin-top:6px;">
+                            last_event_id: <strong>{{ snap.last_event_id|default:"—" }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="snapshot-values" style="margin-top:10px;">
+                        <div class="val">
+                            <div class="label">Общий баланс</div>
+                            <div class="num">{{ snap.total_balance|floatformat:0|intcomma }} RUB</div>
+                        </div>
+                        <div class="val">
+                            <div class="label">Зарезервировано</div>
+                            <div class="num">{{ snap.reserved_amount|floatformat:0|intcomma }} RUB</div>
+                        </div>
+                        <div class="val">
+                            <div class="label">Свободно</div>
+                            <div class="num">{{ snap.free_amount|floatformat:0|intcomma }} RUB</div>
+                        </div>
                     </div>
                 </div>
-
-                <div class="snapshot-values" style="margin-top:10px;">
-                    <div class="val">
-                        <div class="label">Общий баланс</div>
-                        <div class="num">{{ snap.total_balance|floatformat:0|intcomma }} RUB</div>
-                    </div>
-                    <div class="val">
-                        <div class="label">Зарезервировано</div>
-                        <div class="num">{{ snap.reserved_amount|floatformat:0|intcomma }} RUB</div>
-                    </div>
-                    <div class="val">
-                        <div class="label">Свободно</div>
-                        <div class="num">{{ snap.free_amount|floatformat:0|intcomma }} RUB</div>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-    {% else %}
-        <div class="small">Снапшотов ещё нет.</div>
-    {% endif %}
-</div>
-
-</body>
-</html>
+            {% endfor %}
+        {% else %}
+            <div class="small">Снапшотов ещё нет.</div>
+        {% endif %}
+    </div>
+{% endblock %}
