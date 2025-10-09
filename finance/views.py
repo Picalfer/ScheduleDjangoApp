@@ -1,0 +1,89 @@
+import logging
+
+from django.contrib.admin.views.decorators import staff_member_required
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import CreateView
+from django.views.generic import TemplateView
+
+from .forms import FinanceEventForm
+from .models import FinanceSnapshot
+from .models import SchoolExpense
+
+logger = logging.getLogger(__name__)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class SchoolExpenseCreateView(CreateView):
+    model = SchoolExpense
+    fields = ['category', 'amount', 'description', 'expense_date']
+
+    def form_valid(self, form):
+        expense = form.save()
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'message': 'Расход успешно добавлен'
+            })
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'error': 'Пожалуйста, проверьте введенные данные'
+            })
+        return super().form_invalid(form)
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class StatsDashboardView(TemplateView):
+    template_name = 'finance/stats.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Берём последний снапшот — это актуальное состояние школы
+        snapshot = FinanceSnapshot.objects.order_by('-created_at').first()
+
+        if not snapshot:
+            finance_stats = {
+                'current_balance': 0,
+                'free_money': 0,
+                'reserved_money': 0,
+            }
+        else:
+            finance_stats = {
+                'current_balance': float(snapshot.total_balance),
+                'free_money': float(snapshot.free_amount),
+                'reserved_money': float(snapshot.reserved_amount),
+            }
+
+        context['finance_stats'] = finance_stats
+        return context
+
+
+@staff_member_required
+def finance_event_create(request):
+    """Простая отладочная страница для создания финансовых событий."""
+    if request.method == 'POST':
+        form = FinanceEventForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('finance_event_create')
+    else:
+        form = FinanceEventForm()
+
+    # Берём последние 3 снапшота
+    snapshots = list(FinanceSnapshot.objects.order_by('-created_at')[:3])
+
+    balance_stats = {
+        'snapshots': snapshots
+    }
+
+    return render(request, 'finance/finance_event_form.html', {
+        'form': form,
+        'balance_stats': balance_stats,
+    })

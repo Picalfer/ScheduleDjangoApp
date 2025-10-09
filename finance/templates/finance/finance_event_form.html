@@ -1,3 +1,5 @@
+{% load humanize %}
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -120,15 +122,15 @@
                 <div class="snapshot-values" style="margin-top:10px;">
                     <div class="val">
                         <div class="label">Общий баланс</div>
-                        <div class="num">{{ snap.total_balance|floatformat:0 }} RUB</div>
+                        <div class="num">{{ snap.total_balance|floatformat:0|intcomma }} RUB</div>
                     </div>
                     <div class="val">
                         <div class="label">Зарезервировано</div>
-                        <div class="num">{{ snap.reserved_amount|floatformat:0 }} RUB</div>
+                        <div class="num">{{ snap.reserved_amount|floatformat:0|intcomma }} RUB</div>
                     </div>
                     <div class="val">
                         <div class="label">Свободно</div>
-                        <div class="num">{{ snap.free_amount|floatformat:0 }} RUB</div>
+                        <div class="num">{{ snap.free_amount|floatformat:0|intcomma }} RUB</div>
                     </div>
                 </div>
             </div>

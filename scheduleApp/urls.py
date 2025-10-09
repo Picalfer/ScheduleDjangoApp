@@ -22,6 +22,7 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
+    path('', include('finance.urls')),
     path("materials/", include("materials.urls")),
     # TODO СДЕЛАТЬ ЧТОБЫ ЗДЕСЬ ПОДКЛЮЧАЛОСЬ ПРИЛОЖЕНИЕ CORE, А В КОРЕ УЖЕ КОРОВЫКЕ ССЫЛКИ ТОЛЬКО, И НОРМАЛЬНОЕ ИМЕНОВАНИЕ В ОДНОМ СТИЛЕ
     path('', include('pwa.urls')),

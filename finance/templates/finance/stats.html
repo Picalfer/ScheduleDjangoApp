@@ -3,7 +3,7 @@
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'core/css/analytics.css' %}">
+    <link rel="stylesheet" href="{% static 'finance/css/analytics.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -21,14 +21,14 @@
                     <!-- Основной баланс -->
                     <div class="finance-balance">
                         <div class="balance-label">Текущий баланс школы</div>
-                        <div class="balance-value">{{ finance_stats.current_balance|intcomma }} ₽</div>
+                        <div class="balance-value">{{ finance_stats.current_balance|floatformat:0|intcomma }} ₽</div>
                         <div class="balance-subtitle">Доходы - расходы</div>
                     </div>
 
                     <!-- Свободные деньги -->
                     <div class="free-money-section">
                         <div class="free-money-label">💎 Свободные деньги</div>
-                        <div class="free-money-value">{{ finance_stats.free_money|intcomma }} ₽</div>
+                        <div class="free-money-value">{{ finance_stats.free_money|floatformat:0|intcomma }} ₽</div>
                         <div class="free-money-subtitle">Можно вкладывать в развитие</div>
                     </div>
 
@@ -44,7 +44,7 @@
                     <div id="financeDetails" class="finance-details hidden">
                         <div class="finance-row">
                             <span class="finance-label">Зарезервировано для выплат:</span>
-                            <span class="finance-amount warning">{{ finance_stats.reserved_money|intcomma }} ₽</span>
+                            <span class="finance-amount warning">{{ finance_stats.reserved_money|floatformat:0|intcomma }} ₽</span>
                         </div>
 
                         <div class="add-expense-section">
@@ -101,5 +101,5 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="{% static 'core/schedule/analytics.js' %}"></script>
+    <script src="{% static 'finance/js/analytics.js' %}"></script>
 {% endblock %}

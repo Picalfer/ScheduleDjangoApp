@@ -20,18 +20,14 @@ from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.http import require_http_methods
-from django.views.generic import CreateView
-from django.views.generic import TemplateView
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, filters
 from rest_framework.permissions import IsAuthenticated
 
 from .constants import get_excluded_teacher_ids
-from .forms import FinanceEventForm
 from .forms import LoginForm
 from .forms import ProfileForm
-from .models import Client, Teacher, Lesson, TeacherPayment, SchoolExpense
-from .models import FinanceSnapshot
+from .models import Client, Teacher, Lesson, TeacherPayment
 from .models import OpenSlots, UserSettings
 from .models import Student
 from .serializers import LessonSerializer, TeacherSerializer
@@ -696,77 +692,3 @@ def low_balance_clients_count(request):
     except Exception as e:
         logger.error(f"Error in low_balance_clients_count: {str(e)}", exc_info=True)
         return JsonResponse({'count': 0, 'error': str(e)}, status=500)
-
-
-@method_decorator(csrf_exempt, name='dispatch')
-class SchoolExpenseCreateView(CreateView):
-    model = SchoolExpense
-    fields = ['category', 'amount', 'description', 'expense_date']
-
-    def form_valid(self, form):
-        expense = form.save()
-        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({
-                'success': True,
-                'message': 'Расход успешно добавлен'
-            })
-        return super().form_valid(form)
-
-    def form_invalid(self, form):
-        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({
-                'success': False,
-                'error': 'Пожалуйста, проверьте введенные данные'
-            })
-        return super().form_invalid(form)
-
-
-@method_decorator(staff_member_required, name='dispatch')
-class StatsDashboardView(TemplateView):
-    template_name = 'core/stats.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        # Берём последний снапшот — это актуальное состояние школы
-        snapshot = FinanceSnapshot.objects.order_by('-created_at').first()
-
-        if not snapshot:
-            finance_stats = {
-                'current_balance': 0,
-                'free_money': 0,
-                'reserved_money': 0,
-            }
-        else:
-            finance_stats = {
-                'current_balance': float(snapshot.total_balance),
-                'free_money': float(snapshot.free_amount),
-                'reserved_money': float(snapshot.reserved_amount),
-            }
-
-        context['finance_stats'] = finance_stats
-        return context
-
-
-@staff_member_required
-def finance_event_create(request):
-    """Простая отладочная страница для создания финансовых событий."""
-    if request.method == 'POST':
-        form = FinanceEventForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('finance_event_create')
-    else:
-        form = FinanceEventForm()
-
-    # Берём последние 3 снапшота
-    snapshots = list(FinanceSnapshot.objects.order_by('-created_at')[:3])
-
-    balance_stats = {
-        'snapshots': snapshots
-    }
-
-    return render(request, 'finance_event_form.html', {
-        'form': form,
-        'balance_stats': balance_stats,
-    })
