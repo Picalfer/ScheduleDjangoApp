@@ -104,6 +104,14 @@ class FinanceSnapshot(models.Model):
     free_amount = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal('0.00'))
     last_event_id = models.BigIntegerField(null=True, blank=True, db_index=True)
 
+    last_event_link = models.ForeignKey(
+        'FinanceEvent',
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='snapshots',
+        verbose_name='Последнее событие',
+    )
+
     class Meta:
         verbose_name = 'Снапшот баланса'
         verbose_name_plural = 'Снапшоты баланса'
