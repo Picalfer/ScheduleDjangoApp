@@ -5,6 +5,7 @@
             color-mix(in srgb, var(--danger-color) 50%, white)
     );
     transition: background 0.3s ease;
+    color: var(--invert-text-primary);
 }
 
 .admit-lesson-btn {
@@ -19,6 +20,7 @@
 
 
 .cancel-lesson-btn:hover {
+    color: var(--text-primary);
     background: linear-gradient(135deg,
     color-mix(in srgb, var(--danger-color) 50%, black), /* Осветленный success */ var(--danger-color)); /* Исходный цвет */
 }
