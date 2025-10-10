@@ -284,7 +284,7 @@
                                 <span class="small">— создан {{ snap.created_at|date:"d M Y H:i:s" }}</span>
 
                                 <div class="small" style="margin-top:6px;">
-                                    last_event_id: <strong>{{ snap.last_event_id|default:"—" }}</strong>
+                                    last_event_id: <strong>{{ snap.last_event_link.id|default:"—" }}</strong>
                                 </div>
                             </div>
 
