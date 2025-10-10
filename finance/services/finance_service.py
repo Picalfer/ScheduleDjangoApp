@@ -51,5 +51,5 @@ class FinanceService:
             total_balance=total_balance,
             reserved_amount=reserved_amount,
             free_amount=free_amount,
-            last_event_id=event.id,
+            last_event_link=event,
         )

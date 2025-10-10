@@ -82,8 +82,8 @@ def finance_event_create(request):
     snapshot_pairs = []
     for snap in snapshots:
         event = None
-        if snap.last_event_id:
-            event = FinanceEvent.objects.filter(id=snap.last_event_id).first()
+        if snap.last_event_link:
+            event = FinanceEvent.objects.filter(id=snap.last_event_link.id).first()
         snapshot_pairs.append({
             'snapshot': snap,
             'event': event
