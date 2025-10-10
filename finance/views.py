@@ -9,7 +9,7 @@ from django.views.generic import CreateView
 from django.views.generic import TemplateView
 
 from .forms import FinanceEventForm
-from .models import FinanceSnapshot
+from .models import FinanceSnapshot, FinanceEvent
 from .models import SchoolExpense
 
 logger = logging.getLogger(__name__)
@@ -79,11 +79,17 @@ def finance_event_create(request):
     # Берём последние 3 снапшота
     snapshots = list(FinanceSnapshot.objects.order_by('-created_at')[:3])
 
-    balance_stats = {
-        'snapshots': snapshots
-    }
+    snapshot_pairs = []
+    for snap in snapshots:
+        event = None
+        if snap.last_event_id:
+            event = FinanceEvent.objects.filter(id=snap.last_event_id).first()
+        snapshot_pairs.append({
+            'snapshot': snap,
+            'event': event
+        })
 
     return render(request, 'finance/finance_event_form.html', {
         'form': form,
-        'balance_stats': balance_stats,
+        'snapshot_pairs': snapshot_pairs,
     })

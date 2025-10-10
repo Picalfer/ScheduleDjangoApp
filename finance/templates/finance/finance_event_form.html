@@ -8,22 +8,31 @@
 
 {% block extra_css %}
     <style>
+        /* ====== Base Layout ====== */
 
         main {
             margin: 0;
+            overflow-y: auto;
             padding: 28px;
-            font-family: sans-serif;
-            color: #222;
-            background: #fff;
+            font-family: "Inter", "Segoe UI", sans-serif;
+            color: #e8e8e8;
+            background: #1b1d1b;
         }
 
         h1 {
             margin-bottom: 8px;
+            color: #c6e2b5;
+            font-weight: 600;
         }
 
         form {
             max-width: 560px;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            background: #262826;
+            border-radius: 10px;
+            padding: 18px 22px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            border: 1px solid #2f332f;
         }
 
         input, select, textarea {
@@ -31,72 +40,219 @@
             padding: 8px;
             box-sizing: border-box;
             margin-top: 6px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            background: #2f322f;
+            color: #e8e8e8;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #8dd48d;
+            background: #353835;
+            outline: none;
         }
 
         button {
             margin-top: 12px;
-            padding: 8px 14px;
+            padding: 9px 16px;
             cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            background: #4caf50;
+            color: #fff;
+            font-weight: 600;
+            transition: background 0.2s, transform 0.1s;
         }
 
+        button:hover {
+            background: #3e8e41;
+            transform: translateY(-1px);
+        }
+
+        /* ====== Snapshot section ====== */
         .snapshots-wrap {
-            margin-top: 28px;
+            margin-top: 32px;
+        }
+
+        .snapshot-wrapper {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 26px;
+        }
+
+        .snapshot-card, .event-card {
+            border-radius: 10px;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+            padding: 14px 18px;
+            color: #e2e2e2;
         }
 
         .snapshot-card {
-            background: #fbfbfb;
-            border: 1px solid #e6e6e6;
-            border-radius: 8px;
-            padding: 14px;
-            margin-bottom: 14px;
-            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+            background: #2b2f2b;
+            border-left: 5px solid #6bbf59;
+            transition: transform 0.1s ease-in-out;
+        }
+
+        .snapshot-card:hover {
+            transform: translateY(-2px);
+            background: #303530;
         }
 
         .snapshot-current {
-            border-color: #3c9d3c;
-            background: #f7fff7;
+            border-left-color: #9aff9a;
+            background: #354235;
+        }
+
+        .event-card {
+            flex: 0 0 300px;
+            margin-left: 16px;
+            font-size: 14px;
+            background: #2a2d2a;
+            border-left: 5px solid #62797a;
+        }
+
+        .snapshot-arrow {
+            font-size: 24px;
+            color: #777;
+            margin: 0 10px;
         }
 
         .snapshot-values {
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
+            margin-top: 10px;
         }
 
         .val {
             min-width: 160px;
-            background: #fff;
+            background: #242724;
             padding: 8px;
             border-radius: 6px;
-            border: 1px solid #eee;
+            border: 1px solid #3a3d3a;
         }
 
         .val .label {
             font-size: 12px;
-            color: #666;
+            color: #a0a0a0;
         }
 
         .val .num {
             font-size: 16px;
             font-weight: 600;
+            color: #d8f3d8;
             margin-top: 4px;
         }
 
         .small {
             font-size: 12px;
-            color: #888;
+            color: #a5a5a5;
         }
 
         .id-box {
             display: inline-block;
             padding: 4px 8px;
-            background: #f0f6ff;
-            color: #123;
+            background: #3a453a;
+            color: #d6f5d6;
             border-radius: 6px;
             font-weight: 600;
             margin-right: 8px;
         }
+
+        .event-card strong {
+            color: #d3e6ff;
+        }
+
+        .event-card .small {
+            color: #999;
+        }
+
+        /* ====== 📱 Mobile Responsive Styles ====== */
+        @media (max-width: 768px) {
+
+            main {
+                padding: 18px;
+            }
+
+            form {
+                padding: 14px 16px;
+                margin-bottom: 20px;
+            }
+
+            h1 {
+                font-size: 20px;
+                text-align: center;
+            }
+
+            /* Снапшоты теперь в колонку */
+            .snapshot-wrapper {
+                flex-direction: column;
+                align-items: stretch;
+                margin-bottom: 24px;
+            }
+
+            .snapshot-card {
+                border-left-width: 4px;
+                padding: 12px 14px;
+            }
+
+            /* Убираем горизонтальную стрелку — заменяем на вертикальный акцент */
+            .snapshot-arrow {
+                display: none;
+            }
+
+            /* Event-карта под снапшотом */
+            .event-card {
+                margin-left: 0;
+                margin-top: 10px;
+                flex: 1 1 auto;
+                width: 100%;
+                font-size: 13px;
+                padding: 10px 12px;
+            }
+
+            .snapshot-values {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .val {
+                min-width: unset;
+                width: 100%;
+            }
+
+            input, select, textarea {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            button {
+                width: 100%;
+                font-size: 15px;
+                padding: 10px;
+            }
+
+            .id-box {
+                font-size: 13px;
+                padding: 3px 6px;
+            }
+
+            .small {
+                font-size: 11px;
+            }
+        }
+
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: rgba(187, 188, 246, 0.17);
+        }
     </style>
+
 {% endblock %}
 
 {% block content %}
@@ -109,37 +265,57 @@
     </form>
 
     <div class="snapshots-wrap">
-        {% if balance_stats.snapshots %}
-            {% for snap in balance_stats.snapshots %}
-                <div class="snapshot-card {% if forloop.first %}snapshot-current{% endif %}">
-                    <div>
-                        <span class="id-box">#{{ snap.id }}</span>
-                        <strong>
-                            {% if forloop.first %}Текущий баланс{% else %}Снапшот{% endif %}
-                        </strong>
-                        <span class="small">— создан {{ snap.created_at|date:"d M Y H:i:s" }}</span>
+        {% if snapshot_pairs %}
+            {% for pair in snapshot_pairs %}
+                {% with snap=pair.snapshot event=pair.event %}
+                    <div class="snapshot-wrapper">
+                        <div class="snapshot-card {% if forloop.first %}snapshot-current{% endif %}">
+                            <div>
+                                <span class="id-box">#{{ snap.id }}</span>
+                                <strong>
+                                    {% if forloop.first %}Текущий баланс{% else %}Снапшот{% endif %}
+                                </strong>
+                                <span class="small">— создан {{ snap.created_at|date:"d M Y H:i:s" }}</span>
 
-                        <div class="small" style="margin-top:6px;">
-                            last_event_id: <strong>{{ snap.last_event_id|default:"—" }}</strong>
-                        </div>
-                    </div>
+                                <div class="small" style="margin-top:6px;">
+                                    last_event_id: <strong>{{ snap.last_event_id|default:"—" }}</strong>
+                                </div>
+                            </div>
 
-                    <div class="snapshot-values" style="margin-top:10px;">
-                        <div class="val">
-                            <div class="label">Общий баланс</div>
-                            <div class="num">{{ snap.total_balance|floatformat:0|intcomma }} RUB</div>
+                            <div class="snapshot-values" style="margin-top:10px;">
+                                <div class="val">
+                                    <div class="label">Общий баланс</div>
+                                    <div class="num">{{ snap.total_balance|floatformat:0|intcomma }} RUB</div>
+                                </div>
+                                <div class="val">
+                                    <div class="label">Зарезервировано</div>
+                                    <div class="num">{{ snap.reserved_amount|floatformat:0|intcomma }} RUB</div>
+                                </div>
+                                <div class="val">
+                                    <div class="label">Свободно</div>
+                                    <div class="num">{{ snap.free_amount|floatformat:0|intcomma }} RUB</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="val">
-                            <div class="label">Зарезервировано</div>
-                            <div class="num">{{ snap.reserved_amount|floatformat:0|intcomma }} RUB</div>
-                        </div>
-                        <div class="val">
-                            <div class="label">Свободно</div>
-                            <div class="num">{{ snap.free_amount|floatformat:0|intcomma }} RUB</div>
-                        </div>
+
+                        {% if event %}
+                            <div class="snapshot-arrow">→</div>
+                            <div class="event-card">
+                                <div class="event-header">
+                                    <strong>Событие #{{ event.id }}</strong>
+                                    <span class="small">({{ event.get_event_type_display }})</span>
+                                </div>
+                                <div class="event-body small">
+                                    <div>Сумма: <strong>{{ event.amount|floatformat:0|intcomma }} RUB</strong></div>
+                                    <div>Создан: {{ event.created_at|date:"d M Y H:i:s" }}</div>
+                                    <div>External ID: {{ event.external_id }}</div>
+                                </div>
+                            </div>
+                        {% endif %}
                     </div>
-                </div>
+                {% endwith %}
             {% endfor %}
+            <br>
         {% else %}
             <div class="small">Снапшотов ещё нет.</div>
         {% endif %}
