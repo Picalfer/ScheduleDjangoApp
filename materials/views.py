@@ -1,3 +1,4 @@
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
@@ -77,7 +78,6 @@ def courses_with_levels(request):
     return JsonResponse({'courses': data}, safe=False)
 
 
-# Для API (возвращает JSON)
 @require_GET
 def api_level_guides(request, level_id):
     try:
@@ -100,9 +100,8 @@ def api_level_guides(request, level_id):
 
 @csrf_exempt
 @require_POST
+@staff_member_required
 def upload_guide(request):
-    # !!! Временно без авторизации
-
     level_id = request.POST.get('level_id')
     title = request.POST.get('title')
     html_file = request.FILES.get('html_file')

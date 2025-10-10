@@ -1,0 +1,108 @@
+{% extends "core/base.html" %}
+{% load humanize %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'finance/css/analytics.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="stats-container">
+        <!-- Заголовок -->
+        <h1 class="stats-header">📊 Аналитика школы</h1>
+        <div class="stats-updated">Обновлено: {% now "j F Y H:i" %}</div>
+
+        <!-- Финансы - центрированная секция -->
+        <div class="finance-centered">
+            <div class="stat-card finance">
+                <h2>💰 Финансы школы</h2>
+
+                <div class="finance-main">
+                    <!-- Основной баланс -->
+                    <div class="finance-balance">
+                        <div class="balance-label">Текущий баланс школы</div>
+                        <div class="balance-value">{{ finance_stats.current_balance|floatformat:0|intcomma }} ₽</div>
+                        <div class="balance-subtitle">Доходы - расходы</div>
+                    </div>
+
+                    <!-- Свободные деньги -->
+                    <div class="free-money-section">
+                        <div class="free-money-label">💎 Свободные деньги</div>
+                        <div class="free-money-value">{{ finance_stats.free_money|floatformat:0|intcomma }} ₽</div>
+                        <div class="free-money-subtitle">Можно вкладывать в развитие</div>
+                    </div>
+
+                    <!-- Кнопка раскрытия деталей -->
+                    <div class="toggle-details-section">
+                        <button class="toggle-details-btn" onclick="toggleFinanceDetails()">
+                            <span class="toggle-icon">▼</span>
+                            Показать детализацию
+                        </button>
+                    </div>
+
+                    <!-- Детализация (скрыта по умолчанию) -->
+                    <div id="financeDetails" class="finance-details hidden">
+                        <div class="finance-row">
+                            <span class="finance-label">Зарезервировано для выплат:</span>
+                            <span class="finance-amount warning">{{ finance_stats.reserved_money|floatformat:0|intcomma }} ₽</span>
+                        </div>
+
+                        <div class="add-expense-section">
+                            <button class="add-expense-btn" onclick="openExpenseModal()">
+                                ➕ Добавить расход школы
+                            </button>
+                            <br>
+                            <br>
+                            <a href="/finance/events/create/">Последние снапшоты</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="expenseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💸 Добавить расход школы</h3>
+                <span class="close" onclick="closeExpenseModal()">&times;</span>
+            </div>
+            <form id="expenseForm">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Категория:</label>
+                    <select name="category" required>
+                        <option value="">Выберите категорию</option>
+                        <option value="advertising">Реклама</option>
+                        <option value="software">Софт/Подписки</option>
+                        <option value="taxes">Налоги</option>
+                        <option value="other">Другое</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Сумма (₽):</label>
+                    <input type="number" name="amount" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label>Описание:</label>
+                    <input type="text" name="description" maxlength="200" required>
+                </div>
+                <div class="form-group">
+                    <label>Дата расхода:</label>
+                    <input type="date" name="expense_date" value="{{ today|date:'Y-m-d' }}" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" onclick="closeExpenseModal()">Отмена</button>
+                    <button type="submit">💾 Сохранить расход</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Уведомление -->
+    <div id="expenseNotification" class="notification hidden"></div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'finance/js/analytics.js' %}"></script>
+{% endblock %}
