@@ -271,7 +271,13 @@
                     <div class="snapshot-wrapper">
                         <div class="snapshot-card {% if forloop.first %}snapshot-current{% endif %}">
                             <div>
-                                <span class="id-box">#{{ snap.id }}</span>
+                            <span class="id-box">
+                                <a href="{% url 'admin:finance_financesnapshot_change' snap.id %}"
+                                   target="_blank"
+                                   style="text-decoration:none; color:inherit;">
+                                    #{{ snap.id }}
+                                </a>
+                            </span>
                                 <strong>
                                     {% if forloop.first %}Текущий баланс{% else %}Снапшот{% endif %}
                                 </strong>
@@ -302,7 +308,11 @@
                             <div class="snapshot-arrow">→</div>
                             <div class="event-card">
                                 <div class="event-header">
-                                    <strong>Событие #{{ event.id }}</strong>
+                                    <a href="{% url 'admin:finance_financeevent_change' event.id %}"
+                                       target="_blank"
+                                       style="text-decoration:none; color:inherit;">
+                                        <strong>Событие #{{ event.id }}</strong>
+                                    </a>
                                     <span class="small">({{ event.get_event_type_display }})</span>
                                 </div>
                                 <div class="event-body small">
