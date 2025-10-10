@@ -68,6 +68,9 @@ class FinanceEvent(models.Model):
     created_at = models.DateTimeField(default=timezone.now, db_index=True)
 
     class Meta:
+
+        verbose_name = 'Финансовое событие'
+        verbose_name_plural = 'Финансовые события'
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['created_at']),
@@ -102,6 +105,8 @@ class FinanceSnapshot(models.Model):
     last_event_id = models.BigIntegerField(null=True, blank=True, db_index=True)
 
     class Meta:
+        verbose_name = 'Снапшот баланса'
+        verbose_name_plural = 'Снапшоты баланса'
         ordering = ['-created_at']
 
     def __str__(self):
