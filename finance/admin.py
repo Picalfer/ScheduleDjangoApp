@@ -70,7 +70,7 @@ class FinanceEventAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Основное', {
             'fields': (
-                'event_type', 'amount', 'currency', 'created_by'
+                'id', 'event_type', 'amount', 'currency', 'created_by'
             )
         }),
         ('Дополнительно', {
@@ -93,14 +93,14 @@ class FinanceSnapshotAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'created_at',
         'total_balance', 'reserved_amount', 'free_amount',
-        'last_event_id'
+        'last_event_link'
     )
     list_filter = ('created_at',)
     readonly_fields = (
         'id', 'created_at', 'total_balance',
-        'reserved_amount', 'free_amount', 'last_event_id'
+        'reserved_amount', 'free_amount', 'last_event_link'
     )
-    search_fields = ('last_event_id',)
+    search_fields = ('total_balance',)
     ordering = ('-created_at',)
 
     def has_add_permission(self, request):

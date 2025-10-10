@@ -102,7 +102,6 @@ class FinanceSnapshot(models.Model):
     total_balance = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal('0.00'))
     reserved_amount = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal('0.00'))
     free_amount = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal('0.00'))
-    last_event_id = models.BigIntegerField(null=True, blank=True, db_index=True)
 
     last_event_link = models.ForeignKey(
         'FinanceEvent',
