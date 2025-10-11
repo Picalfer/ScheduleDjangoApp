@@ -100,7 +100,6 @@ def api_level_guides(request, level_id):
 
 @csrf_exempt
 @require_POST
-@staff_member_required
 def upload_guide(request):
     level_id = request.POST.get('level_id')
     title = request.POST.get('title')
