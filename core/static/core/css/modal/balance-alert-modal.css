@@ -1,7 +1,6 @@
 .balance-alert-container {
     display: flex;
     flex-direction: row;
-    justify-content: space-evenly;
     gap: 20px;
     height: 100%;
 }
@@ -9,6 +8,9 @@
 .balance-section {
     padding: 15px;
     border-radius: 8px;
+    max-height: 500px;
+    overflow-y: auto;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .balance-section h3 {
@@ -62,23 +64,23 @@
 
 .balance-alert-container.horizontal-layout {
     flex-direction: row;
-    overflow-x: auto; /* Добавляет горизонтальную прокрутку если не помещается */
-    padding-bottom: 10px; /* Для скролла */
-    grid-template-columns: repeat(3, 1fr);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 10px;
+    padding-left: 16px;
+    margin-left: -16px;
+    width: calc(100% + 16px);
+    scroll-padding-left: 16px;
 }
 
 .balance-alert-container.horizontal-layout .balance-section {
-    flex: 1;
-    min-width: 300px; /* Минимальная ширина секции */
-    max-width: 400px; /* Максимальная ширина секции */
+    flex: 0 0 auto;
+    min-width: 300px;
+    max-width: 400px;
 }
 
-.balance-section {
-    max-height: 500px;
-    overflow-y: auto;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.balance-alert-container.horizontal-layout .balance-section:first-child {
+    margin-left: 16px;
 }
 
 .balance-alert-modal-content {
