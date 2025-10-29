@@ -213,6 +213,15 @@ nav {
     min-width: 0;
 }
 
+.lesson-info div {
+    flex-direction: column-reverse;
+    gap: 5px;
+}
+
+.input-group-with-btn {
+    flex-direction: column;
+}
+
 /* ===== МОДАЛЬНЫЕ ОКНА ===== */
 .modal-content {
     width: 90%;

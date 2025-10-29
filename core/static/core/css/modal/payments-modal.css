@@ -12,7 +12,7 @@
 
 .submit-button {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--invert-text-primary);
 }
 
 .generate-payments-btn {

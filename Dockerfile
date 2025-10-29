@@ -1,5 +1,10 @@
 FROM python:3.10-slim-buster
 
+# ВРЕМЕННОЕ ИСПРАВЛЕНИЕ: Обновляем источники для доступа к архивным репозиториям
+RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
+    sed -i 's|security.debian.org|archive.debian.org/debian-security|g' /etc/apt/sources.list && \
+    sed -i '/buster-updates/d' /etc/apt/sources.list
+
 WORKDIR /app
 
 ENV PYTHONUNBUFFERED=1 \
