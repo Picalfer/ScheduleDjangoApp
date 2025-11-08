@@ -13,44 +13,6 @@ export function formatDate(date) {
     return `${date.getDate()} ${MONTH_NAMES[date.getMonth()]}`;
 }
 
-export function showNotification(message, type = 'info') {
-    const notification = document.getElementById('notification');
-
-    // Устанавливаем соответствующий стиль в зависимости от типа
-    switch (type) {
-        case 'success':
-            notification.style.backgroundColor = '#4CAF50'; // Зеленый цвет для успеха
-            notification.style.color = '#fff'; // Белый текст
-            break;
-        case 'error':
-            notification.style.backgroundColor = '#f44336'; // Красный цвет для ошибки
-            notification.style.color = '#fff'; // Белый текст
-            break;
-        case 'info':
-        default:
-            notification.style.backgroundColor = '#2196F3'; // Синий цвет для нейтрального
-            notification.style.color = '#fff'; // Белый текст
-            break;
-    }
-
-    // Показать уведомление
-    notification.textContent = message;
-    notification.style.display = 'block';
-    notification.style.opacity = '1';
-    notification.style.zIndex = '1001';
-    notification.style.textAlign = 'center';
-    notification.style.transform = 'translateX(-50%) translateY(0)';
-
-    // Скрыть уведомление через 3 секунды
-    setTimeout(() => {
-        notification.style.opacity = '0'; // Скрыть уведомление
-        notification.style.transform = 'translateX(-50%) translateY(20px)'; // Убрать уведомление вниз
-        setTimeout(() => {
-            notification.style.display = 'none'; // Убрать из потока
-        }, 500); // Время, чтобы дождаться завершения анимации
-    }, 3000);
-}
-
 export function showConfirmationModal({
                                           text,
                                           onConfirm,
@@ -144,4 +106,93 @@ export function updateCounter(
     } else {
         counter.style.display = 'none';
     }
+}
+
+let notificationTimer = null;
+
+export function showNotification(message, type = 'info') {
+    const notification = document.getElementById('notification');
+    const notificationText = notification.querySelector('.notification-text');
+    const progressBar = notification.querySelector('.notification-progress');
+
+    // Очищаем предыдущий таймер
+    if (notificationTimer) {
+        clearTimeout(notificationTimer);
+        notificationTimer = null;
+    }
+
+    // Удаляем предыдущие классы анимаций
+    notification.classList.remove('notification-appear', 'notification-pop');
+
+    // Устанавливаем соответствующий стиль в зависимости от типа
+    switch (type) {
+        case 'success':
+            notification.style.backgroundColor = '#4CAF50';
+            break;
+        case 'error':
+            notification.style.backgroundColor = '#f44336';
+            break;
+        case 'info':
+        default:
+            notification.style.backgroundColor = '#2196F3';
+            break;
+    }
+
+    // Устанавливаем текст
+    notificationText.textContent = message;
+
+    // Сбрасываем прогресс-бар (важно делать это ДО показа уведомления)
+    resetProgressBar(progressBar);
+
+    // Показываем уведомление
+    notification.style.display = 'block';
+    notification.style.zIndex = '1001';
+
+    // Запускаем анимацию появления
+    setTimeout(() => {
+        notification.classList.add('notification-appear');
+    }, 10);
+
+    // Запускаем анимацию прогресс-бара с небольшой задержкой
+    setTimeout(() => {
+        startProgressBar(progressBar);
+    }, 50);
+
+    // Скрыть уведомление через 3 секунды
+    notificationTimer = setTimeout(() => {
+        hideNotification(notification);
+    }, 3000);
+}
+
+function resetProgressBar(progressBar) {
+    // Полностью сбрасываем стили прогресс-бара
+    progressBar.style.transition = 'none';
+    progressBar.style.transform = 'scaleX(1)';
+    progressBar.style.opacity = '1';
+
+    // Принудительный reflow для применения стилей
+    void progressBar.offsetWidth;
+}
+
+function startProgressBar(progressBar) {
+    // Запускаем анимацию
+    progressBar.style.transition = 'transform 3s linear';
+    progressBar.style.transform = 'scaleX(0)';
+}
+
+function hideNotification(notification) {
+    const progressBar = notification.querySelector('.notification-progress');
+
+    // Убираем анимацию появления и добавляем анимацию лопанья
+    notification.classList.remove('notification-appear');
+    notification.classList.add('notification-pop');
+
+    // Полностью скрываем после анимации
+    setTimeout(() => {
+        notification.style.display = 'none';
+        notification.classList.remove('notification-pop');
+
+        // ВАЖНО: Сбрасываем прогресс-бар после скрытия уведомления
+        resetProgressBar(progressBar);
+    }, 400);
 }
