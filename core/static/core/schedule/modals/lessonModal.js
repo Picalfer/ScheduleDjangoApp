@@ -1,6 +1,6 @@
 import {Modal} from './modal.js';
 import {calendarManager, repository, scheduleState} from "../app.js";
-import {showNotification} from '../utils.js';
+import {showNotification} from '../notifications.js';
 import {CancelLessonModal} from "./cancelLessonModal.js";
 
 export class LessonModal extends Modal {

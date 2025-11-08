@@ -2,23 +2,103 @@
     position: fixed;
     bottom: 20px;
     left: 50%;
-    background-color: #f44336;
+    background-color: #323232;
     color: white;
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    padding: 14px 16px;
+    border-radius: 4px;
+    box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.2),
+    0 6px 10px 0 rgba(0, 0, 0, 0.14),
+    0 1px 18px 0 rgba(0, 0, 0, 0.12);
     z-index: 1000;
     opacity: 0;
     transform: translateX(-50%) translateY(20px);
-    /* Для прогресс-бара */
-    overflow: hidden;
-    min-width: 200px;
-    text-align: center;
+    min-width: 288px;
+    max-width: 568px;
+    text-align: left;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    line-height: 1.43;
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+#notification.notification-appear {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+#notification.notification-pop {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+}
+
+/* Material Design colors for notification types */
+#notification.success {
+    background-color: #4CAF50;
+}
+
+#notification.error {
+    background-color: #f44336;
+}
+
+#notification.info {
+    background-color: #2196F3;
+}
+
+#notification.warning {
+    background-color: #FF9800;
 }
 
 .notification-content {
     position: relative;
     z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.notification-text {
+    flex: 1;
+    padding-right: 16px;
+}
+
+.notification-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.notification-action {
+    background: rgba(255, 255, 255, 0.15); /* Легкий фон по умолчанию */
+    border: none;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    min-width: 72px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.5px;
+}
+
+.notification-action:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px); /* Легкий подъем при ховере */
+}
+
+.notification-action:active {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateY(0);
+}
+
+.notification-action:focus {
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5); /* Контур при фокусе */
 }
 
 .notification-progress {
@@ -27,49 +107,92 @@
     left: 0;
     height: 3px;
     width: 100%;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.3);
     transform: scaleX(1);
     transform-origin: left center;
     z-index: 1;
+    border-radius: 0 0 4px 4px;
 }
 
-/* Анимация появления - как надувание пузыря */
-@keyframes bubbleAppear {
+.notification-counter-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #f44336;
+    color: white;
+    border-radius: 10px;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 500;
+    min-width: 20px;
+    height: 20px;
+    text-align: center;
+    z-index: 10002;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2),
+    0 4px 5px 0 rgba(0, 0, 0, 0.14),
+    0 1px 10px 0 rgba(0, 0, 0, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+
+    /* Material Design animation */
+    animation: badge-appear 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+    transform-origin: center;
+}
+
+/* Material Design colors for different badge types */
+.notification-counter-badge.success {
+    background: #4CAF50;
+}
+
+.notification-counter-badge.info {
+    background: #2196F3;
+}
+
+.notification-counter-badge.warning {
+    background: #FF9800;
+}
+
+.notification-counter-badge.error {
+    background: #f44336;
+}
+
+/* Material Design animations */
+@keyframes badge-appear {
     0% {
+        transform: scale(0) rotate(15deg);
         opacity: 0;
-        transform: translateX(-50%) translateY(20px) scale(0.8);
     }
-    70% {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0) scale(1.05);
+    50% {
+        transform: scale(1.1) rotate(-5deg);
     }
     100% {
+        transform: scale(1) rotate(0);
         opacity: 1;
-        transform: translateX(-50%) translateY(0) scale(1);
     }
 }
 
-/* Анимация исчезновения - как лопанье пузыря */
-@keyframes bubblePop {
+@keyframes badge-pulse {
     0% {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0) scale(1);
+        box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2),
+        0 4px 5px 0 rgba(0, 0, 0, 0.14),
+        0 1px 10px 0 rgba(0, 0, 0, 0.12);
     }
-    30% {
-        opacity: 0.8;
-        transform: translateX(-50%) translateY(0) scale(1.1);
+    50% {
+        box-shadow: 0 4px 8px -1px rgba(0, 0, 0, 0.3),
+        0 6px 10px 0 rgba(0, 0, 0, 0.24),
+        0 2px 12px 0 rgba(0, 0, 0, 0.22);
     }
     100% {
-        opacity: 0;
-        transform: translateX(-50%) translateY(20px) scale(0.8);
+        box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2),
+        0 4px 5px 0 rgba(0, 0, 0, 0.14),
+        0 1px 10px 0 rgba(0, 0, 0, 0.12);
     }
 }
 
-/* Классы для анимаций */
-.notification-appear {
-    animation: bubbleAppear 0.6s ease-out forwards;
-}
-
-.notification-pop {
-    animation: bubblePop 0.4s ease-in forwards;
+/* Optional: Add subtle pulse animation for attention */
+.notification-counter-badge.pulse {
+    animation: badge-appear 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards,
+    badge-pulse 2s ease-in-out infinite;
 }

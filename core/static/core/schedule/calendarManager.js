@@ -1,4 +1,5 @@
-import {DAYS_OF_WEEK, showNotification} from "./utils.js";
+import {DAYS_OF_WEEK} from "./utils.js";
+import {showNotification} from "./notifications.js";
 import {repository, scheduleState, settingsManager} from "./app.js";
 import {WeekManager} from "./weekManager.js";
 import {LessonManager} from "./lessonManager.js";
@@ -163,6 +164,7 @@ export class CalendarManager {
     }
 
     displayLessons() {
+        console.log("test2")
         if (!Array.isArray(this.lessonManager.lessons)) {
             console.warn("Некорректные данные уроков");
             return;
@@ -249,9 +251,11 @@ export class CalendarManager {
 
         // Показываем предупреждение о конфликтах
         this.showScheduleConflicts(lessonsByTimeSlot);
+        console.log("test1")
     }
 
     showScheduleConflicts(lessonsByTimeSlot) {
+        console.log("test")
         const conflicts = Object.entries(lessonsByTimeSlot)
             .filter(([_, lessons]) => {
                 // Фильтруем только те ячейки, где есть конфликт:

@@ -1,5 +1,5 @@
 import * as utils from "./utils.js";
-import {showNotification} from "./utils.js";
+import {showNotification} from "./notifications.js";
 import {calendarManager, scheduleState} from "./app.js";
 
 export class SettingsManager {
