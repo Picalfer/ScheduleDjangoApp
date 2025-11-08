@@ -214,6 +214,10 @@ export class CalendarManager {
                 // Очищаем ячейку перед рендерингом
                 hourElement.innerHTML = '';
 
+                // Проверяем, есть ли в этой ячейке конфликт (больше одного урока И хотя бы один запланирован)
+                const hasScheduledLesson = lessons.some(lesson => lesson.status === 'scheduled');
+                const hasConflict = lessons.length > 1 && hasScheduledLesson;
+
                 if (lessons.length === 1) {
                     // Один урок - обычный рендеринг
                     hourElement.innerHTML = this.lessonManager.createLessonHTML(lessons[0]);
@@ -228,11 +232,14 @@ export class CalendarManager {
                         );
                     });
 
-                    // Добавляем класс для стилизации конфликтных ячеек
-                    hourElement.classList.add('has-conflict');
-
-                    // Добавляем тултип с информацией о конфликте
-                    hourElement.title = `Конфликт расписания: ${lessons.length} урока в одно время`;
+                    // Добавляем класс для стилизации конфликтных ячеек только если есть конфликт
+                    if (hasConflict) {
+                        hourElement.classList.add('has-conflict');
+                        hourElement.title = `Конфликт расписания: ${lessons.length} урока в одно время (есть запланированные)`;
+                    } else {
+                        hourElement.classList.remove('has-conflict');
+                        hourElement.title = `Несколько уроков: ${lessons.length} урока (все обработаны)`;
+                    }
                 }
 
             } catch (error) {
@@ -246,13 +253,22 @@ export class CalendarManager {
 
     showScheduleConflicts(lessonsByTimeSlot) {
         const conflicts = Object.entries(lessonsByTimeSlot)
-            .filter(([_, lessons]) => lessons.length > 1)
+            .filter(([_, lessons]) => {
+                // Фильтруем только те ячейки, где есть конфликт:
+                // больше одного урока И хотя бы один запланирован
+                const hasScheduledLesson = lessons.some(lesson => lesson.status === 'scheduled');
+                return lessons.length > 1 && hasScheduledLesson;
+            })
             .map(([timeSlotKey, lessons]) => {
                 const [dayOfWeek, hour] = timeSlotKey.split('_');
+                const scheduledLessons = lessons.filter(lesson => lesson.status === 'scheduled');
+
                 return {
                     day: dayOfWeek,
                     hour: parseInt(hour),
-                    count: lessons.length,
+                    totalCount: lessons.length,
+                    scheduledCount: scheduledLessons.length,
+                    hasScheduledLessons: scheduledLessons.length > 0,
                     lessons: lessons
                 };
             });
