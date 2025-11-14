@@ -272,8 +272,7 @@
     <script>
         let currentUserId = {{ user_id }};
         let currentTeacherId = {{ teacher_id }}
-        console.log(`UserId: ${currentUserId}`)
-        console.log(`TeacherId: ${currentTeacherId}`)
+        console.log(`UserId: ${currentUserId}; TeacherId: ${currentTeacherId};`)
         const userData = {
             isAdmin: {% if request.user.is_staff %}true{% else %}false{% endif %},
             username: "{{ request.user.username|escapejs }}"
