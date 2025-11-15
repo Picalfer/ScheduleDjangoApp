@@ -8,6 +8,29 @@ import {LessonModal} from "./modals/lessonModal.js";
 import {Repository} from "./repository.js";
 import {BalanceAlertModal} from "./modals/balanceAlertModal.js";
 
+export const scheduleState = {
+    isAnother: false,
+    teacherId: currentTeacherId,
+    userId: currentUserId
+};
+
+export const repository = new Repository();
+export const settingsManager = new SettingsManager();
+export const calendarManager = new CalendarManager();
+
+// Функция для асинхронной инициализации менеджеров
+export async function initializeManagers() {
+    console.log('Initializing managers...');
+
+    // Сначала загружаем настройки
+    await settingsManager.loadSettingsFromServer();
+
+    // Потом инициализируем календарь с примененными настройками
+    await calendarManager.initialize();
+
+    console.log('All managers initialized');
+}
+
 export function initApp() {
     if (userData.isAdmin) {
         setAdminTools()
@@ -87,13 +110,20 @@ function setupContextMenu() {
     });
 }
 
-export const scheduleState = {
-    isAnother: false,
-    teacherId: currentTeacherId,
-    userId: currentUserId
-};
+// Запускаем приложение
+async function startApp() {
+    try {
+        await initializeManagers();
+        initApp();
+        console.log('App started successfully');
+    } catch (error) {
+        console.error('Failed to start app:', error);
+    }
+}
 
-// Важен порядок инициализации
-export const repository = new Repository();
-export const calendarManager = new CalendarManager();
-export const settingsManager = new SettingsManager();
+// Запускаем приложение когда DOM загружен
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startApp);
+} else {
+    startApp();
+}
