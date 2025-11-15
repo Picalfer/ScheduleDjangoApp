@@ -4,9 +4,12 @@ import {repository, scheduleState, settingsManager} from "./app.js";
 import {WeekManager} from "./weekManager.js";
 import {LessonManager} from "./lessonManager.js";
 
+const LOG_PREFIX = '[CM]';
+
 export class CalendarManager {
 
     constructor() {
+        console.log(`${LOG_PREFIX} constructor() - начал выполнение`);
         this.lessonManager = new LessonManager();
         this.weekManager = new WeekManager();
         this.openSlots = {};
@@ -21,6 +24,7 @@ export class CalendarManager {
         this.updateCalendarUi()
         this.goToCurrentWeek();
         this.setupEventListeners()
+        console.log(`${LOG_PREFIX} constructor() - завершил выполнение`);
     }
 
     setupEventListeners() {
@@ -164,7 +168,7 @@ export class CalendarManager {
     }
 
     displayLessons() {
-        console.log("test2")
+        console.log(`${LOG_PREFIX} displayLessons() - начал выполнение`);
         if (!Array.isArray(this.lessonManager.lessons)) {
             console.warn("Некорректные данные уроков");
             return;
@@ -251,11 +255,11 @@ export class CalendarManager {
 
         // Показываем предупреждение о конфликтах
         this.showScheduleConflicts(lessonsByTimeSlot);
-        console.log("test1")
+        console.log(`${LOG_PREFIX} displayLessons() - завершил выполнение, обработано уроков: ${this.lessonManager.lessons?.length || 0}`);
     }
 
     showScheduleConflicts(lessonsByTimeSlot) {
-        console.log("test")
+        console.log(`${LOG_PREFIX} showScheduleConflicts() - начал выполнение`);
         const conflicts = Object.entries(lessonsByTimeSlot)
             .filter(([_, lessons]) => {
                 // Фильтруем только те ячейки, где есть конфликт:
@@ -284,43 +288,54 @@ export class CalendarManager {
             // Логируем конфликты для отладки
             console.log('Конфликты расписания:', conflicts);
         }
+        console.log(`${LOG_PREFIX} showScheduleConflicts() - завершил выполнение, найдено конфликтов: ${conflicts.length}`);
     }
 
     updateScheduleDisplay() {
+        console.log(`${LOG_PREFIX} updateScheduleDisplay() - начал выполнение`);
         this.clearSchedule();
         this.lessonManager.clearAllLessons();
         this.displayOpenSlots();
         this.displayLessons();
+        console.log(`${LOG_PREFIX} updateScheduleDisplay() - завершил выполнение`);
     }
 
     prevWeek() {
+        console.log(`${LOG_PREFIX} prevWeek() - переключение на предыдущую неделю`);
         this.weekManager.currentWeekOffset--;
         this.updateCalendar();
         this.updateScheduleDisplay();
     }
 
     nextWeek() {
+        console.log(`${LOG_PREFIX} nextWeek() - переключение на следующую неделю`);
         this.weekManager.currentWeekOffset++;
         this.updateCalendar();
         this.updateScheduleDisplay();
     }
 
     goToCurrentWeek() {
+        console.log(`${LOG_PREFIX} goToCurrentWeek() - переход к текущей неделе`);
         if (this.weekManager.currentWeekOffset !== 0) {
             this.weekManager.currentWeekOffset = 0;
             this.updateCalendar();
             this.updateScheduleDisplay();
+        } else {
+            console.log(`${LOG_PREFIX} goToCurrentWeek() - уже на текущей неделе, пропускаем`);
         }
     }
 
     updateCalendar() {
+        console.log(`${LOG_PREFIX} updateCalendar() - начал выполнение`);
         this.weekManager.updateHeaderDates();
         this.weekManager.updateWeekInfo();
         this.generateTimeSlots();
         this.updateScheduleDisplay();
+        console.log(`${LOG_PREFIX} updateCalendar() - завершил выполнение`);
     }
 
     async loadSchedule(teacherId = currentTeacherId, userId = currentUserId, startDate = null, endDate = null) {
+        console.log(`${LOG_PREFIX} loadSchedule() - начал выполнение, teacherId: ${teacherId}`);
         try {
             const {start: weekStart, end: weekEnd} = this.weekManager.getWeekRange(this.weekManager.currentWeekOffset);
             const formatDate = (date) => date.toISOString().split('T')[0];
@@ -368,23 +383,22 @@ export class CalendarManager {
                 }
             });
 
+            console.log(`${LOG_PREFIX} loadSchedule() - получено уроков: ${lessons.length}, сгенерировано fakeLessons: ${fakeLessons.length}`);
             this.lessonManager.lessons = [...lessons, ...fakeLessons];
-            /*
-                        const duplicateCount = this.lessonManager.lessons.length - new Set(this.lessonManager.lessons.map(l =>
-                            `${l.id}-${l.date}-${l.time}`
-                        )).size;
-                        console.log('Дубликатов найдено:', duplicateCount);*/
-
             this.openSlots = await repository.getOpenSlots(effectiveTeacherId);
+
+            console.log(`${LOG_PREFIX} loadSchedule() - открытые слоты загружены`);
+
             this.generateTimeSlots();
             this.updateCalendar();
             this.updateScheduleDisplay();
 
         } catch (error) {
-            console.error('Ошибка загрузки расписания:', error);
+            console.error(`${LOG_PREFIX} loadSchedule() - ошибка:`, error);
             showNotification("Ошибка загрузки расписания", "error");
             this.lessons = [];
         }
+        console.log(`${LOG_PREFIX} loadSchedule() - завершил выполнение`);
     }
 
     async getMyId() {
