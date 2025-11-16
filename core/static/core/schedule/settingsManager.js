@@ -1,11 +1,16 @@
 import * as utils from "./utils.js";
-import {showNotification} from "./utils.js";
+import {showNotification} from "./notifications.js";
 import {calendarManager, scheduleState} from "./app.js";
 
 export class SettingsManager {
     constructor() {
         this.isOpenWindowsMode = false; // Флаг для отслеживания состояния выбора открытых окон
         this.openWindowStates = {}; // Объект для хранения состояния чекбоксов
+
+        // Добавляем свойства для рабочих часов
+        this.startHour = 6; // значение по умолчанию
+        this.endHour = 18;  // значение по умолчанию
+
 
         this.modal = document.getElementById('settings-modal');
         this.startHourSelect = document.getElementById('start-hour');
@@ -25,6 +30,13 @@ export class SettingsManager {
         this.initializeTimeOptions();
     }
 
+    getWorkingHours() {
+        return {
+            start: this.startHour,
+            end: this.endHour
+        };
+    }
+
     async loadSettingsFromServer() {
         try {
             const response = await fetch('/get-user-settings/');
@@ -37,7 +49,10 @@ export class SettingsManager {
             if (data.workingHours) {
                 const {start, end} = data.workingHours;
                 if (this.isValidWorkingHours(start, end)) {
-                    calendarManager.updateWorkingHours(start, end);
+                    // Сохраняем настройки, но НЕ вызываем calendarManager
+                    this.startHour = start;
+                    this.endHour = end;
+                    console.log(`SettingsManager: loaded working hours ${start}-${end}`);
                 }
             }
         } catch (error) {

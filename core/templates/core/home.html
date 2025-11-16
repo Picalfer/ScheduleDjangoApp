@@ -165,7 +165,17 @@
         </div>
     </div>
 
-    <div id="notification" style="display: none;"></div>
+    <div id="notification" style="display: none;">
+        <div class="notification-content">
+            <span class="notification-text"></span>
+            <div class="notification-actions">
+                <button class="notification-action" id="hide-all-button" style="display: none;">Скрыть все</button>
+                <button class="notification-action" id="hide-button">Скрыть</button>
+            </div>
+            <div class="notification-counter-badge"></div>
+        </div>
+        <div class="notification-progress"></div>
+    </div>
 
     <div id="selected-count">
         Открытых окон: <span id="count">0</span>
@@ -262,8 +272,7 @@
     <script>
         let currentUserId = {{ user_id }};
         let currentTeacherId = {{ teacher_id }}
-        console.log(`UserId: ${currentUserId}`)
-        console.log(`TeacherId: ${currentTeacherId}`)
+        console.log(`UserId: ${currentUserId}; TeacherId: ${currentTeacherId};`)
         const userData = {
             isAdmin: {% if request.user.is_staff %}true{% else %}false{% endif %},
             username: "{{ request.user.username|escapejs }}"

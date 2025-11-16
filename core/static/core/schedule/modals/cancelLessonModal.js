@@ -1,5 +1,5 @@
 import {Modal} from './modal.js';
-import {showNotification} from '../utils.js';
+import {showNotification} from '../notifications.js';
 
 export class CancelLessonModal extends Modal {
     constructor(options) {

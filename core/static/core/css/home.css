@@ -1,5 +1,6 @@
 @import "subheader.css";
 @import "calendar.css";
+@import "notification.css";
 @import "lesson.css";
 @import "modal/modal.css";
 @import "modal/balance-alert-modal.css";

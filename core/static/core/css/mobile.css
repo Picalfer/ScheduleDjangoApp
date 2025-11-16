@@ -93,6 +93,7 @@ nav {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE и Edge */
+    overscroll-behavior: none;
 }
 
 .scrollable-area::-webkit-scrollbar {
