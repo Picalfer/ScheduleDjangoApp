@@ -23,6 +23,10 @@ class UserSettings(models.Model):
     def __str__(self):
         return f"Настройки пользователя {self.user.username}"
 
+    class Meta:
+        verbose_name = 'Настройки пользователя'
+        verbose_name_plural = 'Настройки пользователей'
+
 
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

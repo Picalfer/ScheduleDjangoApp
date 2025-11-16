@@ -8,7 +8,7 @@ from safedelete.admin import SafeDeleteAdmin
 
 from core.forms import LessonAdminForm
 from core.models import Teacher, Student, Lesson, OpenSlots, BalanceOperation, Client, PhoneNumber, TeacherPayment, \
-    DeletedClient
+    DeletedClient, UserSettings
 
 
 class TeacherPaymentInline(admin.TabularInline):  # или admin.StackedInline
@@ -139,6 +139,34 @@ class StudentAdmin(admin.ModelAdmin):
     list_display = ('name', 'client', 'teacher', 'family_balance')
     list_select_related = ('client', 'teacher')
     search_fields = ('name__icontains', 'client__name__icontains')
+
+
+@admin.register(UserSettings)
+class UserSettingsAdmin(admin.ModelAdmin):
+    list_display = ('user', 'user_full_name', 'working_hours_display', 'theme_display')
+    list_filter = ('theme',)
+    search_fields = ('user__username', 'user__email')
+    ordering = ('user__first_name', 'user__last_name')
+
+    def user_full_name(self, obj):
+        full_name = f"{obj.user.first_name} {obj.user.last_name}"
+        return full_name.strip() if full_name.strip() else "Не указано"
+
+    user_full_name.short_description = 'Имя и фамилия'
+
+    def working_hours_display(self, obj):
+        return f"{obj.working_hours_start}:00 - {obj.working_hours_end}:00"
+
+    working_hours_display.short_description = 'Рабочие часы'
+
+    def theme_display(self, obj):
+        theme_names = {
+            'light': 'Светлая',
+            'dark': 'Темная'
+        }
+        return theme_names.get(obj.theme, obj.theme)
+
+    theme_display.short_description = 'Тема'
 
 
 @admin.register(OpenSlots)

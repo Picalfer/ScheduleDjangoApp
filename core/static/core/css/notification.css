@@ -19,6 +19,8 @@
     font-size: 14px;
     line-height: 1.43;
     transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    /* Гарантируем, что контент не обрезается */
+    overflow: visible !important;
 }
 
 #notification.notification-appear {
@@ -54,6 +56,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    /* Гарантируем, что бейдж не обрезается */
+    overflow: visible !important;
 }
 
 .notification-text {
@@ -114,27 +118,42 @@
     border-radius: 0 0 4px 4px;
 }
 
+.notification-progress {
+    /* Добавляем will-change для оптимизации анимации */
+    will-change: transform;
+
+    /* Гарантируем, что прогресс-бар виден */
+    opacity: 1 !important;
+}
+
+/* Убедитесь, что прогресс-бар не скрыт какими-либо другими стилями */
+#notification .notification-progress {
+    display: block !important;
+    visibility: visible !important;
+}
+
 .notification-counter-badge {
     position: absolute;
-    top: -8px;
-    right: -8px;
+    top: -12px; /* Вылазит за верхнюю границу */
+    right: -12px; /* Вылазит за правую границу */
     background: #f44336;
     color: white;
-    border-radius: 10px;
-    padding: 4px 8px;
+    border-radius: 12px; /* Немного больше радиус для красоты */
+    padding: 6px 10px; /* Увеличиваем паддинг для лучшей читаемости */
     font-size: 12px;
-    font-weight: 500;
-    min-width: 20px;
-    height: 20px;
+    font-weight: 600; /* Более жирный шрифт */
+    min-width: 24px; /* Увеличиваем минимальную ширину */
+    height: 24px; /* Увеличиваем высоту */
     text-align: center;
     z-index: 10002;
-    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2),
-    0 4px 5px 0 rgba(0, 0, 0, 0.14),
-    0 1px 10px 0 rgba(0, 0, 0, 0.12);
+    box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.3),
+    0 6px 10px 0 rgba(0, 0, 0, 0.24),
+    0 1px 18px 0 rgba(0, 0, 0, 0.22);
     display: flex;
     align-items: center;
     justify-content: center;
     line-height: 1;
+    border: 2px solid white; /* Белая обводка для контраста */
 
     /* Material Design animation */
     animation: badge-appear 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
@@ -158,7 +177,7 @@
     background: #f44336;
 }
 
-/* Material Design animations */
+/* Обновленная анимация появления */
 @keyframes badge-appear {
     0% {
         transform: scale(0) rotate(15deg);
@@ -175,19 +194,21 @@
 
 @keyframes badge-pulse {
     0% {
-        box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2),
-        0 4px 5px 0 rgba(0, 0, 0, 0.14),
-        0 1px 10px 0 rgba(0, 0, 0, 0.12);
+        box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.3),
+        0 6px 10px 0 rgba(0, 0, 0, 0.24),
+        0 1px 18px 0 rgba(0, 0, 0, 0.22);
     }
     50% {
-        box-shadow: 0 4px 8px -1px rgba(0, 0, 0, 0.3),
-        0 6px 10px 0 rgba(0, 0, 0, 0.24),
-        0 2px 12px 0 rgba(0, 0, 0, 0.22);
+        box-shadow: 0 6px 12px -1px rgba(0, 0, 0, 0.4),
+        0 10px 16px 0 rgba(0, 0, 0, 0.32),
+        0 3px 20px 0 rgba(0, 0, 0, 0.28);
+        transform: scale(1.05); /* Легкое увеличение при пульсации */
     }
     100% {
-        box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2),
-        0 4px 5px 0 rgba(0, 0, 0, 0.14),
-        0 1px 10px 0 rgba(0, 0, 0, 0.12);
+        box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.3),
+        0 6px 10px 0 rgba(0, 0, 0, 0.24),
+        0 1px 18px 0 rgba(0, 0, 0, 0.22);
+        transform: scale(1);
     }
 }
 
