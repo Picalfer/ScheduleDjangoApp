@@ -100,12 +100,18 @@ export class CalendarManager {
 
     prevWeek() {
         logger.log(`${LOG_PREFIX} prevWeek() - переключение на предыдущую неделю`);
+
+        clearAllNotifications();
+
         this.weekManager.currentWeekOffset--;
         this.refreshCalendar();
     }
 
     nextWeek() {
         logger.log(`${LOG_PREFIX} nextWeek() - переключение на следующую неделю`);
+
+        clearAllNotifications();
+
         this.weekManager.currentWeekOffset++;
         this.refreshCalendar();
     }
@@ -113,6 +119,9 @@ export class CalendarManager {
     goToCurrentWeek() {
         logger.log(`${LOG_PREFIX} goToCurrentWeek() - переход к текущей неделе`);
         if (this.weekManager.currentWeekOffset !== 0) {
+
+            clearAllNotifications();
+
             this.weekManager.currentWeekOffset = 0;
             this.refreshCalendar();
         } else {
