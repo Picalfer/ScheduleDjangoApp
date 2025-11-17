@@ -143,16 +143,12 @@ export class CalendarManager {
         this.refreshCalendar();
     }
 
-    async updateOpenSlots() {
+    async updateOpenSlots(openSlots) {
         try {
-            await repository.updateOpenSlots(this.openSlots);
-            showNotification(`Открытые окна обновлены`, "success");
+            await repository.updateOpenSlots(openSlots);
         } catch (error) {
             console.error("Ошибка при обновлении свободных слотов:", error);
-            showNotification(
-                error.message || "Ошибка при обновлении окон",
-                "error"
-            );
+            throw error;
         }
     }
 
@@ -484,5 +480,25 @@ export class CalendarManager {
                 hour.innerHTML = '';
             }
         });
+    }
+
+    updateOpenWindowsOnly() {
+        console.log(`${LOG_PREFIX} updateOpenWindowsOnly() - обновление только открытых окон`);
+
+        // Пропускаем если инициализация
+        if (this.isInitializing) {
+            console.log(`${LOG_PREFIX} updateOpenWindowsOnly() - пропущено из-за инициализации`);
+            return;
+        }
+
+        if (!this.lessonManager.lessons) {
+            console.warn("Расписание не загружено");
+            return;
+        }
+
+        // Обновляем только открытые окна, не трогая уроки
+        this.renderOpenSlots();
+
+        console.log(`${LOG_PREFIX} updateOpenWindowsOnly() - завершил выполнение`);
     }
 }

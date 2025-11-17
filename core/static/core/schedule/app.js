@@ -18,112 +18,88 @@ export const repository = new Repository();
 export const settingsManager = new SettingsManager();
 export const calendarManager = new CalendarManager();
 
-// Функция для асинхронной инициализации менеджеров
-export async function initializeManagers() {
-    console.log('Initializing managers...');
+// Главная функция инициализации
+export async function initApp() {
+    console.log('Starting app initialization...');
 
-    // Сначала загружаем настройки
+    // Инициализируем все последовательно
     await settingsManager.loadSettingsFromServer();
-
-    // Потом инициализируем календарь с примененными настройками
     await calendarManager.initialize();
 
-    console.log('All managers initialized');
+    // Настраиваем функционал
+    setupAdminTools();
+    setupContextMenu();
+    setupLessonModal();
+
+    console.log('App initialized successfully');
 }
 
-export function initApp() {
-    if (userData.isAdmin) {
-        setAdminTools()
-    }
+function setupAdminTools() {
+    if (!userData.isAdmin) return;
 
+    console.log("Setting up admin tools");
+
+    document.getElementById('teachers-button').addEventListener('click', () => {
+        new TeachersModal().open();
+    });
+
+    document.getElementById("payments-button").addEventListener('click', () => {
+        new PaymentsModal().open();
+    });
+
+    document.getElementById("balance-alert-button").addEventListener('click', () => {
+        new BalanceAlertModal().open();
+    });
+
+    // Загружаем счетчики
+    loadCounters();
+}
+
+async function loadCounters() {
+    const [lowBalanceClientsCount, paymentsCount] = await Promise.all([
+        repository.loadLowBalanceClientsCount(),
+        repository.loadPaymentsCount()
+    ]);
+
+    updateCounter('balance-alert-counter', lowBalanceClientsCount);
+    updateCounter('payments-counter', paymentsCount);
+}
+
+function setupLessonModal() {
     window.openLessonModal = (lessonData) => {
         if (settingsManager.isOpenWindowsMode) {
             showNotification("Недоступно в режиме выбора открытых окон", "error");
         } else {
-            const lessonModal = new LessonModal();
-            lessonModal.open(lessonData);
+            new LessonModal().open(lessonData);
         }
-    }
-
-    setupContextMenu();
-}
-
-async function setAdminTools() {
-    const teachersBtn = document.getElementById('teachers-button')
-    teachersBtn.addEventListener('click', () => {
-        const teachersModal = new TeachersModal().open();
-    })
-
-    const paymentsBtn = document.getElementById("payments-button");
-    paymentsBtn.addEventListener('click', async function () {
-        const paymentsModal = new PaymentsModal().open();
-    })
-
-    const balanceAlertBtn = document.getElementById("balance-alert-button");
-    balanceAlertBtn.addEventListener('click', async function () {
-        const balanceAlertModal = new BalanceAlertModal().open()
-    })
-
-    const lowBalanceClientsCount = await repository.loadLowBalanceClientsCount()
-    const paymentsCount = await repository.loadPaymentsCount()
-
-    updateCounter('balance-alert-counter', lowBalanceClientsCount);
-    updateCounter('payments-counter', paymentsCount);
+    };
 }
 
 function setupContextMenu() {
     const customContextMenu = document.createElement('div');
     customContextMenu.id = 'custom-context-menu';
     customContextMenu.style.display = 'none';
+    customContextMenu.innerHTML = `
+        <div class="menu-item" data-action="refresh">🔄 Обновить расписание</div>
+    `;
     document.body.appendChild(customContextMenu);
 
     document.addEventListener('contextmenu', (e) => {
         e.preventDefault();
-        customContextMenu.innerHTML = `
-            <div class="menu-item" data-action="refresh">🔄 Обновить расписание</div>
-        `;
         customContextMenu.style.display = 'block';
         customContextMenu.style.left = `${e.pageX}px`;
         customContextMenu.style.top = `${e.pageY}px`;
     });
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') customContextMenu.style.display = 'none';
-    });
-
     document.addEventListener('click', (e) => {
-        if (e.button !== 2) {
-            customContextMenu.style.display = 'none';
-        }
+        if (e.button !== 2) customContextMenu.style.display = 'none';
     });
 
     customContextMenu.addEventListener('click', (e) => {
         const menuItem = e.target.closest('.menu-item');
-        if (!menuItem) return;
-
-        const action = menuItem.dataset.action;
-        if (action === 'refresh') {
-            calendarManager.loadSchedule(scheduleState.teacherId, scheduleState.userId)
+        if (menuItem?.dataset.action === 'refresh') {
+            calendarManager.loadSchedule(scheduleState.teacherId, scheduleState.userId);
         }
-
         customContextMenu.style.display = 'none';
     });
-}
-
-// Запускаем приложение
-async function startApp() {
-    try {
-        await initializeManagers();
-        initApp();
-        console.log('App started successfully');
-    } catch (error) {
-        console.error('Failed to start app:', error);
-    }
-}
-
-// Запускаем приложение когда DOM загружен
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', startApp);
-} else {
-    startApp();
 }

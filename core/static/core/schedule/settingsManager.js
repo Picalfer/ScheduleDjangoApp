@@ -247,14 +247,10 @@ export class SettingsManager {
 
     applyOpenSlotsUpdate() {
         const newOpenSlots = {
-            "monday": [],
-            "tuesday": [],
-            "wednesday": [],
-            "thursday": [],
-            "friday": [],
-            "saturday": [],
-            "sunday": []
+            "monday": [], "tuesday": [], "wednesday": [], "thursday": [],
+            "friday": [], "saturday": [], "sunday": []
         };
+
         document.querySelectorAll('.hour.open-window').forEach((hourElement) => {
             const day = hourElement.getAttribute('data-day');
             const hour = hourElement.getAttribute('data-hour');
@@ -262,16 +258,15 @@ export class SettingsManager {
             if (!newOpenSlots[day]) {
                 newOpenSlots[day] = [];
             }
-
             newOpenSlots[day].push(hour);
         });
 
         const currentOpenSlots = calendarManager.openSlots;
-
         const isChanged = JSON.stringify(newOpenSlots) !== JSON.stringify(currentOpenSlots);
+
         if (!isChanged) {
             console.log('Открытые окна не изменились');
-            utils.showNotification("Открытые окна не изменились", "info");
+            showNotification("Открытые окна не изменились", "info");
             this.turnOffOpenWindowsMode();
             return;
         }
@@ -281,15 +276,16 @@ export class SettingsManager {
         calendarManager.updateOpenSlots(calendarManager.openSlots)
             .then(() => {
                 console.log('Открытые слоты успешно обновлены');
-                calendarManager.updateCalendarUi();
-                utils.showNotification("Открытые окна успешно сохранены", "success");
+
+                showNotification("Открытые окна успешно сохранены", "success");
             })
             .catch((error) => {
                 console.error('Ошибка при обновлении открытых окон:', error);
-                utils.showNotification("Ошибка при обновлении открытых окон", "error");
+                showNotification("Ошибка при обновлении открытых окон", "error");
+            })
+            .finally(() => {
+                this.turnOffOpenWindowsMode();
             });
-
-        this.turnOffOpenWindowsMode();
     }
 
     toggleOpenWindows() {
@@ -326,11 +322,13 @@ export class SettingsManager {
     }
 
     turnOffOpenWindowsMode() {
-        this.removeHourClickHandlers(); // Удаляем обработчики кликов
+        this.removeHourClickHandlers();
 
         document.querySelectorAll('.open-window-checkbox').forEach((checkbox) => {
             checkbox.remove();
         });
+
+        document.querySelectorAll('.hour').forEach(hour => hour.classList.remove('open-window-mode'));
 
         const selectedCountPanel = document.getElementById('selected-count');
         if (selectedCountPanel) {
@@ -339,7 +337,8 @@ export class SettingsManager {
 
         this.isOpenWindowsMode = false;
         this.openWindowsControls.style.display = 'none';
-        calendarManager.updateCalendarUi();
+
+        calendarManager.updateOpenWindowsOnly();
     }
 
 
@@ -372,7 +371,6 @@ export class SettingsManager {
 
             checkbox.addEventListener('change', () => {
                 hourElement.classList.toggle('open-window', checkbox.checked);
-                this.updateSelectedCount();
 
                 if (!this.openWindowStates[day]) {
                     this.openWindowStates[day] = [];
@@ -389,6 +387,7 @@ export class SettingsManager {
                 this.updateSelectedCount();
             });
         });
+
         this.updateSelectedCount();
     }
 
